@@ -1,1 +1,4 @@
-/inputs/
+inputs/
+
+*.o
+*.hi
