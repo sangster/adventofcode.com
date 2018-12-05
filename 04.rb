@@ -56,7 +56,6 @@ class Part1And2
   end
 end
 
-# puts format("1: %s\n2: %p", Part1.new.call, part2)
 puts format("1: %s\n2: %p",
             Part1And2.new.call_most_minutes,
             Part1And2.new.call_most_frequency)
