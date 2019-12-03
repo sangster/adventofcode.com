@@ -1,6 +1,6 @@
-name:                aoc2019
+name:                aoc2018
 version:             0.1.0.0
-github:              "sangster/aoc2019"
+github:              "sangster/aoc2018"
 license:             BSD3
 author:              "Jon Sangster"
 maintainer:          "jon@ertt.ca"
@@ -20,17 +20,13 @@ data-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/sangster/aoc2019#readme>
+description:         Please see the README on GitHub at <https://github.com/sangster/aoc2018#readme>
 
 dependencies:
-  - array
   - base >= 4.7 && < 5
   - bytestring
   - containers
-  - data-default
   - file-embed
-  - regex
-  - regex-with-pcre
   - safe
   - utf8-string
 
@@ -38,42 +34,39 @@ library:
   source-dirs: src
 
 executables:
-  aoc2019-exe:
+  aoc2018-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
-      - -Wall
     dependencies:
-      - aoc2019
+      - aoc2018
 
 tests:
-  aoc2019-test:
+  aoc2018-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
-      - -Wall
     dependencies:
-      - aoc2019
+      - aoc2018
       - test-framework
       - test-framework-hunit
       - HUnit
       - util
 
 benchmarks:
-  aoc2019-bench:
+  aoc2018-bench:
     main:                Bench.hs
     source-dirs:         bench
     ghc-options:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
-      - -Wall
     dependencies:
-      - aoc2019
+      - aoc2018
       - criterion
