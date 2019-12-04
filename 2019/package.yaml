@@ -6,10 +6,6 @@ author:              "Jon Sangster"
 maintainer:          "jon@ertt.ca"
 copyright:           "GPL-3"
 
-extra-source-files:
-  - README.md
-  - ChangeLog.md
-
 data-files:
   - data/inputs/*
 
@@ -48,32 +44,3 @@ executables:
       - -Wall
     dependencies:
       - aoc2019
-
-tests:
-  aoc2019-test:
-    main:                Spec.hs
-    source-dirs:         test
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-N
-      - -Wall
-    dependencies:
-      - aoc2019
-      - test-framework
-      - test-framework-hunit
-      - HUnit
-      - util
-
-benchmarks:
-  aoc2019-bench:
-    main:                Bench.hs
-    source-dirs:         bench
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-N
-      - -Wall
-    dependencies:
-      - aoc2019
-      - criterion

@@ -6,12 +6,13 @@ import Data.List (intercalate)
 import Input (lookupInput)
 import qualified Day01
 import qualified Day02
-
+import qualified Day03
 
 
 days :: [(FilePath, [((String -> IO String), Maybe String)])]
 days = [ ("01", Day01.parts)
        , ("02", Day02.parts)
+       , ("03", Day03.parts)
        ]
 
 

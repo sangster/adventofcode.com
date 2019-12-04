@@ -11,8 +11,4 @@ inputsDir = $(FE.embedDir "data/inputs")
 
 
 lookupInput :: FilePath -> Maybe String
-lookupInput filename =
-    case maybeData of
-      Just dat -> Just $ toString dat
-      Nothing  -> Nothing
-  where maybeData = (lookup filename inputsDir)
+lookupInput fp = lookup fp inputsDir >>= pure . toString
