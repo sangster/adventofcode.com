@@ -1,4 +1,4 @@
-module Day03 (parts, part1, part2, intersection) where
+module Day03 (parts, part1, part2) where
 
 import Util.Parser
 
@@ -30,7 +30,7 @@ part2 input = return . show $ minimum dists
 
 -- Models
 type Wire        = [LineSegment]
-type LineSegment = ((X, Y), (X, Y))
+type LineSegment = ((X, Y), (X, Y)) -- horizontal or vertical segments only
 type X           = Int
 type Y           = Int
 
@@ -90,12 +90,12 @@ intersection :: LineSegment
              -> LineSegment
              -> Maybe (X, Y)
 intersection a b
-  | isVert a && isVert b = Nothing
   | isHorz a && isHorz b = Nothing
+  | isVert a && isVert b = Nothing
   | otherwise            = (bool (flip intersect) intersect $ isHorz a) a b
   where
+    isHorz                    = not . isVert
     isVert ((x1, _), (x2, _)) = x1 == x2
-    isHorz = not . isVert
     intersect ((x1, y), (x2, _)) ((x, y1), (_, y2))
       | between x1 x2 x = bool Nothing (Just (x, y)) $ between y1 y2 y
       | otherwise       = Nothing
