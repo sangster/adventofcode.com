@@ -7,12 +7,14 @@ import Input (lookupInput)
 import qualified Day01
 import qualified Day02
 import qualified Day03
+import qualified Day04
 
 
 days :: [(FilePath, [((String -> IO String), Maybe String)])]
 days = [ ("01", Day01.parts)
        , ("02", Day02.parts)
        , ("03", Day03.parts)
+       , ("04", Day04.parts)
        ]
 
 

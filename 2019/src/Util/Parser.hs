@@ -35,7 +35,7 @@ runParser m s =
     case parse m s of
         [(res, [])] -> res
         [(_,   rs)] -> error "did not read entire string"
-        _           -> error "failure"
+        _           -> error "parser failure"
 
 
 instance Functor Parser where
