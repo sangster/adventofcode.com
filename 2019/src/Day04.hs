@@ -1,11 +1,9 @@
 module Day04 (parts, part1, part2) where
 
-import Util.Parser
-
 import Control.Monad
-import Data.Bool
-import Data.Maybe
 import Data.List
+
+import Util.Parser
 
 
 parts :: [((String -> IO String), Maybe String)]
