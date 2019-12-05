@@ -41,6 +41,7 @@ data Move = Up    Distance
           | Down  Distance
           | Left  Distance
           | Right Distance
+  deriving Show
 
 
 -- | The length of a Wire, from its origin to the given point.

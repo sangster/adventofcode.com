@@ -1,6 +1,7 @@
 --
 -- See http://dev.stephendiehl.com/fun/002_parsers.html
 --
+{-# LANGUAGE ScopedTypeVariables #-}
 module Util.Parser
     ( Parser(..)
     , runParser
@@ -16,6 +17,9 @@ module Util.Parser
     , oneOf
     , chainl
     , chainl1
+    , some
+    , many
+    , (<|>)
     ) where
 
 
@@ -28,14 +32,21 @@ import Control.Applicative
 newtype Parser a = Parser { parse :: String -> [(a, String)] }
 
 
-runParser :: Parser a
-          -> String
-          -> a
+runParser :: forall a. Show a => Parser a -> String -> a
+
+-- runParser :: Parser a
+--           -> String
+--           -> a
 runParser m s =
     case parse m s of
         [(res, [])] -> res
-        [(_,   rs)] -> error "did not read entire string"
-        _           -> error "parser failure"
+        [(res, rs)] -> error . unlines $
+                         [ "did not read entire string."
+                         , "    result: " ++ (show res)
+                         , ""
+                         , " remaining: " ++ rs
+                         ]
+        []          -> error $ "nothing created from: " ++ s
 
 
 instance Functor Parser where
