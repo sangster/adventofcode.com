@@ -86,7 +86,7 @@ runProgram mem input cursor = do
 
     doCmp f m a b dst = do a' <- modeRead m 0 a
                            b' <- modeRead m 1 b
-                           writeArray mem dst $ bool 0 1 (a' `f` b')
+                           writeArray mem dst $ bool 0 1 $ f a' b'
                            runProgram mem input $ cursor + 4
 
     store :: Position -> Value -> IO Int
@@ -117,13 +117,13 @@ parseExpr mem cursor = do
             6  -> expr2  JumpFalse
             7  -> expr3  LessThan
             8  -> expr3  Equals
-            _  -> error $ "unknown code " ++ (show opcode)
+            _  -> error $ "unknown code " ++ show opcode
     return $ Expr modes op
   where
     expr1 f = do { a <- read' 1;                             return $ f a     }
     expr2 f = do { a <- read' 1; b <- read' 2;               return $ f a b   }
     expr3 f = do { a <- read' 1; b <- read' 2; c <- read' 3; return $ f a b c }
-    read' n = readArray mem (cursor + n) :: IO Int
+    read' n = readArray mem $ cursor + n :: IO Int
 
 
 -- | Split a number into its modes and opcode components.
