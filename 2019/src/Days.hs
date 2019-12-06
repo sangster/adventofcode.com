@@ -9,6 +9,7 @@ import qualified Day02
 import qualified Day03
 import qualified Day04
 import qualified Day05
+import qualified Day06
 
 
 days :: [(FilePath, [((String -> IO String), Maybe String)])]
@@ -17,6 +18,7 @@ days = [ ("01", Day01.parts)
        , ("03", Day03.parts)
        , ("04", Day04.parts)
        , ("05", Day05.parts)
+       , ("06", Day06.parts)
        ]
 
 
