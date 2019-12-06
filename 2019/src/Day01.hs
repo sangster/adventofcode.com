@@ -22,5 +22,5 @@ part2 content = return . show . sum $ totalRequirement <$> readMasses content
 totalRequirement :: Int -> Int
 totalRequirement mass
   | fuel <= 0 = 0
-  | otherwise = fuel + (totalRequirement fuel)
-  where fuel = (floor $ fromIntegral mass / 3.0) - 2
+  | otherwise = fuel + totalRequirement fuel
+  where fuel = fuelRequirement mass
