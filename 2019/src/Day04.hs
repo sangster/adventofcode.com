@@ -1,4 +1,4 @@
-module Day04 (parts, part1, part2) where
+module Day04 (parts) where
 
 import Control.Monad
 import Data.List

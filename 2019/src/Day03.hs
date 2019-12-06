@@ -1,4 +1,4 @@
-module Day03 (parts, part1, part2) where
+module Day03 (parts) where
 
 import Util.Parser
 

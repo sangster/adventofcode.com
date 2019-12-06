@@ -1,4 +1,4 @@
-module Day02 (parts, part1, part2) where
+module Day02 (parts) where
 
 import Data.Array.IO
 
