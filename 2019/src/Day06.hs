@@ -21,12 +21,12 @@ parts = [ (part1, Just "162439")
 part1 input = return . show $ sum $ elems counts
   where
     counts = countDirectAndIndirectOrbits orbits
-    orbits = buildOrbitMap $ runParser (some orbit) input
+    orbits = orbitMap $ runParser (some orbit) input
 
 
 part2 input = return . show $ transfers $ path orbits "YOU" "SAN"
  where
-    orbits    = buildOrbitMap $ runParser (some orbit) input
+    orbits    = orbitMap $ runParser (some orbit) input
     transfers = (flip (-) 2) . length
 
 
@@ -39,11 +39,11 @@ orbit = do a <- id
     id = some . satisfy $ liftM2 (||) isAsciiUpper isDigit
 
 
-buildOrbitMap :: [Orbit] -> OrbitMap
-buildOrbitMap []                    = empty
-buildOrbitMap ((Orbit body sat):os) = insertWith (++) body [sat]
-                                    $ insertWith (++) sat  []
-                                    $ buildOrbitMap os
+orbitMap :: [Orbit] -> OrbitMap
+orbitMap []                    = empty
+orbitMap ((Orbit body sat):os) = insertWith (++) body [sat]
+                               $ insertWith (++) sat  []
+                               $ orbitMap os
 
 
 countDirectAndIndirectOrbits :: OrbitMap
