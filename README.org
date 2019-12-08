@@ -6,9 +6,9 @@
 cd 2019/
 stack install
 
-stack exec aoc2019-exe 01    # execute the given day.
-# or
-stack exec aoc2019-exe last  # execute the most recent day with a source file.
+stack exec aoc2019-exe 01    # Execute the given day.
+stack exec aoc2019-exe last  # Execute the most recent day with a source file.
+stack exec aoc2019-exe all   # Execute every day with a source file.
 #+END_SRC
 
 * Notes
