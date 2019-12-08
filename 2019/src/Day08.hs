@@ -53,6 +53,6 @@ compile (lay:ls) = compile' lay $ compile ls
 
 
 layers :: [Color] -> Int -> Int -> [Layer]
-layers sif w h = group h $ group w sif
+layers colors w h = group h $ group w colors
   where group _ [] = []
         group n xs = take n xs : group n (drop n xs)
