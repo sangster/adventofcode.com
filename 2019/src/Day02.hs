@@ -1,7 +1,5 @@
 module Day02 (parts) where
 
-import Data.Array.IO
-
 import Util.Computer
 
 parts :: [((String -> IO String), Maybe String)]

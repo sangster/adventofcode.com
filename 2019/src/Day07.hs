@@ -1,12 +1,8 @@
 module Day07 (parts) where
 
 import Control.Monad
-import Data.Char
-import Data.Bool     (bool)
 import Data.List
-import Safe          (atDef)
 
-import Util.RAM
 import Util.Computer
 
 
