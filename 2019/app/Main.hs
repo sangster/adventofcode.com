@@ -4,15 +4,28 @@ module Main where
 import Data.List (intercalate)
 import System.Environment (getArgs)
 
-import Days (callDay)
+import Days
 
 
 main :: IO ()
 main = do
     day <- (!! 0) <$> getArgs
-    maybe (toError day) renderResults (callDay day) >>= putStrLn
+    case day of
+      "all" -> appAllDays
+      _     -> appSingleDay day
+
+
+appAllDays :: IO ()
+appAllDays = mapM_ renderDay (fst <$> days)
+  where renderDay d = do putStr $ "Day " ++ d ++ "\n======\n"
+                         appSingleDay d
+                         putChar '\n'
+
+
+appSingleDay :: String -> IO ()
+appSingleDay day = maybe error' renderResults (callDay day) >>= putStrLn
   where
-    toError day = return $ "Unknown day: '" ++ day ++ "' (or input file missing)"
+    error' = return $ "Unknown day: '" ++ day ++ "' (or input file missing)"
     renderResults results = reports >>= return . intercalate "\n"
       where reports = sequence $ (uncurry fmtIO) <$> (zip [1..] results)
     fmtIO n (ioResult, e) = ioResult >>= return . formatPart n e

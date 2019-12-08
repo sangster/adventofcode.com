@@ -9,6 +9,7 @@ module Util.Parser
     , char
     , string
     , digit
+    , digit'
     , natural
     , number
     , token
@@ -135,6 +136,10 @@ string (c:cs) = do char c
 
 digit :: Parser Char
 digit = satisfy isDigit
+
+
+digit' :: Parser Int
+digit' = flip (-) (ord '0') . ord <$> digit
 
 
 natural :: (Integral a, Read a)

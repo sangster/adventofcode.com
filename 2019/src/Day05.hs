@@ -1,10 +1,10 @@
 module Day05 (parts) where
 
-import Data.Array.IO
 import Data.Bool     (bool)
 import Safe          (atDef)
 
 import Util.Parser hiding (token)
+import Util.RAM
 
 
 parts :: [((String -> IO String), Maybe String)]
@@ -13,51 +13,31 @@ parts = [ (part1, Just "7259358")
         ]
 
 
-part1 input = do { mem <- parseInitialMemory input; show <$> runProgram mem 1 0 }
-part2 input = do { mem <- parseInitialMemory input; show <$> runProgram mem 5 0 }
+part1 input = do { mem <- parseRAM input; show <$> runProgram mem 1 0 }
+part2 input = do { mem <- parseRAM input; show <$> runProgram mem 5 0 }
 
-
-type Position        = Int
-type Value           = Int
-type ReadWriteMemory = IOUArray Position Int
 
 data Expr = Expr [Mode] Op
 data Mode = Position | Immediate
 
 data Op = Halt
-        | Add       Int Int Position
-        | Multiply  Int Int Position
+        | Add       Int Int Index
+        | Multiply  Int Int Index
         | Store     Int
         | Output    Int
         | JumpTrue  Int Int
         | JumpFalse Int Int
-        | LessThan  Int Int Position
-        | Equals    Int Int Position
-
-
--- | Convert the input file into a Read/Write buffer of memory.
-parseInitialMemory :: String
-                   -> IO ReadWriteMemory
-parseInitialMemory input = newListArray (0, length codes - 1) codes
-  where codes = runParser cells input
-
-
--- | Parse a list of memory cells from the input string, containing both opcodes
---   and data.
-cells :: Parser [Int]
-cells = many $ token cell
-  where
-    cell    = (some $ satisfy (/= ',')) >>= return . read
-    token p = do { t <- p; many (char ','); return t }
+        | LessThan  Int Int Index
+        | Equals    Int Int Index
 
 
 -- | Execute the program found in the given R/W memory, using the given value as
 --   the origin input, and starting the program's execution at the given
 --   position.
-runProgram :: ReadWriteMemory
-           -> Value
-           -> Position
-           -> IO Value
+runProgram :: RAM
+           -> Data
+           -> Index
+           -> IO Data
 runProgram mem input cursor = do
     expr <- parseExpr mem cursor
 
@@ -74,7 +54,7 @@ runProgram mem input cursor = do
   where
     doMath f m a b dst = do a' <- modeRead m 0 a
                             b' <- modeRead m 1 b
-                            writeArray mem dst $ f a' b'
+                            writeData mem dst $ f a' b'
                             runProgram mem input $ cursor + 4
 
     doMem f dst input = do out <- f dst input
@@ -86,27 +66,27 @@ runProgram mem input cursor = do
 
     doCmp f m a b dst = do a' <- modeRead m 0 a
                            b' <- modeRead m 1 b
-                           writeArray mem dst $ bool 0 1 $ f a' b'
+                           writeData mem dst $ bool 0 1 $ f a' b'
                            runProgram mem input $ cursor + 4
 
-    store :: Position -> Value -> IO Int
-    store dst i = do { writeArray mem dst i; return i }
+    store :: Index -> Data -> IO Int
+    store dst i = do { writeData mem dst i; return i }
 
-    output :: Position -> Value -> IO Int
-    output dst _ = readArray  mem dst
+    output :: Index -> Data -> IO Int
+    output dst _ = readData  mem dst
 
-    modeRead :: [Mode] -> Position -> Int -> IO Value
+    modeRead :: [Mode] -> Index -> Int -> IO Data
     modeRead modes i a = case atDef Position modes i of
                              Immediate -> return a
-                             Position  -> readArray mem a
+                             Position  -> readData mem a
 
 
 -- | Parse the expression at the given cursor.
-parseExpr :: ReadWriteMemory
-          -> Position
+parseExpr :: RAM
+          -> Index
           -> IO Expr
 parseExpr mem cursor = do
-    (modes, opcode) <- splitCode <$> readArray mem cursor
+    (modes, opcode) <- splitCode <$> readData mem cursor
     op <- case opcode of
             99 -> return Halt
             1  -> expr3  Add
@@ -123,7 +103,7 @@ parseExpr mem cursor = do
     expr1 f = do { a <- read' 1;                             return $ f a     }
     expr2 f = do { a <- read' 1; b <- read' 2;               return $ f a b   }
     expr3 f = do { a <- read' 1; b <- read' 2; c <- read' 3; return $ f a b c }
-    read' n = readArray mem $ cursor + n :: IO Int
+    read' n = readData mem $ cursor + n :: IO Int
 
 
 -- | Split a number into its modes and opcode components.

@@ -1,6 +1,42 @@
 #+TITLE: Advent of Code
 
+* Usage
+
+#+BEGIN_SRC shell
+cd 2019/
+stack install
+
+stack exec aoc2019-exe 01    # execute the given day.
+# or
+stack exec aoc2019-exe last  # execute the most recent day with a source file.
+#+END_SRC
+
 * Notes
 
 In the greatest of hackathon traditions, these solutions follow the Easiest
 Thing That Works™ methodology.
+
+
+* Creating a new Day source file
+
+** Download input file into =data/inputs/=
+
+This file should have a two digit filename, with no extension. The input file
+must exist, even if then problem doesn't supply one.
+
+** Create a new =Day01.hs= file in =src/=
+** Update =days= export in =src/Days.hs=
+
+I would prefer if this were automated, but that will be a TODO for now.
+
+#+BEGIN_SRC haskell
+module Day01 (parts) where
+
+parts :: [((String -> IO String), Maybe String)]
+parts = [ (part1, Nothing)
+        , (part2, Nothing)
+        ]
+
+part1 input = return ""
+part2 input = return ""
+#+END_SRC
