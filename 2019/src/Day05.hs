@@ -1,6 +1,6 @@
 module Day05 (parts) where
 
-import Util.Computer
+import Util.Program
 
 
 parts :: [((String -> IO String), Maybe String)]
@@ -9,5 +9,5 @@ parts = [ (part1, Just "7259358")
         ]
 
 
-part1 input = do { mem <- parseRAM input; show <$> runUntilHalt' mem [1] 0 }
-part2 input = do { mem <- parseRAM input; show <$> runUntilHalt' mem [5] 0 }
+part1 input = do { prog <- aoc19Program' input; show <$> runUntilHalt' prog [1] 0 }
+part2 input = do { prog <- aoc19Program' input; show <$> runUntilHalt' prog [5] 0 }

@@ -3,7 +3,7 @@ module Day07 (parts) where
 import Control.Monad
 import Data.List
 
-import Util.Computer
+import Util.Program
 
 
 parts :: [((String -> IO String), Maybe String)]
@@ -12,19 +12,19 @@ parts = [ (part1, Just "338603")
         ]
 
 
-part1 input = do mem <- parseRAM input
-                 res <- sequence $ run mem 0 <$> phasePermutations 0 5
+part1 input = do prog <- aoc19Program' input
+                 res  <- sequence $ run prog 0 <$> phasePermutations 0 5
                  return . show $ maximum res
   where
-    run mem io phases      = makeAmps mem phases >>= foldM run' io
+    run prog io phases     = makeAmps prog phases >>= foldM run' io
     run' i amp@(Amp p _ _) = last . snd <$> runAmp amp [p, i]
 
 
-part2 input = do mem <- parseRAM input
-                 res <- sequence $ run mem 0 <$> phasePermutations 5 5
+part2 input = do prog <- aoc19Program' input
+                 res  <- sequence $ run prog 0 <$> phasePermutations 5 5
                  return . show $ maximum res
   where
-    run mem io phases = do makeAmps mem phases >>= loop io
+    run prog io phases = makeAmps prog phases >>= loop io
 
     -- | Continuously re-run all unhalted amps
     loop io amps = do (amps', io') <- foldM run' ([], io) amps
@@ -44,18 +44,20 @@ part2 input = do mem <- parseRAM input
             _               -> return (amps ++ [amp'], last io')
 
 
-data Amp   = Amp Phase RAM (Maybe Index)
+data Amp   = Amp Phase Program (Maybe Index)
 type Phase = Int
+
 
 phasePermutations :: Int -> Int -> [[Int]]
 phasePermutations i n = permutations [i .. i + n - 1]
 
 
-makeAmps :: RAM -> [Phase] -> IO [Amp]
-makeAmps mem ps = sequence $ (makeAmp mem) <$> ps
+makeAmps :: Program -> [Phase] -> IO [Amp]
+makeAmps prog ps = sequence $ makeAmp prog <$> ps
 
-makeAmp :: RAM -> Phase -> IO Amp
-makeAmp m p = memcpy m >>= return . (flip (Amp p) (Just 0))
+
+makeAmp :: Program -> Phase -> IO Amp
+makeAmp (Program i m) p = memcpy m >>= return . (flip (Amp p) $ Just 0) . Program i
 
 
 -- | Run the program in the given amplifier using the provided input.
@@ -63,6 +65,6 @@ makeAmp m p = memcpy m >>= return . (flip (Amp p) (Just 0))
 runAmp :: Amp
        -> [Data]
        -> IO (Amp, [Data])
-runAmp amp@(Amp _ _ Nothing) io  = return $ (amp, tail io)
+runAmp amp@(Amp _ _ Nothing)  io = return $ (amp, tail io)
 runAmp (Amp p mem (Just cur)) io = do (cur', io') <- runProgram mem io cur
                                       return $ (Amp p mem cur', io')
