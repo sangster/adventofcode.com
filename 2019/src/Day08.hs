@@ -13,13 +13,12 @@ parts = [ (part1, Just "2684")
         , (part2, Just part2Expected)
         ]
 
-
-part2Expected = unlines $ [ "#   # ##  ###  #   ##### "
-                          , "#   ##  # #  # #   #   # "
-                          , " # # #    #  #  # #   #  "
-                          , "  #  # ## ###    #   #   "
-                          , "  #  #  # # #    #  #    "
-                          , "  #   ### #  #   #  #### "
+part2Expected = unlines $ [ "█   █ ██  ███  █   █████ "
+                          , "█   ██  █ █  █ █   █   █ "
+                          , " █ █ █    █  █  █ █   █  "
+                          , "  █  █ ██ ███    █   █   "
+                          , "  █  █  █ █ █    █  █    "
+                          , "  █   ███ █  █   █  ████ "
                           ]
 
 
@@ -41,7 +40,7 @@ data Color = Black | White | Trans deriving Eq
 
 instance Show Color where
     show Black = " "
-    show White = "#"
+    show White = "█"
     show _     = "?"
 
 
