@@ -1,7 +1,8 @@
 module Days (days, callDay) where
 
-import Control.Applicative (liftA2)
-import Data.List (intercalate)
+import Control.Applicative  (liftA2)
+import Data.List            (intercalate)
+import Text.Printf          (printf)
 
 import Input (lookupInput)
 import qualified Day01
@@ -12,18 +13,27 @@ import qualified Day05
 import qualified Day06
 import qualified Day07
 import qualified Day08
+import qualified Day09
+import qualified Day10
+
+
+parts = [ Day01.parts
+        , Day02.parts
+        , Day03.parts
+        , Day04.parts
+        , Day05.parts
+        , Day06.parts
+        , Day07.parts
+        , Day08.parts
+        , Day09.parts
+        , Day10.parts
+        ]
 
 
 days :: [(FilePath, [((String -> IO String), Maybe String)])]
-days = [ ("01", Day01.parts)
-       , ("02", Day02.parts)
-       , ("03", Day03.parts)
-       , ("04", Day04.parts)
-       , ("05", Day05.parts)
-       , ("06", Day06.parts)
-       , ("07", Day07.parts)
-       , ("08", Day08.parts)
-       ]
+days = [ (fmt d, part) | (d, part) <- zip [1..] parts]
+  where fmt d | d < 10    = ('0':show d)
+              | otherwise = show d
 
 
 callDay :: String -> Maybe [(IO String, Maybe String)]

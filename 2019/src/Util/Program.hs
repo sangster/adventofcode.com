@@ -1,54 +1,39 @@
 module Util.Program
-    ( Program(..)
-    , aoc19Program
-    , aoc19Program'
-    , runUntilHalt
-    , runUntilHalt'
-    , runProgram
-    , runProgram'
+    ( executeUntilHalt
+    , executeUntilHalt'
+    , execute
+    , module Util.Computer
     , module Util.RAM
     ) where
 
-import Data.Bool
-import Data.List
-import Data.Maybe
-import Safe       (atDef)
+
+import Data.List  (find)
 
 import Util.Computer
-import Util.InstructionSet
+import Util.OpCode
 import Util.RAM
 
 
-data Program = Program { is  :: InstructionSet
-                       , mem :: RAM
-                       }
+-- | Like @execute@, but this function will continue to execute until
+-- @execute@ returns @Nothing@ for the cursor position.
+executeUntilHalt :: Program
+                 -> [Data]
+                 -> IO [Data]
+executeUntilHalt prog' io' = loop prog' io' 0 0
+  where
+    loop p i c b = do
+        (dat, proc') <- runStateT execute $ (load p){ action = Run c
+                                                    , fifo   = i
+                                                    , base   = b
+                                                    }
+        case action proc' of
+            Halt      -> return $ dat
+            Signal c' -> loop (prog proc') dat c' (base proc')
+            Run    c' -> loop (prog proc') dat c' (base proc')
 
 
--- | Create a @Program@ using the complete Advent Of Code 2019 instruction set.
-aoc19Program :: RAM -> Program
-aoc19Program = Program aoc19Set
-
-
--- | Create a @Program@ using the complete Advent Of Code 2019 instruction set,
--- parsing the @RAM@ from the given string.
-aoc19Program' :: String -> IO Program
-aoc19Program' = fmap aoc19Program . parseRAM
-
-
--- | Like @runProgram@, but this function will continue to execute until
--- @runProgram@ returns @Nothing@ for the cursor position.
-runUntilHalt :: Program
-             -> [Data]
-             -> Index
-             -> IO [Data]
-runUntilHalt prog io cursor = do (maybeCursor, dat) <- runProgram prog io cursor
-                                 case maybeCursor of
-                                     Nothing -> return $ dat
-                                     Just c  -> runUntilHalt prog dat c
-
-
--- | Like @runUntilHalt@, but only the last output is returned.
-runUntilHalt' = (((last <$>) .) .) . runUntilHalt
+-- | Like @executeUntilHalt@, but only the finaly IO is returned.
+executeUntilHalt' = ((last <$>) .) . executeUntilHalt
 
 
 -- | Execute a program, starting from the given index in its R/W memory.
@@ -61,18 +46,24 @@ runUntilHalt' = (((last <$>) .) .) . runUntilHalt
 --
 -- @Store@ expressions read from the head and @Output@ expressions append to the
 -- tail.
-runProgram :: Program
-           -> [Data]
-           -> Index
-           -> IO (Maybe Index, [Data])
-runProgram prog io i = do
-    (inst, assocs) <- parseExpr prog i
-    (action, dat)  <- call inst (mem prog) i assocs io
+execute :: Runtime [Data]
+execute = do
+    p <- get
+    case cursor (action p) of
+        Nothing -> return $ fifo p
+        Just  c -> do
+            (inst, assocs) <- lift $ parseExpr (prog p) c
+            call inst assocs
+            p' <- get
 
-    case action of
-        Halt     -> return (Nothing, dat)
-        Signal c -> return (Just c, dat)
-        Jump   c -> runProgram prog dat c
+            case action p' of
+                Halt     -> return $ fifo p'
+                Signal c -> return $ fifo p'
+                Run    c -> execute
+  where
+    cursor Halt       = Nothing
+    cursor (Signal a) = Just a
+    cursor (Run    a) = Just a
 
 
 -- | Parse the expression at the given index of the program's memory.
@@ -92,17 +83,4 @@ parseExpr (Program is mem) i = do
     assocs :: [Mode] -> Instruction -> IO [(Mode, Data)]
     assocs ms is' = sequence $ mkAssoc <$> [0 .. argc is' - 1]
       where mkAssoc i' = do d <- readData mem $ i+i'+1
-                            return (atDef Position ms i', d)
-
-
--- | Like runProgram', but only returning the output data, and not the cursor's
--- final position.
-runProgram' = ((((last . snd) <$>) .) .) . runProgram
-
-
--- | Split a number into its modes and opcode components.
-splitCode :: Int -> ([Mode], Int)
-splitCode n = (modes $ n `div` 100, n `mod` 100)
-  where modes x | x >= 10   = modes (x `mod` 10) ++ modes (x `div` 10)
-                | x == 1    = [Immediate]
-                | otherwise = [Position]
+                            return (getMode ms i', d)

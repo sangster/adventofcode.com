@@ -1,12 +1,11 @@
 module Day03 (parts) where
 
-import Util.Parser
+import Data.Bool   (bool)
+import Data.Maybe  (catMaybes)
+import Data.List   (sort, tails)
+import Prelude     hiding (Left, Right)
 
-import Control.Applicative
-import Data.Bool
-import Data.Maybe
-import Data.List
-import Prelude hiding (Left, Right)
+import Util.Parser
 
 
 parts :: [((String -> IO String), Maybe String)]
@@ -121,7 +120,7 @@ distance (x1, y1) (x2, y2) = (abs $ x2 - x1) + (abs $ y2 - y1)
 -- followed by a positive integer defining a distance.
 parseWires :: String
             -> [Wire]
-parseWires = (fmap segments) . (runParser $ some path)
+parseWires = fmap segments . (parse $ some path)
 
 
 -- | Parse a single comma-separated list of moves

@@ -9,10 +9,11 @@ import Days
 
 main :: IO ()
 main = do
-    day <- (!! 0) <$> getArgs
-    case day of
-      "all" -> appAllDays
-      _     -> appSingleDay day
+    args <- getArgs
+    case args of
+        ["all"] -> appAllDays
+        [day]   -> appSingleDay day
+        _       -> error $ "expected onen argument, got " ++ show args
 
 
 appAllDays :: IO ()
@@ -38,8 +39,7 @@ formatPart :: Int
 formatPart number expected result
   | shortEnough && singleLine = valid ++ " " ++ show number ++ ": " ++ result
   | otherwise = unlines [ valid ++ " " ++ show number ++ ": ⏬"
-                        , result
-                        , "==========="
+                        , result ++ "==========="
                         ]
   where
     shortEnough = length result < 70

@@ -1,9 +1,8 @@
 module Day08 (parts) where
 
-import Data.Bool
-import Data.Char
-import Data.List
-import Data.Function
+import Data.Bool      (bool)
+import Data.List      (minimumBy)
+import Data.Function  (on)
 
 import Util.Parser
 
@@ -23,13 +22,13 @@ part2Expected = unlines $ [ "█   █ ██  ███  █   █████ 
 
 
 part1 input = return . show $ count White smallest * count Trans smallest
-  where layers'     = layers (runParser colors input) 25 6
+  where layers'     = layers (parse colors input) 25 6
         smallest    = minimumBy (compare `on` count Black) layers'
         count c lay = sum [bool 0 1 (c == c') | row <- lay, c' <- row]
 
 
 part2 input = return $ show' compiled
-  where layers'  = layers (runParser colors input) 25 6
+  where layers'  = layers (parse colors input) 25 6
         compiled = compile layers'
         show' l  = unlines $ [concatMap show row | row <- l]
 

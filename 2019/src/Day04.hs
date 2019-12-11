@@ -1,7 +1,7 @@
 module Day04 (parts) where
 
-import Control.Monad
-import Data.List
+import Control.Monad  (liftM2)
+import Data.List      (group)
 
 import Util.Parser
 
@@ -15,14 +15,14 @@ parts = [ (part1, Just "2050")
 part1 input = return . show $ length valids
   where
     valids    = filter isValid passwords
-    passwords = runParser range input
+    passwords = parse range input
 
 
 part2 input = return . show $ length valids
   where
     valids    = filter (liftM2 (&&) isValid isValid') passwords
     isValid'  = (any $ (== 2) . length) . group . digits
-    passwords = runParser range input
+    passwords = parse range input
 
 
 range :: Parser [Int]

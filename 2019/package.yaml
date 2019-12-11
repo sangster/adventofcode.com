@@ -25,10 +25,12 @@ dependencies:
   - containers
   - data-default
   - file-embed
+  - mtl
   - regex
   - regex-with-pcre
   - safe
   - utf8-string
+  - vector
 
 library:
   source-dirs: src

@@ -1,6 +1,8 @@
 module Day02 (parts) where
 
+import Util.InstructionSet
 import Util.Program
+
 
 parts :: [((String -> IO String), Maybe String)]
 parts = [ (part1, Just "2782414")
@@ -8,12 +10,12 @@ parts = [ (part1, Just "2782414")
         ]
 
 
-part1 input = do prog <- aoc19Program' input
+part1 input = do prog <- program input
                  zero <- runAdjustedProject prog 12 2
                  return $ show zero
 
 
-part2 input = do prog   <- aoc19Program' input
+part2 input = do prog   <- program input
                  result <- findNounAndVerb prog expectedResult 0 0
                  return $ render result
   where
@@ -21,9 +23,19 @@ part2 input = do prog   <- aoc19Program' input
     render = maybe "fail" $ \(noun, verb) -> show $ 100 * noun + verb
 
 
+program :: String -> IO Program
+program = (fmap $ Program instructions) . parseRAM
+  where instructions :: InstructionSet
+        instructions = [ halt "HALT" 99
+                       , math " ADD"  1 (+)
+                       , math "MULT"  2 (*)
+                       ]
+
+
+
 runAdjustedProject prog noun verb = do writeData (mem prog) 1 noun
                                        writeData (mem prog) 2 verb
-                                       runUntilHalt prog [] 0
+                                       executeUntilHalt prog []
                                        readData (mem prog) 0
 
 

@@ -22,12 +22,12 @@ parts = [ (part1, Just "162439")
 part1 input = return . show $ sum $ elems counts
   where
     counts = countDirectAndIndirectOrbits orbits
-    orbits = orbitMap $ runParser (some orbit) input
+    orbits = orbitMap $ parse (some orbit) input
 
 
 part2 input = return . show $ transfers $ path orbits "YOU" "SAN"
  where
-    orbits    = orbitMap $ runParser (some orbit) input
+    orbits    = orbitMap $ parse (some orbit) input
     transfers = (flip (-) 2) . length
 
 

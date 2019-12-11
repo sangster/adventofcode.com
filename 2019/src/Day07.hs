@@ -1,8 +1,8 @@
 module Day07 (parts) where
 
-import Control.Monad
-import Data.List
+import Data.List  (permutations)
 
+import Util.InstructionSet
 import Util.Program
 
 
@@ -12,15 +12,15 @@ parts = [ (part1, Just "338603")
         ]
 
 
-part1 input = do prog <- aoc19Program' input
+part1 input = do prog <- program input
                  res  <- sequence $ run prog 0 <$> phasePermutations 0 5
                  return . show $ maximum res
   where
-    run prog io phases     = makeAmps prog phases >>= foldM run' io
-    run' i amp@(Amp p _ _) = last . snd <$> runAmp amp [p, i]
+    run prog io phases   = makeAmps prog phases >>= foldM run' io
+    run' i amp@(Amp p _) = last . snd <$> runAmp amp [p, i]
 
 
-part2 input = do prog <- aoc19Program' input
+part2 input = do prog <- program input
                  res  <- sequence $ run prog 0 <$> phasePermutations 5 5
                  return . show $ maximum res
   where
@@ -36,16 +36,31 @@ part2 input = do prog <- aoc19Program' input
     --   list of amps executed during this loop for the next loop, unless it has
     --   halted.
     run' (amps, io) amp = do
-        (amp', io') <- case amp of
-                           Amp phase _ (Just 0) -> runAmp amp [phase, io]
-                           _                    -> runAmp amp [io]
-        case amp' of
-            Amp _ _ Nothing -> return (amps,           last io') -- halted
-            _               -> return (amps ++ [amp'], last io')
+        (amp', io') <- case action . ampProc $ amp of
+                           Run 0 -> runAmp amp [phase amp, io]
+                           _     -> runAmp amp [io]
+        case nextIndex amp' of
+            Nothing -> return (amps,           last io') -- halted
+            _       -> return (amps ++ [amp'], last io')
 
 
-data Amp   = Amp Phase Program (Maybe Index)
+data Amp   = Amp { phase :: Phase, ampProc :: Process }
 type Phase = Int
+
+
+program :: String -> IO Program
+program = (fmap $ Program instructions) . parseRAM
+  where instructions :: InstructionSet
+        instructions = [ halt   "HALT" 99
+                       , math   " ADD"  1 (+)
+                       , math   "MULT"  2 (*)
+                       , store  "STOR"  3
+                       , output " OUT"  4
+                       , jump   " JEQ"  5 (/= 0)
+                       , jump   "JNEQ"  6 (== 0)
+                       , cmp    "  LT"  7 (<)
+                       , cmp    "  EQ"  8 (==)
+                       ]
 
 
 phasePermutations :: Int -> Int -> [[Int]]
@@ -57,7 +72,14 @@ makeAmps prog ps = sequence $ makeAmp prog <$> ps
 
 
 makeAmp :: Program -> Phase -> IO Amp
-makeAmp (Program i m) p = memcpy m >>= return . (flip (Amp p) $ Just 0) . Program i
+makeAmp (Program i m) ph = memcpy m >>= return . (Amp ph) . load . (Program i)
+
+
+nextIndex :: Amp -> Maybe Index
+nextIndex (Amp _ p) = case action p of
+                          Halt     -> Nothing
+                          Signal c -> Just c
+                          Run    c -> Just c
 
 
 -- | Run the program in the given amplifier using the provided input.
@@ -65,6 +87,8 @@ makeAmp (Program i m) p = memcpy m >>= return . (flip (Amp p) $ Just 0) . Progra
 runAmp :: Amp
        -> [Data]
        -> IO (Amp, [Data])
-runAmp amp@(Amp _ _ Nothing)  io = return $ (amp, tail io)
-runAmp (Amp p mem (Just cur)) io = do (cur', io') <- runProgram mem io cur
-                                      return $ (Amp p mem cur', io')
+runAmp amp io = runAmp' $ nextIndex amp
+  where runAmp' Nothing  = return $ (amp, tail (fifo . ampProc $ amp))
+        runAmp' (Just c) = do (i', p') <- run
+                              return $ (Amp (phase amp) p', i')
+        run = runStateT execute (ampProc amp){ fifo = io }

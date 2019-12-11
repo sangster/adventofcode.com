@@ -1,10 +1,10 @@
 --
 -- See http://dev.stephendiehl.com/fun/002_parsers.html
 --
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, GeneralizedNewtypeDeriving #-}
 module Util.Parser
     ( Parser(..)
-    , runParser
+    , parse
     , satisfy
     , char
     , string
@@ -26,99 +26,96 @@ module Util.Parser
 
 import Data.Bool
 import Data.Char
-import Control.Monad
+import Data.Default
 import Control.Applicative
+import Control.Monad.State
+import Control.Monad.Except
+import Debug.Trace
 
 
-newtype Parser a = Parser { parse :: String -> [(a, String)] }
+newtype Parser a = Parser { runParser :: StateT PState (Either ParseError) a }
+    deriving ( Functor
+             , Applicative
+             , Monad
+             , MonadState PState
+             , MonadError ParseError
+             )
 
 
-runParser :: forall a. Show a => Parser a -> String -> a
-
--- runParser :: Parser a
---           -> String
---           -> a
-runParser m s =
-    case parse m s of
-        [(res, [])] -> res
-        [(res, rs)] -> error . unlines $
-                         [ "did not read entire string."
-                         , "    result: " ++ (show res)
-                         , ""
-                         , " remaining: " ++ rs
-                         ]
-        []          -> error $ "nothing created from: " ++ s
+data PState = PState { queue :: String
+                     , line  :: Int
+                     , col   :: Int
+                     }
+  deriving Show
 
 
-instance Functor Parser where
-    fmap f (Parser cs) = Parser cs'
-      where cs' s = [(f a, b) | (a, b) <- cs s]
+instance Default PState where
+    def = PState { queue = ""
+                 , line  = 0
+                 , col   = 0
+                 }
 
 
-instance Applicative Parser where
-    pure = return
-
-    (Parser cs1) <*> (Parser cs2) = Parser cs
-      where cs s = [(f a, s2) | (f, s1) <- cs1 s,
-                                (a, s2) <- cs2 s1]
+data ParseError = UnexpectedToken Char
+                | EOF
+    deriving Show
 
 
-instance Monad Parser where
-    return = unit
-    (>>=)  = bind
-
-
-bind :: Parser a
-     -> (a -> Parser b)
-     -> Parser b
-bind p f = Parser cs
-  where cs s      = concatMap f' $ parse p s
-        f' (a, s) = parse (f a) s
+parse :: forall a. Show a
+      => Parser a
+      -> String
+      -> a
+parse p s = report $ (evalStateT (runParser p) def{ queue = s })
+  where
+    report :: Either ParseError a -> a
+    report (Right a) = a
+    report (Left e)  = do
+        error . unlines $
+            [ "did not read entire string."
+            , "    result: " ++ (show e)
+            , ""
+            , " remaining: " ++ s
+            ]
 
 
 unit :: a -> Parser a
-unit a = Parser (\s -> [(a, s)])
-
-
-instance MonadPlus Parser where
-    mzero = failure
-    mplus = combine
-
-
-failure :: Parser a
-failure = Parser (\_ -> [])
-
-
-combine :: Parser a
-        -> Parser a
-        -> Parser a
-combine p q = Parser cs
-  where cs s = (parse p s) ++ (parse q s)
+unit a = return a
 
 
 instance Alternative Parser where
-    empty = mzero
+    empty = throwError EOF
     (<|>) = option
 
 
 option :: Parser a
        -> Parser a
        -> Parser a
-option p q = Parser cs
-  where cs s = case parse p s of
-                   []  -> parse q s
-                   res -> res
+option p q = do st <- trace "option"  get
+                case runStateT (runParser p) st of
+                  Left  _        -> q
+                  Right (a, st') -> do { put st'; return a }
 
 
 satisfy :: (Char -> Bool)
         -> Parser Char
-satisfy p = do { c <- item; bool failure (unit c) (p c) }
+satisfy f = do c <- item
+               bool (throwError $ UnexpectedToken c) (unit c) $ f c
 
 
 item :: Parser Char
-item = Parser cs
-  where cs []      = []
-        cs (c:cs') = [(c, cs')]
+item = do st <- get
+          cs (queue st)
+  where cs []      = throwError EOF
+        cs (c:cs') = do st <- get
+                        put st{ queue = cs' }
+                        putPos c
+                        return c
+        putPos :: Char -> Parser Char
+        putPos c = do st <- get
+                      if c == '\n'
+                          then put st{ col = 0, line = (line st) + 1 }
+                          else put st{ col = (col st) + 1 }
+                      return c
 
 
 char :: Char
@@ -128,7 +125,7 @@ char c = satisfy (c ==)
 
 string :: String
        -> Parser String
-string [] = return []
+string []     = return []
 string (c:cs) = do char c
                    string cs
                    return (c:cs)

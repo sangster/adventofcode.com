@@ -1,5 +1,6 @@
 module Day01 (parts) where
 
+
 parts = [(part1, Just "3152919"), (part2, Just "4726527")]
 
 
