@@ -3,7 +3,8 @@
 --
 {-# LANGUAGE ScopedTypeVariables, GeneralizedNewtypeDeriving #-}
 module Util.Parser
-    ( Parser(..)
+    ( Parser (..)
+    , PState (..)
     , parse
     , satisfy
     , char
@@ -21,6 +22,7 @@ module Util.Parser
     , some
     , many
     , (<|>)
+    , module Control.Monad.State
     ) where
 
 
@@ -90,7 +92,7 @@ instance Alternative Parser where
 option :: Parser a
        -> Parser a
        -> Parser a
-option p q = do st <- trace "option"  get
+option p q = do st <- get
                 case runStateT (runParser p) st of
                   Left  _        -> q
                   Right (a, st') -> do { put st'; return a }

@@ -5,11 +5,11 @@ module Util.OpCode
     , getMode
     ) where
 
+import Safe      (atDef)
+import Util.RAM  (Data)
 
-import Safe
-import Util.RAM
 
-
+-- | A numeric code in memory which names an operation the computer can perform.
 type OpCode = Data
 
 
@@ -18,7 +18,6 @@ data Mode = Position   -- ^ Return the data at the memory location of the value.
           | Immediate  -- ^ Return the value verbatim.
           | Relative   -- ^ Return the data at the memorry location relative to value.
     deriving Show
-
 
 
 
@@ -31,5 +30,6 @@ splitCode n = (modes $ n `div` 100, n `mod` 100)
                 | otherwise = [Position]
 
 
+-- | Get the mode at the given index, defaulting to @Position@.
 getMode :: [Mode] -> Int -> Mode
 getMode modes i = atDef Position modes i

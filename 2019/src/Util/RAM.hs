@@ -12,13 +12,13 @@ module Util.RAM
     , dumpRAM
     ) where
 
+
 import Control.Monad
 import Data.Bool
 import qualified Data.Vector.Unboxed.Mutable as M
 import qualified Data.Vector.Unboxed as U
 import Data.List
 import Text.Printf
-import Debug.Trace
 import Util.Parser hiding (token)
 
 
@@ -52,6 +52,10 @@ writeData :: RAM
 writeData = M.write
 
 
+-- Increase the amount of available memory so that the given index can be
+-- addressed.
+--
+-- Don't do this too often as we need to send an intern to BestBuy each time.
 grow :: RAM
      -> Index
      -> IO RAM

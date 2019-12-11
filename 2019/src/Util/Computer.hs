@@ -8,7 +8,6 @@ module Util.Computer
     , load
     , fetch
     , write
-    , modeLoc
     , modeDest
     , modeRead
     , relativeJump
@@ -22,13 +21,15 @@ import Util.OpCode
 import Util.RAM
 
 
+-- | A state transformer representing a Process currently being run.
 type Runtime a = StateT Process IO a
 
 
-data Process = Process { prog   :: Program
-                       , action :: Action
-                       , fifo   :: [Data]
-                       , base   :: Data
+-- | A @Program@ and the state needed to execute it.
+data Process = Process { prog   :: Program  -- ^ Instruction set and RAM.
+                       , action :: Action   -- ^ What the computer should do next.
+                       , fifo   :: [Data]   -- ^ Input/Output
+                       , base   :: Data     -- ^ The base for relative modes.
                        }
 
 
@@ -41,9 +42,9 @@ type InstructionSet = [Instruction]
 
 
 data Instruction = Instruction
-    { name   :: String
-    , opcode :: OpCode           -- Its code in memory.
-    , argc   :: Index            -- The number of arguments it uses.
+    { name   :: String  -- ^ A useful name for debugging.
+    , opcode :: OpCode  -- ^ Its code in memory.
+    , argc   :: Index   -- ^ The number of arguments it uses.
     , call   :: [(Mode, Data)] -> Runtime ()
     }
 
@@ -60,6 +61,7 @@ data Action = Halt          -- ^ Stop execution entirely.
     deriving Show
 
 
+-- | Create a new @Process@, ready to be executed.
 load :: Program
      -> Process
 load p = Process { prog   = p
@@ -69,6 +71,11 @@ load p = Process { prog   = p
                  }
 
 
+-- | Fetch a datum from memory, defaulting to @0@ if that value hasn't been
+-- written yet.
+--
+-- The amount of memory will be increased to insure the given index isn't out of
+-- bounds.
 fetch :: Index
       -> Runtime Data
 fetch src = do growIfSmall src
@@ -76,6 +83,10 @@ fetch src = do growIfSmall src
                lift $ readData ram src
 
 
+-- | Write a datum to memory.
+--
+-- The amount of memory will be increased to insure the given index isn't out of
+-- bounds.
 write :: Index
       -> Data
       -> Runtime ()
@@ -84,6 +95,8 @@ write dst dat = do growIfSmall dst
                    lift $ writeData ram dst dat
 
 
+-- | Grow the amount of available memory to ensure the given index isn't out of
+-- bounds.
 growIfSmall :: Index
             -> Runtime ()
 growIfSmall i = do
@@ -94,13 +107,14 @@ growIfSmall i = do
                 modify $ \p -> p{ prog = (Program (is . prog $ p) cpy) }
 
 
-
+-- | Move execution of the program relative to its current @cursor@.
 relativeJump :: Data
              -> Runtime ()
 relativeJump n = do cur <- cursor
                     modify $ \p -> p{ action = Run (cur + n) }
 
 
+-- | The position in memory currently being executed.
 cursor :: Runtime Index
 cursor = do act <- action <$> get
             return $ cursor' act
@@ -119,19 +133,23 @@ modeRead assocs i = do eitherIndexOrData <- modeLoc assocs i
                            Right idx -> fetch  idx
 
 
+-- | Read data from memory, interpreting it as memory location.
+--
+-- It differs from @modeRead@ by not derefercing @Position@ modes. ie: @Position
+-- 10@ will write to @10@, and not reading the current value of @10@ and using
+-- that address.
 modeDest assocs i = do eitherIndexOrData <- modeLoc assocs i
                        case eitherIndexOrData of
                            Left  a -> return a
                            Right a -> return a
 
 
+-- | @Left@ for an @Immediate@ location or @Right@ for a @Position@ location.
 modeLoc :: [(Mode, Data)]
          -> Data
          -> Runtime (Either Data Data)
-modeLoc assocs i = do ram <- mem . prog <$> get
-                      uncurry modeRead' $ assocs !! i
-  where modeRead' :: Mode -> Data -> Runtime (Either Data Data)
-        modeRead' Immediate a = return $ Left a
-        modeRead' Position  a = return $ Right a
-        modeRead' Relative  a = do b <- base <$> get
-                                   return . Right $ b + a
+modeLoc assocs i = uncurry loc $ assocs !! i
+  where loc :: Mode -> Data -> Runtime (Either Data Data)
+        loc Immediate a = return $ Left a
+        loc Position  a = return $ Right a
+        loc Relative  a = do { b <- base <$> get; return . Right $ b + a }
