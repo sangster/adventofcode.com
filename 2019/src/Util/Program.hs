@@ -8,6 +8,7 @@ module Util.Program
 
 
 import Data.List  (find)
+import Debug.Trace
 
 import Util.Computer
 import Util.OpCode

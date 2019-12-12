@@ -1,7 +1,9 @@
 module Day01 (parts) where
 
 
-parts = [(part1, Just "3152919"), (part2, Just "4726527")]
+parts = [ (part1, Just "3152919")
+        , (part2, Just "4726527")
+        ]
 
 
 part1 :: String -> IO String
@@ -9,7 +11,7 @@ part1 content = return . show . sum $ fuelRequirement <$> readMasses content
 
 
 readMasses :: String -> [Int]
-readMasses = (read <$>) . lines
+readMasses = fmap read . lines
 
 
 fuelRequirement :: Int -> Int
@@ -21,7 +23,6 @@ part2 content = return . show . sum $ totalRequirement <$> readMasses content
 
 
 totalRequirement :: Int -> Int
-totalRequirement mass
-  | fuel <= 0 = 0
-  | otherwise = fuel + totalRequirement fuel
+totalRequirement mass | fuel <= 0 = 0
+                      | otherwise = fuel + totalRequirement fuel
   where fuel = fuelRequirement mass

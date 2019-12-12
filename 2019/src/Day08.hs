@@ -12,13 +12,13 @@ parts = [ (part1, Just "2684")
         , (part2, Just part2Expected)
         ]
 
-part2Expected = unlines $ [ "█   █ ██  ███  █   █████ "
-                          , "█   ██  █ █  █ █   █   █ "
-                          , " █ █ █    █  █  █ █   █  "
-                          , "  █  █ ██ ███    █   █   "
-                          , "  █  █  █ █ █    █  █    "
-                          , "  █   ███ █  █   █  ████ "
-                          ]
+part2Expected = unlines [ "█   █ ██  ███  █   █████ "
+                        , "█   ██  █ █  █ █   █   █ "
+                        , " █ █ █    █  █  █ █   █  "
+                        , "  █  █ ██ ███    █   █   "
+                        , "  █  █  █ █ █    █  █    "
+                        , "  █   ███ █  █   █  ████ "
+                        ]
 
 
 part1 input = return . show $ count White smallest * count Trans smallest

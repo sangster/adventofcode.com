@@ -39,10 +39,14 @@ formatPart :: Int
 formatPart number expected result
   | shortEnough && singleLine = valid ++ " " ++ show number ++ ": " ++ result
   | otherwise = unlines [ valid ++ " " ++ show number ++ ": ⏬"
-                        , result ++ "==========="
+                        , strip result
+                        , "==========="
                         ]
   where
     shortEnough = length result < 70
     singleLine  = not $ elem '\n' result
     valid = maybe "?" isSuccess expected
     isSuccess ex = if result == ex then " " else "X"
+    strip  []       = []
+    strip ('\n':[]) = []
+    strip (c:cc)    = c:(strip cc)
