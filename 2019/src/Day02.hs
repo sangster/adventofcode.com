@@ -23,14 +23,13 @@ part2 input = do prog   <- program input
     render = maybe "fail" $ \(noun, verb) -> show $ 100 * noun + verb
 
 
-program :: String -> IO Program
-program = (fmap $ UserProgram instructions) . parseRAM
-  where instructions :: InstructionSet
+program :: String -> IO Program'
+program = (fmap $ Program instructions) . parseRAM
+  where instructions :: InstructionSet'
         instructions = [ halt "HALT" 99
                        , math " ADD"  1 (+)
                        , math "MULT"  2 (*)
                        ]
-
 
 
 runAdjustedProject prog noun verb = do writeData (mem prog) 1 noun
@@ -39,7 +38,7 @@ runAdjustedProject prog noun verb = do writeData (mem prog) 1 noun
                                        readData (mem prog) 0
 
 
-findNounAndVerb :: Program
+findNounAndVerb :: Program'
                 -> Data     -- expected
                 -> Data     -- noun
                 -> Data     -- verb
@@ -49,7 +48,7 @@ findNounAndVerb p e noun 100 = findNounAndVerb p e (noun + 1) 0
 
 findNounAndVerb prog expected noun verb = do
     mem'   <- memcpy $ mem prog
-    result <- runAdjustedProject (UserProgram (is prog) mem') noun verb
+    result <- runAdjustedProject (Program (is prog) mem') noun verb
 
     if (expected == result)
         then return $ Just (noun, verb)

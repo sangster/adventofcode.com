@@ -25,15 +25,15 @@ withQuarters n prog = do { writeData (mem prog) 0 n; return prog }
 
 
 play :: GameProgram -> IO Score
-play prog = exec 0 $ load' prog M.empty
-  where exec s proc = do (score, proc') <- runStateT (updateScreen s) proc
+play prog = exec 0 $ load prog M.empty
+  where exec s proc = do (score, proc') <- runStateT (gameState s) proc
                          case action proc' of
                              Halt -> return score
                              _    -> exec score proc'
 
 
-updateScreen :: Score -> GameRuntime Score
-updateScreen score = do
+gameState :: Score -> GameRuntime Score
+gameState score = do
     execute >> execute >> execute
     output <- pop
     case output of
@@ -46,8 +46,8 @@ updateScreen score = do
 
 type Screen = M.Map (X,Y) Sprite
 
-type GameProgram   = UserProgram Screen
-type GameRuntime a = UserRuntime Screen a
+type GameProgram   = Program Screen
+type GameRuntime a = Runtime Screen a
 
 data Sprite = Empty
             | Wall
@@ -57,7 +57,7 @@ data Sprite = Empty
   deriving (Enum, Eq, Ord)
 
 
-data Tile = Tile { pos  :: (X, Y)
+data Tile = Tile { pos    :: (X, Y)
                  , sprite :: Sprite
                  }
 
@@ -74,8 +74,9 @@ type X     = Int
 type Y     = Int
 type Score = Int
 
+
 gameProgram :: GameProgram -> IO Screen
-gameProgram prog = do exec M.empty $ load' prog M.empty
+gameProgram prog = exec M.empty $ load prog M.empty
   where exec es proc = do (es', proc') <- runStateT (buildSprites es) proc
                           case action proc' of
                               Halt -> return es'
@@ -90,10 +91,9 @@ buildSprites es = do execute >> execute >> execute
                          _       -> return es
 
 
-
 program :: String -> IO GameProgram
-program = (fmap $ UserProgram instructions) . parseRAM
-  where instructions :: UserInstructionSet Screen
+program = (fmap $ Program instructions) . parseRAM
+  where instructions :: InstructionSet Screen
         instructions = [ halt    "HALT" 99
                        , math    " ADD"  1 (+)
                        , math    "MULT"  2 (*)

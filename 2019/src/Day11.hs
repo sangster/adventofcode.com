@@ -38,7 +38,7 @@ type Y = Int
 type ColorMap = M.Map (X, Y) Color
 
 
-data Robot = Robot { proc' :: Process
+data Robot = Robot { proc' :: Process ()
                    , dir   :: Direction
                    , loc   :: (X,Y)
                    }
@@ -66,8 +66,8 @@ data Turn = Left
     deriving Show
 
 
-dispatchBot :: ColorMap -> Program -> IO ColorMap
-dispatchBot m p = bot m Robot{ proc' = load p, dir = North, loc = (0,0) }
+dispatchBot :: ColorMap -> Program () -> IO ColorMap
+dispatchBot m p = bot m Robot{ proc' = load' p, dir = North, loc = (0,0) }
   where bot map b =
             do ((c, t), proc'') <- runStateT runBot (proc' b){ fifo = [input map b] }
                case action proc'' of
@@ -78,7 +78,7 @@ dispatchBot m p = bot m Robot{ proc' = load p, dir = North, loc = (0,0) }
         colorAt cm key = maybe Black id $ M.lookup key cm
 
 
-runBot :: Runtime (Color, Turn)
+runBot :: Runtime' (Color, Turn)
 runBot = do dat <- do { execute; execute }
             return (parseColor $ head dat, parseTurn $ head . tail $ dat)
   where
@@ -120,10 +120,9 @@ draw colors = unlines lines
                                                        )
 
 
-program :: String -> IO (UserProgram ())
-program = (fmap $ UserProgram instructions) . parseRAM
-  where instructions :: UserInstructionSet ()
-        instructions = [ halt    "HALT" 99
+program :: String -> IO Program'
+program = (fmap $ Program instructions) . parseRAM
+  where instructions = [ halt    "HALT" 99
                        , math    " ADD"  1 (+)
                        , math    "MULT"  2 (*)
                        , store   "STOR"  3

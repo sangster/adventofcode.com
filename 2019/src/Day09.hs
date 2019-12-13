@@ -14,11 +14,9 @@ part1 input = show <$> (program input >>= flip executeUntilHalt' [1])
 part2 input = show <$> (program input >>= flip executeUntilHalt' [2])
 
 
-
-program :: String -> IO (UserProgram ())
-program = (fmap $ UserProgram instructions) . parseRAM
-  where instructions :: UserInstructionSet ()
-        instructions = [ halt    "HALT" 99
+program :: String -> IO Program'
+program = (fmap $ Program instructions) . parseRAM
+  where instructions = [ halt    "HALT" 99
                        , math    " ADD"  1 (+)
                        , math    "MULT"  2 (*)
                        , store   "STOR"  3

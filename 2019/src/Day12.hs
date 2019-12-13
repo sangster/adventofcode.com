@@ -99,4 +99,4 @@ unit a b = case compare a b of
 findRepeatStep :: [Moon] -> Dimension -> Int
 findRepeatStep origin d = findRepeat (step origin) 1
   where findRepeat moons i = bool (findRepeat (step moons) $ i+1) i $ match moons
-        match moons        = ((==) `on` fmap (!! d)) moons origin
+        match moons         = ((==) `on` fmap (!! d)) moons origin

@@ -19,7 +19,7 @@ import Util.RAM
 
 
 -- The full Advent of Code 2019 instruction set.
-aoc19Set :: UserInstructionSet a
+aoc19Set :: InstructionSet a
 aoc19Set = [ halt    "HALT" 99
            , math    " ADD"  1 (+)
            , math    "MULT"  2 (*)
@@ -34,7 +34,7 @@ aoc19Set = [ halt    "HALT" 99
 
 
 halt = mkInstruction 0 halt'
-  where halt' :: [(Mode, Data)] -> UserRuntime a ()
+  where halt' :: [(Mode, Data)] -> Runtime a ()
         halt' _ = modify $ \p -> p{ action = Halt }
 
 
@@ -88,12 +88,12 @@ newBase = mkInstruction 1 newBase'
 
 
 mkInstruction :: Index
-              -> ([(Mode, Data)] -> UserRuntime a ())
+              -> ([(Mode, Data)] -> Runtime a ())
               -> String
               -> OpCode
-              -> UserInstruction a
-mkInstruction a c n op = UserInstruction{ name = n
-                                        , opcode = op
-                                        , argc = a
-                                        , call = c
-                                        }
+              -> Instruction a
+mkInstruction a c n op = Instruction{ name = n
+                                    , opcode = op
+                                    , argc = a
+                                    , call = c
+                                    }

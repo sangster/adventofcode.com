@@ -15,16 +15,18 @@ parts = [ (part1, Just "340")
 
 
 part1 input = return . show . length $ visMap M.! best
-  where best   = findBest visMap
-        visMap = visibleMap $ parse (some asteroid) input
+  where
+    best   = findBest visMap
+    visMap = visibleMap $ parse (some asteroid) input
 
 
 part2 input = return . show $ code (destroyPos 200)
-  where destroyPos i = sorted !! (i - 1)
-        code (x,y) = x * 100 + y
-        sorted = sortBy (compare `on` laserBearing best) $ visMap M.! best
-        best   = findBest visMap
-        visMap = visibleMap $ parse (some asteroid) input
+  where
+    destroyPos i = sorted !! (i - 1)
+    code (x,y) = x * 100 + y
+    sorted = sortBy (compare `on` laserBearing best) $ visMap M.! best
+    best   = findBest visMap
+    visMap = visibleMap $ parse (some asteroid) input
 
 
 type X = Int
