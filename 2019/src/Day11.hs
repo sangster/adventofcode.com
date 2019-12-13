@@ -120,9 +120,9 @@ draw colors = unlines lines
                                                        )
 
 
-program :: String -> IO Program
-program = (fmap $ Program instructions) . parseRAM
-  where instructions :: InstructionSet
+program :: String -> IO (UserProgram ())
+program = (fmap $ UserProgram instructions) . parseRAM
+  where instructions :: UserInstructionSet ()
         instructions = [ halt    "HALT" 99
                        , math    " ADD"  1 (+)
                        , math    "MULT"  2 (*)

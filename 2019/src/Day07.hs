@@ -49,7 +49,7 @@ type Phase = Int
 
 
 program :: String -> IO Program
-program = (fmap $ Program instructions) . parseRAM
+program = (fmap $ UserProgram instructions) . parseRAM
   where instructions :: InstructionSet
         instructions = [ halt   "HALT" 99
                        , math   " ADD"  1 (+)
@@ -71,8 +71,8 @@ makeAmps :: Program -> [Phase] -> IO [Amp]
 makeAmps prog ps = sequence $ makeAmp prog <$> ps
 
 
-makeAmp :: Program -> Phase -> IO Amp
-makeAmp (Program i m) ph = memcpy m >>= return . (Amp ph) . load . (Program i)
+makeAmp :: UserProgram () -> Phase -> IO Amp
+makeAmp (UserProgram i m) ph = memcpy m >>= return . (Amp ph) . load . (UserProgram i)
 
 
 nextIndex :: Amp -> Maybe Index

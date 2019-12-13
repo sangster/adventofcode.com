@@ -17,6 +17,7 @@ import qualified Day09
 import qualified Day10
 import qualified Day11
 import qualified Day12
+import qualified Day13
 
 
 parts = [ Day01.parts
@@ -31,6 +32,7 @@ parts = [ Day01.parts
         , Day10.parts
         , Day11.parts
         , Day12.parts
+        , Day13.parts
         ]
 
 

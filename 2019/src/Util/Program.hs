@@ -8,7 +8,7 @@ module Util.Program
 
 
 import Data.List  (find)
-import Debug.Trace
+import Data.Default
 
 import Util.Computer
 import Util.OpCode
@@ -17,23 +17,36 @@ import Util.RAM
 
 -- | Like @execute@, but this function will continue to execute until
 -- @execute@ returns @Nothing@ for the cursor position.
-executeUntilHalt :: Program
-                 -> [Data]
-                 -> IO [Data]
-executeUntilHalt prog' io' = loop prog' io' 0 0
+execUserUntilHalt :: UserProgram a
+                  -> a
+                  -> [Data]
+                  -> IO [Data]
+execUserUntilHalt prog' a io' = loop prog' io' 0 0
   where
     loop p i c b = do
-        (dat, proc') <- runStateT execute $ (load p){ action = Run c
-                                                    , fifo   = i
-                                                    , base   = b
-                                                    }
+        (dat, proc') <- runStateT execute $ (load' p a){ action = Run c
+                                                       , fifo   = i
+                                                       , base   = b
+                                                       }
         case action proc' of
             Halt      -> return $ dat
             Signal c' -> loop (prog proc') dat c' (base proc')
             Run    c' -> loop (prog proc') dat c' (base proc')
 
 
+
+executeUntilHalt :: (Default a)
+                 => UserProgram a
+                 -> [Data]
+                 -> IO [Data]
+executeUntilHalt p = execUserUntilHalt p def
+
+
 -- | Like @executeUntilHalt@, but only the finaly IO is returned.
+executeUntilHalt' :: (Default a)
+                  => UserProgram a
+                  -> [Data]
+                  -> IO Data
 executeUntilHalt' = ((last <$>) .) . executeUntilHalt
 
 
@@ -47,7 +60,7 @@ executeUntilHalt' = ((last <$>) .) . executeUntilHalt
 --
 -- @Store@ expressions read from the head and @Output@ expressions append to the
 -- tail.
-execute :: Runtime [Data]
+execute :: UserRuntime a [Data]
 execute = do
     p <- get
     case cursor (action p) of
@@ -68,20 +81,20 @@ execute = do
 
 
 -- | Parse the expression at the given index of the program's memory.
-parseExpr :: Program
+parseExpr :: UserProgram a
           -> Index
-          -> IO (Instruction, [(Mode, Data)])
-parseExpr (Program is mem) i = do
+          -> IO (UserInstruction a, [(Mode, Data)])
+parseExpr (UserProgram is mem) i = do
     (modes, opcode) <- splitCode <$> readData mem i
     assocs' <- assocs modes $ inst opcode
     return (inst opcode, assocs')
   where
-    inst code = case (find (\Instruction{ opcode = c } -> c == code) is) of
+    inst code = case (find (\UserInstruction{ opcode = c } -> c == code) is) of
                     Nothing -> error $ "unknown opcode @ " ++ show i ++ ": " ++
                                    show code
                     Just i  -> i
 
-    assocs :: [Mode] -> Instruction -> IO [(Mode, Data)]
+    assocs :: [Mode] -> UserInstruction a -> IO [(Mode, Data)]
     assocs ms is' = sequence $ mkAssoc <$> [0 .. argc is' - 1]
       where mkAssoc i' = do d <- readData mem $ i+i'+1
                             return (getMode ms i', d)

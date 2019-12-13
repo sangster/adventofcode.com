@@ -7,15 +7,19 @@ module Util.InstructionSet
     , jump
     , cmp
     , newBase
+    , mkInstruction
     ) where
 
 
 import Data.Bool  (bool)
 
 import Util.Computer
+import Util.OpCode
+import Util.RAM
 
 
 -- The full Advent of Code 2019 instruction set.
+aoc19Set :: UserInstructionSet a
 aoc19Set = [ halt    "HALT" 99
            , math    " ADD"  1 (+)
            , math    "MULT"  2 (*)
@@ -30,7 +34,7 @@ aoc19Set = [ halt    "HALT" 99
 
 
 halt = mkInstruction 0 halt'
-  where halt' :: [(a, b)] -> Runtime ()
+  where halt' :: [(Mode, Data)] -> UserRuntime a ()
         halt' _ = modify $ \p -> p{ action = Halt }
 
 
@@ -42,12 +46,14 @@ math n op f = mkInstruction 3 math' n op
                           relativeJump 4
 
 
-store = mkInstruction 1 store'
-  where store' assocs = do (i:io) <- fifo <$> get
-                           dst <- modeDest assocs 0
-                           write dst i
-                           modify $ \p -> p{ fifo = io }
-                           relativeJump 2
+store n = mkInstruction 1 store' n
+  where store' assocs = do dat <- fifo <$> get
+                           case dat of
+                             (i:io) -> do dst <- modeDest assocs 0
+                                          write dst i
+                                          modify $ \p -> p{ fifo = io }
+                                          relativeJump 2
+                             _      -> error $ n ++ ": FIFO empty"
 
 
 output = mkInstruction 1 output'
@@ -81,8 +87,13 @@ newBase = mkInstruction 1 newBase'
                              relativeJump 2
 
 
-mkInstruction a c n op = Instruction{ name = n
-                                    , opcode = op
-                                    , argc = a
-                                    , call = c
-                                    }
+mkInstruction :: Index
+              -> ([(Mode, Data)] -> UserRuntime a ())
+              -> String
+              -> OpCode
+              -> UserInstruction a
+mkInstruction a c n op = UserInstruction{ name = n
+                                        , opcode = op
+                                        , argc = a
+                                        , call = c
+                                        }

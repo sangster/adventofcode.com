@@ -24,7 +24,7 @@ part2 input = do prog   <- program input
 
 
 program :: String -> IO Program
-program = (fmap $ Program instructions) . parseRAM
+program = (fmap $ UserProgram instructions) . parseRAM
   where instructions :: InstructionSet
         instructions = [ halt "HALT" 99
                        , math " ADD"  1 (+)
@@ -49,7 +49,7 @@ findNounAndVerb p e noun 100 = findNounAndVerb p e (noun + 1) 0
 
 findNounAndVerb prog expected noun verb = do
     mem'   <- memcpy $ mem prog
-    result <- runAdjustedProject (Program (is prog) mem') noun verb
+    result <- runAdjustedProject (UserProgram (is prog) mem') noun verb
 
     if (expected == result)
         then return $ Just (noun, verb)
