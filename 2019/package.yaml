@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/sang
 dependencies:
   - array
   - base >= 4.7 && < 5
+  - brick
   - bytestring
   - containers
   - data-default
@@ -44,5 +45,6 @@ executables:
       - -rtsopts
       - -with-rtsopts=-N
       - -Wall
+      - -funbox-strict-fields
     dependencies:
       - aoc2019

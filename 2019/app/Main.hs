@@ -6,14 +6,25 @@ import System.Environment (getArgs)
 
 import Days
 
+import Brick
+
 
 main :: IO ()
 main = do
     args <- getArgs
     case args of
         ["all"] -> appAllDays
+        ["viz"] -> todoVisuals
         [day]   -> appSingleDay day
         _       -> error $ "expected onen argument, got " ++ show args
+
+
+todoVisuals :: IO ()
+todoVisuals = simpleMain ui
+  where
+    ui :: Widget ()
+    ui = str "Hello, world!"
+
 
 
 appAllDays :: IO ()
