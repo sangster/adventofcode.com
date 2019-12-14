@@ -39,9 +39,10 @@ part2 input = do prog <- program input
         (amp', io') <- case action . ampProc $ amp of
                            Run 0 -> runAmp amp [phase amp, io]
                            _     -> runAmp amp [io]
-        case nextIndex amp' of
-            Nothing -> return (amps,           last io') -- halted
-            _       -> return (amps ++ [amp'], last io')
+
+        return $ act (amps, last io')
+                     (\_-> (amps ++ [amp'], last io'))
+                     (ampProc amp')
 
 
 data Amp   = Amp { phase :: Phase, ampProc :: Process () }
@@ -75,20 +76,14 @@ makeAmp :: Program () -> Phase -> IO Amp
 makeAmp (Program i m) ph = memcpy m >>= return . (Amp ph) . load' . (Program i)
 
 
-nextIndex :: Amp -> Maybe Index
-nextIndex (Amp _ p) = case action p of
-                          Halt     -> Nothing
-                          Signal c -> Just c
-                          Run    c -> Just c
-
-
 -- | Run the program in the given amplifier using the provided input.
 -- The result will be the amp, modified with its new cursor, and its output.
 runAmp :: Amp
        -> [Data]
        -> IO (Amp, [Data])
-runAmp amp io = runAmp' $ nextIndex amp
-  where runAmp' Nothing  = return $ (amp, tail (fifo . ampProc $ amp))
-        runAmp' (Just c) = do (i', p') <- run
-                              return $ (Amp (phase amp) p', i')
-        run = runStateT execute (ampProc amp){ fifo = io }
+
+runAmp amp io = act returnAmp runAmp' $ ampProc amp
+  where
+    returnAmp = return $ (amp, tail (fifo . ampProc $ amp))
+    runAmp' _ = do (i', p') <- runStateT execute (ampProc amp){ fifo = io }
+                   return $ (Amp (phase amp) p', i')

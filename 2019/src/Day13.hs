@@ -27,9 +27,8 @@ withQuarters n prog = do { writeData (mem prog) 0 n; return prog }
 play :: GameProgram -> IO Score
 play prog = exec 0 $ load prog M.empty
   where exec s proc = do (score, proc') <- runStateT (gameState s) proc
-                         case action proc' of
-                             Halt -> return score
-                             _    -> exec score proc'
+                         act (return score) (\_-> exec score proc') proc
+
 
 
 gameState :: Score -> GameRuntime Score
@@ -78,9 +77,7 @@ type Score = Int
 gameProgram :: GameProgram -> IO Screen
 gameProgram prog = exec M.empty $ load prog M.empty
   where exec es proc = do (es', proc') <- runStateT (buildSprites es) proc
-                          case action proc' of
-                              Halt -> return es'
-                              _    -> exec es' proc'
+                          act (return es') (\_-> exec es' proc') proc'
 
 
 buildSprites :: Screen -> GameRuntime Screen

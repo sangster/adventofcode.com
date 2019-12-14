@@ -70,10 +70,10 @@ dispatchBot :: ColorMap -> Program () -> IO ColorMap
 dispatchBot m p = bot m Robot{ proc' = load' p, dir = North, loc = (0,0) }
   where bot map b =
             do ((c, t), proc'') <- runStateT runBot (proc' b){ fifo = [input map b] }
-               case action proc'' of
-                   Halt -> return map
-                   _    -> do let map' = M.insert (loc b) c map
-                              bot map' (move . (turn t) $ b{ proc' = proc'' })
+               act (return map)
+                   (\_ -> do let map' = M.insert (loc b) c map
+                             bot map' (move . (turn t) $ b{ proc' = proc'' }))
+                   (proc'')
         input map b    = bool 0 1 $ White == colorAt map (loc b)
         colorAt cm key = maybe Black id $ M.lookup key cm
 

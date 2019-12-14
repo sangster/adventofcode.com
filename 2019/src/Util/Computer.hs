@@ -10,6 +10,7 @@ module Util.Computer
     , Program'
     , Runtime (..)
     , Runtime'
+    , act
     , cursor
     , fetch
     , load
@@ -31,9 +32,6 @@ import Util.RAM
 
 
 -- | A state transformer representing a Process currently being run.
---type Runtime a = UserRuntime () a
-
-
 type Runtime a b = StateT (Process a) IO b
 type Runtime'  b = Runtime () b
 
@@ -72,12 +70,24 @@ instance Show (Instruction a) where
    show i = name i ++ "-" ++ show (opcode i)
 
 
-
 -- | The computer has various types of actions it can perform.
 data Action = Halt          -- ^ Stop execution entirely.
             | Signal Index  -- ^ Stop execution and respond to a signal. Return at the given index.
             | Run Index     -- ^ Continue executing the program at the given index.
   deriving Show
+
+
+-- | Like @maybe@, but for the action of a @Process@.
+-- If the current access is @Halt@ the first argument will be returned,
+-- otherwise the @second@ will be called with the action's @Index@.
+act :: a
+    -> (Index -> a)
+    -> Process b
+    -> a
+act false true proc = case action proc of
+                          Halt     -> false
+                          Signal i -> true i
+                          Run    i -> true i
 
 
 -- | Create a new @Process@, ready to be executed.
@@ -151,12 +161,9 @@ relativeJump n = do cur <- cursor
 
 
 -- | The position in memory currently being executed.
+-- A negative number will be returned if the program is halted.
 cursor :: Runtime a Index
-cursor = do act <- action <$> get
-            return $ cursor' act
-  where cursor' Halt       = 0
-        cursor' (Run    i) = i
-        cursor' (Signal i) = i
+cursor = do get >>= return . (act (-1) id)
 
 
 -- | Read data from memory using position or immediate mode.

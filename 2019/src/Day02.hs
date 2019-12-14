@@ -50,6 +50,6 @@ findNounAndVerb prog expected noun verb = do
     mem'   <- memcpy $ mem prog
     result <- runAdjustedProject (Program (is prog) mem') noun verb
 
-    if (expected == result)
+    if expected == result
         then return $ Just (noun, verb)
         else findNounAndVerb prog expected noun $ verb + 1
