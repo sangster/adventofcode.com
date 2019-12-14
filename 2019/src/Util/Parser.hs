@@ -15,14 +15,16 @@ module Util.Parser
     , number
     , token
     , reserved
+    , word
     , spaces
     , oneOf
+    , noneOf
     , chainl
     , chainl1
     , some
     , many
     , (<|>)
-    , module Control.Monad.State
+    , module Control.Monad.State.Strict
     ) where
 
 
@@ -30,7 +32,7 @@ import Data.Bool
 import Data.Char
 import Data.Default
 import Control.Applicative
-import Control.Monad.State
+import Control.Monad.State.Strict
 import Control.Monad.Except
 import Debug.Trace
 
@@ -164,6 +166,10 @@ reserved :: String
 reserved = token . string
 
 
+word :: Parser String
+word = some $ noneOf " \n\r"
+
+
 spaces :: Parser String
 spaces = many $ oneOf " \n\r"
 
@@ -171,6 +177,11 @@ spaces = many $ oneOf " \n\r"
 oneOf :: String
       -> Parser Char
 oneOf = satisfy . (flip elem)
+
+
+noneOf :: String
+      -> Parser Char
+noneOf = satisfy . (\ss' s -> not (flip elem ss' s)) -- TODO: point form
 
 
 chainl :: Parser a

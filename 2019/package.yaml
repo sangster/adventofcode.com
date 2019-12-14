@@ -25,10 +25,12 @@ dependencies:
   - containers
   - data-default
   - file-embed
+  - hashtables
   - mtl
   - regex
   - regex-with-pcre
   - safe
+  - transformers
   - utf8-string
   - vector
 
