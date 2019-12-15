@@ -1,0 +1,44 @@
+name:                aoc
+version:             0.1.0.0
+github:              "sangster/adventofcode.com"
+license:             BSD3
+author:              "Jon Sangster"
+copyright:           "GPL-3"
+
+data-files:
+  - data/inputs/*
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+description: Please see the README on GitHub at <https://github.com/sangster/adventofcode.com#readme>
+
+dependencies:
+  - array
+  - base >= 4.7 && < 5
+  - bytestring
+  - containers
+  - data-default
+  - file-embed
+  - mtl
+  - safe
+  - utf8-string
+  - vector
+
+library:
+  source-dirs: src
+
+executables:
+  aoc:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+      - -threaded
+      - -O
+      - -rtsopts
+      - -optc-ffast-math
+      - -with-rtsopts=-N
+      - -Wall
+    dependencies:
+      - aoc
