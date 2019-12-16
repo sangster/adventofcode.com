@@ -39,11 +39,11 @@ formatPart :: Int
            -> String
            -> String
 formatPart number expected result
-  | shortEnough && singleLine = valid ++ " " ++ show number ++ ": " ++ result
-  | otherwise = unlines [ valid ++ " " ++ show number ++ ": ⏬"
-                        , strip result
-                        , "==========="
-                        ]
+    | shortEnough && singleLine = valid ++ " " ++ show number ++ ": " ++ result
+    | otherwise = unlines [ valid ++ " " ++ show number ++ ": ⏬"
+                          , strip result
+                          , "==========="
+                          ]
   where
     shortEnough = length result < 70
     singleLine  = not $ elem '\n' result

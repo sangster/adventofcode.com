@@ -5,10 +5,10 @@ import           Data.Bool  (bool)
 import           Data.List
 import           Prelude    hiding (Left, Right)
 
-import Util.InstructionSet
-import Util.Program
+import           Util.InstructionSet
+import           Util.Program
+import qualified Draw
 
-import Debug.Trace
 
 parts :: [((String -> IO String), Maybe String)]
 parts = [ (part1, Just "2276")
@@ -50,8 +50,8 @@ data Color = Black
 
 
 instance Show Color where
-    show White = "█"
-    show _     = " "
+    show White = Draw.block
+    show _     = Draw.space
 
 
 data Direction = North

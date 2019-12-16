@@ -3,7 +3,7 @@ module Y2019.Day04 (parts) where
 import Control.Monad  (liftM2)
 import Data.List      (group)
 
-import Util.Parser
+import Parser
 
 
 parts :: [((String -> IO String), Maybe String)]

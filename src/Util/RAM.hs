@@ -12,14 +12,14 @@ module Util.RAM
     , dumpRAM
     ) where
 
-
-import Control.Monad
-import Data.Bool
+import           Control.Monad
+import           Data.Bool
+import           Data.List
 import qualified Data.Vector.Unboxed.Mutable as M
 import qualified Data.Vector.Unboxed as U
-import Data.List
-import Text.Printf
-import Util.Parser hiding (token)
+import           Text.Printf
+
+import Parser hiding (token)
 
 
 type RAM   = M.IOVector Data

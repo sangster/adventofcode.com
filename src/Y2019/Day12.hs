@@ -2,7 +2,8 @@ module Y2019.Day12 (parts) where
 
 import Data.Bool
 import Data.Function
-import Util.Parser
+
+import Parser
 
 
 parts :: [((String -> IO String), Maybe String)]

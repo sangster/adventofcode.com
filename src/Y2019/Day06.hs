@@ -5,7 +5,7 @@ import Data.Char
 import Data.List
 import Data.Map.Strict
 
-import Util.Parser
+import Parser
 
 
 type ObjectId = String

@@ -6,7 +6,8 @@ author:              "Jon Sangster"
 copyright:           "GPL-3"
 
 data-files:
-  - data/inputs/*
+  - inputs/2018/*
+  - inputs/2019/*
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -21,8 +22,10 @@ dependencies:
   - containers
   - data-default
   - file-embed
+  - hashtables
   - mtl
   - safe
+  - unordered-containers
   - utf8-string
   - vector
 

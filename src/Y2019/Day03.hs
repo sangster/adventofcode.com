@@ -5,7 +5,7 @@ import Data.Maybe  (catMaybes)
 import Data.List   (sort, tails)
 import Prelude     hiding (Left, Right)
 
-import Util.Parser
+import Parser
 
 
 parts :: [((String -> IO String), Maybe String)]

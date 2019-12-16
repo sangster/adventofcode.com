@@ -5,7 +5,7 @@ import           Data.Function  (on)
 import           Data.List
 import qualified Data.Map       as M
 
-import Util.Parser
+import Parser
 
 
 parts :: [((String -> IO String), Maybe String)]

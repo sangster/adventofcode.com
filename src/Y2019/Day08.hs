@@ -4,7 +4,8 @@ import Data.Bool      (bool)
 import Data.Function  (on)
 import Data.List      (minimumBy)
 
-import Util.Parser
+import           Parser
+import qualified Draw
 
 
 parts :: [((String -> IO String), Maybe String)]
@@ -43,9 +44,9 @@ data Color = Black
 
 
 instance Show Color where
-    show Black = " "
-    show White = "█"
-    show _     = "?"
+    show Black = Draw.space
+    show White = Draw.block
+    show _     = Draw.lightShade
 
 
 colors :: Parser [Color]

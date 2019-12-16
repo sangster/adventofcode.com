@@ -2,7 +2,7 @@
 -- See http://dev.stephendiehl.com/fun/002_parsers.html
 --
 {-# LANGUAGE ScopedTypeVariables, GeneralizedNewtypeDeriving #-}
-module Util.Parser
+module Parser
     ( Parser (..)
     , PState (..)
     , parse

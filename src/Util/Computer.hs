@@ -18,8 +18,10 @@ module Util.Computer
     , modeDest
     , modeRead
     , pop
+    , push
     , relativeJump
     , userState
+    , setUserState
     , write
     , module Control.Monad.State
     ) where
@@ -109,6 +111,11 @@ load' p = load p def
 
 
 -- | Empty the @fifo@ and return its contents.
+push :: Data -> Runtime a ()
+push d = do { dd <- fifo <$> get; modify (\p -> p{ fifo = (d:dd) }) }
+
+
+-- | Empty the @fifo@ and return its contents.
 pop :: Runtime a [Data]
 pop = do { out <- fifo <$> get; modify (\p -> p{ fifo = [] }); return out }
 
@@ -128,6 +135,14 @@ fetch src = do growIfSmall src
 -- | TODO: Fetch user state.
 userState :: Runtime a a
 userState = user <$> get
+
+
+-- | TODO: Fetch user state.
+setUserState :: (a -> a) -> Runtime a a
+setUserState f = do state <- f <$> userState
+                    modify $ \p -> p{ user = state }
+                    return state
+
 
 -- | Write a datum to memory.
 --

@@ -7,7 +7,7 @@ import           Data.Function
 import qualified Data.Map.Strict as M
 import           Data.Maybe
 
-import           Util.Parser
+import Parser
 
 
 parts :: [((String -> IO String), Maybe String)]
