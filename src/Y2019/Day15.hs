@@ -6,11 +6,8 @@ import           Data.Maybe
 import           Data.Bool
 import           Data.Default
 
-import qualified Draw
 import Util.InstructionSet
 import Util.Program
-import Debug.Trace
-
 
 
 parts :: [((String -> IO String), Maybe String)]
@@ -28,37 +25,27 @@ part1 input = do status <- program input >>= dispatchDroid
         return $ bool (Just $ minimum distances) Nothing $ null distances
 
 
-
 part2 input = do shipMap <- program input >>= dispatchDroid
-                 --putStrLn $ Draw.showHashMap Unknown $ shipMap
-                 show <$> gasTime shipMap M.empty
-                                     [head . M.keys $ M.filter (== System) shipMap]
-                                     0
+                 show <$> gasTime shipMap M.empty [queue shipMap] 0
   where
+    queue = head . M.keys . M.filter (== System)
     dispatchDroid p = evalStateT startSearch (load' p)
     startSearch = do
         mapM_ mapShip movements
         seen <$> userState
 
--- gasTime s g q a = trace ("gasTime shipMap "++show g++"  ___  "++show q++" "++show a)
---                         (gasTime' s g q a)
 
 gasTime :: Seen -> Seen -> [(X,Y)] -> Int -> IO Int
 gasTime _       _      []     acc = return acc
 gasTime shipMap gassed qq acc = do
-    --putStrLn $ concat (take 2 $ repeat "\n") ++ Draw.showHashMapP myDraw shipMap
-
     if M.size hollows == M.size gassed
         then return $ acc
-        else gasTime shipMap newGassed (qq ++ (qq >>= options)) (succ acc)
+        else gasTime shipMap newGassed (qq >>= options) (succ acc)
   where
     hollows     = M.filter (flip elem [Open, Origin]) shipMap
     options   q = filter (not . flip M.member gassed) (neighbors q)
     neighbors q = filter (flip M.member hollows) (flip move q <$> movements)
     newGassed   = foldr (\loc -> M.insert loc $ (M.!) shipMap loc) gassed qq
-
-    myDraw _ Nothing  = show Unknown
-    myDraw l (Just a) = bool (show a) (show Gas) $ M.member l gassed
 
 
 mapShip :: Movement -> Runtime Search Bool
@@ -73,7 +60,6 @@ mapShip dir = do
                       case deadEnd of
                         True  -> doMove (reverse' dir) >> return False
                         False -> return True
-
 
 
 findOxygen :: Movement -> Int -> Runtime Search (Maybe Int)
@@ -94,7 +80,6 @@ findOxygen dir acc = do
                         False -> return $ Just (minimum distances)
 
 
-
 doMove :: Movement -> Runtime Search (Status)
 doMove dir = do
     push $ fromEnum dir
@@ -111,14 +96,11 @@ type X = Int
 type Y = Int
 
 
-data Search = Search { loc   :: (X,Y)
-                     , seen  :: Seen
-                     }
+data Search = Search { loc :: (X,Y), seen :: Seen }
+
 
 instance Default Search where
-    def = Search { loc   = (0,0)
-                 , seen  = M.fromList [((0,0), Origin)]
-                 }
+    def = Search { loc = (0,0), seen = M.fromList [((0,0), Origin)] }
 
 
 type Seen = M.HashMap (X,Y) Tile
@@ -155,22 +137,14 @@ reverse' West  = East
 reverse' East  = West
 
 
-data Status = Blocked | Moved | Arrived  deriving (Show, Enum)
+data Status = Blocked | Moved | Arrived                             deriving Enum
+data Tile   = Unknown | Gas | Open | Wall | System | Origin | Droid deriving Eq
 
-data Tile = Unknown | Gas | Open | Wall | System | Origin | Droid deriving Eq
-
-instance Show Tile where
-    show Unknown = Draw.lightShade
-    show Gas     = Draw.mediumShade
-    show Open    = Draw.space
-    show Wall    = Draw.block
-    show System  = Draw.target
-    show Origin  = Draw.origin
-    show Droid   = Draw.avatar
 
 fromStatus Blocked = Wall
 fromStatus Moved   = Open
 fromStatus Arrived = System
+
 
 program :: String -> IO (Program Search)
 program = (fmap $ Program aoc19Set) . parseRAM
