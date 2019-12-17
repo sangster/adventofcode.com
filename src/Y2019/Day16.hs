@@ -1,20 +1,18 @@
-{-# LANGUAGE BangPatterns #-}
 module Y2019.Day16 (parts) where
-
-import Parser
-import Debug.Trace
 
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed as U
 
-
-type Nums = U.Vector Int
+import Parser
 
 
 parts :: [((String -> IO String), Maybe String)]
 parts = [ (part1, Just "61149209")
         , (part2, Just "16178430")
         ]
+
+
+type Nums = U.Vector Int
 
 
 part1 input = return $ extractMessage fftPhase 8 100 nums
