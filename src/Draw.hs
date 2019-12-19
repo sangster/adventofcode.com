@@ -1,46 +1,67 @@
 module Draw
-    ( block
-    , space
-    , target
-    , lightShade
-    , mediumShade
-    , darkShade
-    , origin
-    , avatar
-    , dot
-    , showHashMapP
-    , showHashMap
-    ) where
+  (
+    -- * Common unicode characters for drawing on the console.
+    block
+  , space
+  , target
+  , lightShade
+  , mediumShade
+  , darkShade
+  , origin
+  , avatar
+  , dot
+  , arrowUp
+  , arrowDown
+  , arrowLeft
+  , arrowRight
+
+    -- * Print a @HashMap@ with (X,Y) keys.
+  , showHashMapP
+  , showHashMap
+  ) where
 
 import qualified Data.HashMap.Strict as M
 import           Data.Bool
 
-block   = [blockCh]
-blockCh = '█'
 
-space   = [spaceCh]
-spaceCh = ' '
+blockCh       = '█'
+block         = [blockCh]
 
-dot   = [dotCh]
-dotCh = '·'
+spaceCh       = ' '
+space         = [spaceCh]
 
-target   = [targetCh]
-targetCh = '⦿'
+dotCh         = '·'
+dot           = [dotCh]
 
-lightShade   = [lightShadeCh]
-lightShadeCh = '░'
+targetCh      = '⦿'
+target        = [targetCh]
 
-mediumShade   = [mediumShadeCh]
+lightShadeCh  = '░'
+lightShade    = [lightShadeCh]
+
 mediumShadeCh = '▒'
+mediumShade   = [mediumShadeCh]
 
-darkShade   = [darkShadeCh]
-darkShadeCh = '▓'
+darkShadeCh   = '▓'
+darkShade     = [darkShadeCh]
 
-origin   = [originCh]
-originCh = '◯'
+originCh      = '◯'
+origin        = [originCh]
 
-avatar   = [avatarCh]
-avatarCh = '☻'
+avatarCh      = '☻'
+avatar        = [avatarCh]
+
+arrowUpCh     = '↑'
+arrowUp       =  [arrowUpCh]
+
+arrowDownCh   = '↓'
+arrowDown     = [arrowDownCh]
+
+arrowLeftCh   = '←'
+arrowLeft     = [arrowLeftCh]
+
+arrowRightCh  = '→'
+arrowRight    = [arrowRightCh]
 
 
 showHashMapP :: ((Int,Int) -> Maybe a -> String)
@@ -64,4 +85,4 @@ showHashMap :: (Show a)
             => a
             -> M.HashMap (Int,Int) a
             -> String
-showHashMap d = showHashMapP $ \_ -> maybe (show d) show
+showHashMap d = showHashMapP $ const (maybe (show d) show)

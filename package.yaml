@@ -25,6 +25,7 @@ dependencies:
   - hashtables
   - mtl
   - safe
+  - split
   - unordered-containers
   - utf8-string
   - vector

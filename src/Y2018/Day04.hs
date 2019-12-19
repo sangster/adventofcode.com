@@ -2,15 +2,6 @@
 
 module Y2018.Day04 (parts, part1, part2) where
 
-import qualified Data.IntMap as IM
-import qualified Data.IntSet as IS
-
-import Data.Bool
-import Data.Default
-import Data.List
--- import Text.RE.PCRE
--- import Text.RE.PCRE.Text ()
-
 type GuardId = Int
 type Minute  = Int
 

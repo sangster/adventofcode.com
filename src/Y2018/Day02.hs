@@ -1,9 +1,8 @@
 module Y2018.Day02 (parts, part1, part2) where
 
-import Data.List (group, sort, intercalate, find)
+import Data.List (group, sort)
 import Data.Maybe (catMaybes)
 import Safe (headMay)
-import System.Environment (getArgs)
 
 
 parts :: [((String -> IO String), Maybe String)]

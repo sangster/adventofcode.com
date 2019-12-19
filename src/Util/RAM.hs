@@ -12,8 +12,6 @@ module Util.RAM
     , dumpRAM
     ) where
 
-import           Control.Monad
-import           Data.Bool
 import           Data.List
 import qualified Data.Vector.Unboxed.Mutable as M
 import qualified Data.Vector.Unboxed as U

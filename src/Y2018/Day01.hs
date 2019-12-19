@@ -1,6 +1,5 @@
 module Y2018.Day01 (parts) where
 
-import System.Environment (getArgs)
 import qualified Data.IntSet as IntSet
 
 
@@ -12,9 +11,9 @@ parts = [ (part1, Nothing)
 
 {- converts a textual number like -123, +123 into an Int -}
 parseSigned :: [Char] -> Int
-parseSigned ('+' : str) =     read str
-parseSigned ('-' : str) = 0 - read str
-parseSigned str         = error ("'" ++ str ++ "' is not a signed integer")
+parseSigned ('+':str) =     read str
+parseSigned ('-':str) = 0 - read str
+parseSigned str       = error $ "'"++str++"' is not a signed integer"
 
 
 part1 content = return . show $ sum . (map parseSigned) . lines $ content

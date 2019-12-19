@@ -1,11 +1,8 @@
 module Days (parts, callDay) where
 
 import Control.Applicative  (liftA2)
-import Data.List            (intercalate)
-import Text.Printf          (printf)
 
-import           Input (lookupInput)
-
+import           Input     (lookupInput)
 import qualified Year2018
 import qualified Year2019
 
@@ -15,9 +12,10 @@ type Day  = String
 
 
 parts :: [( (Year, Day), [((String -> IO String), Maybe String)] )]
-parts = daysFor "2018" Year2018.days
-        ++
-        daysFor "2019" Year2019.days
+parts =
+  daysFor "2018" Year2018.days
+  ++
+  daysFor "2019" Year2019.days
 
 
 daysFor :: Year

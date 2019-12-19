@@ -1,7 +1,6 @@
 module Y2019.Day15 (parts) where
 
 import qualified Data.HashMap.Strict as M
-import           Data.List
 import           Data.Maybe
 import           Data.Bool
 import           Data.Default

@@ -1,9 +1,9 @@
 module Y2018.Day03 (parts, part1, part2, part2new) where
 
-import Data.Char (isDigit)
-import qualified Data.List       as L
-import qualified Data.Map.Strict as M
-import qualified Data.Set        as S
+import           Data.Char  (isDigit)
+import qualified Data.List  as L
+import qualified Data.Set   as S
+
 
 parts :: [((String -> IO String), Maybe String)]
 parts = [ (part1, Nothing)
