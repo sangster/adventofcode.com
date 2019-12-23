@@ -21,9 +21,11 @@ dependencies:
   - bytestring
   - containers
   - data-default
+  - dequeue
   - file-embed
   - hashtables
   - mtl
+  - pqueue
   - safe
   - split
   - unordered-containers

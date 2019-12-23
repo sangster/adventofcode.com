@@ -95,29 +95,35 @@ type X = Int
 type Y = Int
 
 
-data Search = Search { loc :: (X,Y), seen :: Seen }
+data Search = Search
+  { loc :: (X,Y)
+  , seen :: Seen
+  }
 
 
 instance Default Search where
-    def = Search { loc = (0,0), seen = M.fromList [((0,0), Origin)] }
+  def = Search
+    { loc = (0,0)
+    , seen = M.fromList [((0,0), Origin)]
+    }
 
 
 type Seen = M.HashMap (X,Y) Tile
 
-data Movement = North | South | West | East
-    deriving (Bounded, Show)
+
+data Movement = North | South | West | East  deriving (Bounded, Show)
 
 
 instance Enum Movement where
-    toEnum 1 = North
-    toEnum 2 = South
-    toEnum 3 = West
-    toEnum 4 = East
+  toEnum 1 = North
+  toEnum 2 = South
+  toEnum 3 = West
+  toEnum 4 = East
 
-    fromEnum North = 1
-    fromEnum South = 2
-    fromEnum West  = 3
-    fromEnum East  = 4
+  fromEnum North = 1
+  fromEnum South = 2
+  fromEnum West  = 3
+  fromEnum East  = 4
 
 
 movements        = [minBound .. maxBound]

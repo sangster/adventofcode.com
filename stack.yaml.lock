@@ -11,6 +11,13 @@ packages:
       sha256: 587d279ff94e8d6f43da3710634ca3611fa4f6886b1e541a73c69303c00297b9
   original:
     hackage: Unique-0.4.7.6@sha256:a1ff411f4d68c756e01e8d532fbe8e57f1ac77f2cc0ee8a999770be2bca185c5,2723
+- completed:
+    hackage: dequeue-0.1.12@sha256:547c2a71819dca0ae1bf7c15fb290b39f80d5d9a6f9985a06a1cb8645b578df2,855
+    pantry-tree:
+      size: 436
+      sha256: ac0f83f7cf92d5858f9f3b1d61b9da52fa2918af8eebde1e0bc7bb652c2d3d99
+  original:
+    hackage: dequeue-0.1.12@sha256:547c2a71819dca0ae1bf7c15fb290b39f80d5d9a6f9985a06a1cb8645b578df2
 snapshots:
 - completed:
     size: 500539
