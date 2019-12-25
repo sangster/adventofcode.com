@@ -28,6 +28,8 @@ dependencies:
   - pqueue
   - safe
   - split
+  - timeit
+  - transformers
   - unordered-containers
   - utf8-string
   - vector

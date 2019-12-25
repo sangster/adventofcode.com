@@ -3,6 +3,7 @@ module Main where
 
 import Data.List          (intercalate)
 import System.Environment (getArgs)
+import System.TimeIt
 
 import Days
 
@@ -20,9 +21,9 @@ appAllDays :: String -> IO ()
 appAllDays year = mapM_ renderDay (fst <$> parts)
   where
     renderDay (y,d) = do
-        putStr $ y ++ "-12-" ++ d ++ "\n==========\n"
-        appSingleDay year d
-        putChar '\n'
+      putStr $ y++"-12-"++d++"\n"++footer
+      timeItNamed footer $ appSingleDay year d
+      putStr $ footer ++ "\n\n"
 
 
 appSingleDay :: String -> String -> IO ()
@@ -39,11 +40,8 @@ formatPart :: Int
            -> String
            -> String
 formatPart number expected result
-    | shortEnough && singleLine = valid ++ " " ++ show number ++ ": " ++ result
-    | otherwise = unlines [ valid ++ " " ++ show number ++ ": ⏬"
-                          , strip result
-                          , "==========="
-                          ]
+    | shortEnough && singleLine = valid++" "++show number++": "++result
+    | otherwise = valid++" "++show number++": ⏬\n"++strip result
   where
     shortEnough = length result < 70
     singleLine  = not $ elem '\n' result
@@ -52,3 +50,7 @@ formatPart number expected result
     strip  []       = []
     strip ('\n':[]) = []
     strip (c:cc)    = c:(strip cc)
+
+
+footer :: String
+footer = "===========\n"
