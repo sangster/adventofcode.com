@@ -84,6 +84,8 @@ runAmp :: Amp
 
 runAmp amp io = act returnAmp runAmp' $ ampProc amp
   where
-    returnAmp = return $ (amp, tail (fifo . ampProc $ amp))
-    runAmp' _ = do (i', p') <- runStateT execute (ampProc amp){ fifo = io }
+    returnAmp = return (amp, tail (stdout . ampProc $ amp))
+    runAmp' _ = do (i', p') <- runStateT execAndPoll (ampProc amp){ stdin = io }
                    return $ (Amp (phase amp) p', i')
+
+    execAndPoll = execute >> stdout <$> get

@@ -17,6 +17,7 @@ module Util.Computer
     , load'
     , modeDest
     , modeRead
+    , setStdin
     , pop
     , push
     , relativeJump
@@ -43,7 +44,8 @@ data Process a = Process
     { user   :: a          -- ^ User-defined state.
     , prog   :: Program a  -- ^ Instruction set and RAM.
     , action :: Action     -- ^ What the computer should do next.
-    , fifo   :: [Data]     -- ^ Input/Output
+    , stdin  :: [Data]     -- ^ Input
+    , stdout :: [Data]     -- ^ Output
     , base   :: Data       -- ^ The base for relative modes.
     }
 type Process' = Process ()
@@ -86,22 +88,25 @@ act :: a
     -> (Index -> a)
     -> Process b
     -> a
-act false true proc = case action proc of
-                          Halt     -> false
-                          Signal i -> true i
-                          Run    i -> true i
+act false true proc =
+    case action proc of
+      Halt     -> false
+      Signal i -> true i
+      Run    i -> true i
 
 
 -- | Create a new @Process@, ready to be executed.
 load :: Program a
      -> a
      -> Process a
-load p a = Process { prog   = p
-                   , action = Run 0
-                   , fifo   = []
-                   , base   = 0
-                   , user  = a
-                   }
+load p a = Process
+    { prog   = p
+    , action = Run 0
+    , stdin  = []
+    , stdout = []
+    , base   = 0
+    , user  = a
+    }
 
 
 load' :: Default a
@@ -110,14 +115,23 @@ load' :: Default a
 load' p = load p def
 
 
--- | Empty the @fifo@ and return its contents.
+
+-- | Add the given data to the head of @stdin@.
+setStdin :: [Data] -> Runtime a ()
+setStdin dd = modify $ \p -> p{ stdin = dd }
+
+
+-- | Add the given data to the head of @stdin@.
 push :: Data -> Runtime a ()
-push d = do { dd <- fifo <$> get; modify (\p -> p{ fifo = (d:dd) }) }
+push d = do { dd <- stdin <$> get; setStdin (d:dd) }
 
 
--- | Empty the @fifo@ and return its contents.
+-- | Empty the @stdout@ and return its contents.
 pop :: Runtime a [Data]
-pop = do { out <- fifo <$> get; modify (\p -> p{ fifo = [] }); return out }
+pop = do
+    out <- stdout <$> get
+    modify $ \p -> p{ stdout = [] }
+    return out
 
 
 -- | Fetch a datum from memory, defaulting to @0@ if that value hasn't been

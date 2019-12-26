@@ -8,6 +8,7 @@ import           Prelude    hiding (Left, Right)
 import           Util.InstructionSet
 import           Util.Program
 import qualified Draw
+import Debug.Trace
 
 
 parts :: [((String -> IO String), Maybe String)]
@@ -68,19 +69,21 @@ data Turn = Left
 
 dispatchBot :: ColorMap -> Program () -> IO ColorMap
 dispatchBot m p = bot m Robot{ proc' = load' p, dir = North, loc = (0,0) }
-  where bot map b =
-            do ((c, t), proc'') <- runStateT runBot (proc' b){ fifo = [input map b] }
-               act (return map)
-                   (\_ -> do let map' = M.insert (loc b) c map
-                             bot map' (move . (turn t) $ b{ proc' = proc'' }))
-                   (proc'')
-        input map b    = bool 0 1 $ White == colorAt map (loc b)
-        colorAt cm key = maybe Black id $ M.lookup key cm
+  where
+    bot map b = do
+      ((c, t), proc'') <- runStateT runBot (proc' b){ stdin = [input map b] }
+      act (return map)
+          (\_ -> do let map' = M.insert (loc b) c map
+                    bot map' (move . (turn t) $ b{ proc' = proc'' }))
+          (proc'')
+    input map b    = bool 0 1 $ White == colorAt map (loc b)
+    colorAt cm key = maybe Black id $ M.lookup key cm
 
 
 runBot :: Runtime' (Color, Turn)
-runBot = do dat <- do { execute; execute }
-            return (parseColor $ head dat, parseTurn $ head . tail $ dat)
+runBot = do
+    dat <- do { execute; execute; pop }
+    return (parseColor $ head dat, parseTurn $ head . tail $ dat)
   where
     parseColor 0 = Black
     parseColor _ = White
@@ -108,16 +111,17 @@ move r@Robot{ loc = (x,y), dir = West  } = r{ loc = (x-1, y  ) }
 
 draw :: ColorMap -> String
 draw colors = unlines lines
-  where getC x y  = maybe Black id $ M.lookup (x,y) colors
-        lines  = reverse [(concat) [show (getC x y) | x <- xrange] | y <- yrange]
-        xrange = [xMin .. xMax]
-        yrange = [yMin .. yMax]
-        (xMin, yMin, xMax, yMax) = foldr (\c b -> bounds b c) (0,0,0,0) (M.keys colors)
-        bounds (xMin', yMin', xMax', yMax') (x', y') = ( minimum [xMin', x']
-                                                       , minimum [yMin', y']
-                                                       , maximum [xMax', x']
-                                                       , maximum [yMax', y']
-                                                       )
+  where
+    getC x y  = maybe Black id $ M.lookup (x,y) colors
+    lines  = reverse [(concat) [show (getC x y) | x <- xrange] | y <- yrange]
+    xrange = [xMin .. xMax]
+    yrange = [yMin .. yMax]
+    (xMin, yMin, xMax, yMax) = foldr (\c b -> bounds b c) (0,0,0,0) (M.keys colors)
+    bounds (xMin', yMin', xMax', yMax') (x', y') = ( minimum [xMin', x']
+                                                   , minimum [yMin', y']
+                                                   , maximum [xMax', x']
+                                                   , maximum [yMax', y']
+                                                   )
 
 
 program :: String -> IO Program'

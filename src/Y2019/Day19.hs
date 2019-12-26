@@ -128,7 +128,8 @@ findAngles x prog = do
 
 -- | Is the beam having an effect at the given coordinates?
 beam :: Program' -> Int -> Int -> IO Bool
-beam prog x y = all (== 1) <$> evalStateT execute (load' prog){ fifo = [x,y] }
+beam prog x y =
+    all (== 1) <$> evalStateT (execute >> pop) (load' prog){ stdin = [x,y] }
 
 
 -- | Test if a square of the given size fit inside the beam at these coordinates.

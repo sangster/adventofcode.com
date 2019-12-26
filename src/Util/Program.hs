@@ -24,11 +24,12 @@ execUserUntilHalt :: Program a
 execUserUntilHalt prog' a io' = loop prog' io' 0 0
   where
     loop p i c b = do
-        (dat, proc') <- runStateT execute $ (load p a){ action = Run c
-                                                      , fifo   = i
-                                                      , base   = b
-                                                      }
-        act (return dat) (\c' -> loop (prog proc') dat c' (base proc')) proc'
+      let proc = (load p a){ action = Run c, stdin = i, base = b }
+      (dat, proc') <- runStateT (execute >> pop) proc
+      act (return dat) (rerun (dat, proc')) proc'
+
+    rerun (dat, proc') c =
+      (dat ++) <$> loop (prog proc') (stdin proc') c (base proc')
 
 
 executeUntilHalt :: (Default a)
@@ -48,16 +49,12 @@ executeUntilHalt' = ((last <$>) .) . executeUntilHalt
 
 -- | Execute a program, starting from the given index in its R/W memory.
 --
--- This function accepts a @[Data]@, representing a FIFO list of inputs and
--- outputs. If the given program @Output@s a signal, the program will return
--- before halting, providing the new cursor positon and outputted data. If the
--- program halts, @Nothing@ will be returned for the cursor position, along with
--- any remaining output data.
---
--- @Store@ expressions read from the head and @Output@ expressions append to the
--- tail.
-execute :: Runtime a [Data]
-execute = do { proc <- get; act (return $ fifo proc) (execExpr proc) proc }
+-- This function accepts a @[Data]@ as the program's "stdin." If the given
+-- program @Output@s a signal, the program will return before halting, providing
+-- the new cursor positon. If the program halts, @Nothing@ will be returned for
+-- the cursor position.
+execute :: Runtime a ()
+execute = get >>= \p -> act (return ()) (execExpr p) p
   where
     execExpr p c = do
         (inst, assocs) <- lift $ parseExpr (prog p) c
@@ -65,7 +62,7 @@ execute = do { proc <- get; act (return $ fifo proc) (execExpr proc) proc }
         p' <- get
         case action p' of
             Run c -> execute
-            _     -> return $ fifo p'
+            _     -> return () -- return $ stdout p'
 
 
 -- | Parse the expression at the given index of the program's memory.
@@ -77,7 +74,7 @@ parseExpr (Program is mem) i = do
     assocs' <- assocs modes $ inst opcode
     return (inst opcode, assocs')
   where
-    inst code = case (find (\Instruction{ opcode = c } -> c == code) is) of
+    inst code = case find (\Instruction{ opcode = c } -> c == code) is of
                     Just i  -> i
                     Nothing -> error $ "unknown opcode @ " ++ show i ++ ": " ++
                                    show code

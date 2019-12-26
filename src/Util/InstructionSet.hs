@@ -34,57 +34,70 @@ aoc19Set = [ halt    "HALT" 99
 
 
 halt = mkInstruction 0 halt'
-  where halt' :: [(Mode, Data)] -> Runtime a ()
-        halt' _ = modify $ \p -> p{ action = Halt }
+  where
+    halt' :: [(Mode, Data)] -> Runtime a ()
+    halt' _ = modify $ \p -> p{ action = Halt }
 
 
 math n op f = mkInstruction 3 math' n op
-  where math' assocs = do x   <- modeRead assocs 0
-                          y   <- modeRead assocs 1
-                          dst <- modeDest assocs 2
-                          write dst $ f x y
-                          relativeJump 4
+  where
+    math' assocs = do
+      x   <- modeRead assocs 0
+      y   <- modeRead assocs 1
+      dst <- modeDest assocs 2
+      write dst $ f x y
+      relativeJump 4
 
 
 store n = mkInstruction 1 store' n
-  where store' assocs = do dat <- fifo <$> get
-                           case dat of
-                             (i:io) -> do dst <- modeDest assocs 0
-                                          write dst i
-                                          modify $ \p -> p{ fifo = io }
-                                          relativeJump 2
-                             _      -> error $ n ++ ": FIFO empty"
+  where
+    store' assocs = do
+      dat <- stdin <$> get
+      case dat of
+        (i:io) -> do dst <- modeDest assocs 0
+                     write dst i
+                     modify $ \p -> p{ stdin = io }
+                     relativeJump 2
+        _      -> error $ n ++ ": stdin empty"
 
 
 output = mkInstruction 1 output'
-  where output' assocs = do dat <- modeRead assocs 0
-                            cur <- cursor
-                            io  <- fifo <$> get
-                            modify $ \p -> p{ action = Signal (cur + 2)
-                                            , fifo   = io ++ [dat]
-                                            }
+  where
+    output' assocs = do
+      dat <- modeRead assocs 0
+      cur <- cursor
+      out <- stdout <$> get
+      modify $ \p -> p{ action = Signal (cur + 2)
+                      , stdout = out ++ [dat]
+                      }
 
 
 jump n op f = mkInstruction 2 jump' n op
-  where jump' assocs = do x <- modeRead assocs 0
-                          y <- modeRead assocs 1
-                          cur <- cursor
-                          modify $ \p -> p{ action = Run $ bool (cur + 3) y (f x) }
+  where
+    jump' assocs = do
+      x   <- modeRead assocs 0
+      y   <- modeRead assocs 1
+      cur <- cursor
+      modify $ \p -> p{ action = Run $ bool (cur + 3) y (f x) }
 
 
 cmp n op f = mkInstruction 3 cmp' n op
-  where cmp' assocs = do x   <- modeRead assocs 0
-                         y   <- modeRead assocs 1
-                         dst <- modeDest assocs 2
-                         write dst (bool 0 1 $ f x y)
-                         relativeJump 4
+  where
+    cmp' assocs = do
+      x   <- modeRead assocs 0
+      y   <- modeRead assocs 1
+      dst <- modeDest assocs 2
+      write dst (bool 0 1 $ f x y)
+      relativeJump 4
 
 
 newBase = mkInstruction 1 newBase'
-  where newBase' assocs = do x   <- modeRead assocs 0
-                             old <- base <$> get
-                             modify $ \p -> p{ base = old + x }
-                             relativeJump 2
+  where
+    newBase' assocs = do
+      x   <- modeRead assocs 0
+      old <- base <$> get
+      modify $ \p -> p{ base = old + x }
+      relativeJump 2
 
 
 mkInstruction :: Index
