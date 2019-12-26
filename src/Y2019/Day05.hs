@@ -16,14 +16,15 @@ part2 input = show <$> (program input >>= flip executeUntilHalt' [5])
 
 program :: String -> IO Program'
 program = (fmap $ Program instructions) . parseRAM
-  where instructions :: InstructionSet'
-        instructions = [ halt   "HALT" 99
-                       , math   " ADD"  1 (+)
-                       , math   "MULT"  2 (*)
-                       , store  "STOR"  3
-                       , output " OUT"  4
-                       , jump   " JEQ"  5 (/= 0)
-                       , jump   "JNEQ"  6 (== 0)
-                       , cmp    "  LT"  7 (<)
-                       , cmp    "  EQ"  8 (==)
-                       ]
+  where
+    instructions :: InstructionSet'
+    instructions = [ halt   "HALT" 99
+                   , math   " ADD"  1 (+)
+                   , math   "MULT"  2 (*)
+                   , store  "STOR"  3
+                   , output " OUT"  4
+                   , jump   " JEQ"  5 (/= 0)
+                   , jump   "JNEQ"  6 (== 0)
+                   , cmp    "  LT"  7 (<)
+                   , cmp    "  EQ"  8 (==)
+                   ]

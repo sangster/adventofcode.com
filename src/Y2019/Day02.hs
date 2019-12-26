@@ -10,14 +10,14 @@ parts = [ (part1, Just "2782414")
         ]
 
 
-part1 input = do prog <- program input
-                 zero <- runAdjustedProject prog 12 2
-                 return $ show zero
+part1 input = do
+    prog <- program input
+    show <$> runAdjustedProject prog 12 2
 
 
-part2 input = do prog   <- program input
-                 result <- findNounAndVerb prog expectedResult 0 0
-                 return $ render result
+part2 input = do
+    prog <- program input
+    render <$> findNounAndVerb prog expectedResult 0 0
   where
     expectedResult = 19690720
     render = maybe "fail" $ \(noun, verb) -> show $ 100 * noun + verb
@@ -25,17 +25,19 @@ part2 input = do prog   <- program input
 
 program :: String -> IO Program'
 program = (fmap $ Program instructions) . parseRAM
-  where instructions :: InstructionSet'
-        instructions = [ halt "HALT" 99
-                       , math " ADD"  1 (+)
-                       , math "MULT"  2 (*)
-                       ]
+  where
+    instructions :: InstructionSet'
+    instructions = [ halt "HALT" 99
+                   , math " ADD"  1 (+)
+                   , math "MULT"  2 (*)
+                   ]
 
 
-runAdjustedProject prog noun verb = do writeData (mem prog) 1 noun
-                                       writeData (mem prog) 2 verb
-                                       executeUntilHalt prog []
-                                       readData (mem prog) 0
+runAdjustedProject prog noun verb = do
+    writeData (mem prog) 1 noun
+    writeData (mem prog) 2 verb
+    executeUntilHalt prog []
+    readData (mem prog) 0
 
 
 findNounAndVerb :: Program'
