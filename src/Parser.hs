@@ -164,7 +164,7 @@ natural :: (Integral a, Read a) => Parser a
 natural = read <$> some (satisfy isDigit)
 
 
-number :: Parser Int
+number :: (Integral a, Read a) => Parser a
 number = do
   s  <- string "-" <|> return []
   cs <- some digit

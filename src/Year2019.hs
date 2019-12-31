@@ -21,6 +21,7 @@ import qualified Y2019.Day18
 import qualified Y2019.Day19
 import qualified Y2019.Day20
 import qualified Y2019.Day21
+import qualified Y2019.Day22
 
 
 days =
@@ -45,4 +46,5 @@ days =
   , Y2019.Day19.parts
   , Y2019.Day20.parts
   , Y2019.Day21.parts
+  , Y2019.Day22.parts
   ]

@@ -2,8 +2,8 @@ module Y2019.Day21 (parts) where
 
 import Data.Char
 import Util.InstructionSet
-import Util.Program hiding (Run)
-
+import Util.Program                hiding (Run)
+import Control.Monad.Trans.Except
 
 
 parts :: [((String -> IO String), Maybe String)]
