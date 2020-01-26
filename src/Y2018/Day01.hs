@@ -3,7 +3,7 @@ module Y2018.Day01 (parts) where
 import qualified Data.IntSet as IntSet
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Nothing)
         , (part2, Nothing)
         ]
@@ -16,7 +16,7 @@ parseSigned ('-':str) = 0 - read str
 parseSigned str       = error $ "'"++str++"' is not a signed integer"
 
 
-part1 content = return . show $ sum . (map parseSigned) . lines $ content
+part1 content = show $ sum . (map parseSigned) . lines $ content
 
 
 type FreqQueue = [Int]
@@ -34,5 +34,5 @@ findRepeat numbers =
             history' = IntSet.insert freq' history
 
 
-part2 content = return .show $ findRepeat numbers
+part2 content = show $ findRepeat numbers
   where numbers = (map parseSigned) . lines $ content :: FreqQueue

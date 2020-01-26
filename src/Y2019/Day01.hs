@@ -6,8 +6,8 @@ parts = [ (part1, Just "3152919")
         ]
 
 
-part1 :: String -> IO String
-part1 content = return . show . sum $ fuelRequirement <$> readMasses content
+part1 :: String -> String
+part1 content = show . sum $ fuelRequirement <$> readMasses content
 
 
 readMasses :: String -> [Int]
@@ -18,8 +18,8 @@ fuelRequirement :: Int -> Int
 fuelRequirement mass = (floor $ fromIntegral mass / 3.0) - 2
 
 
-part2 :: String -> IO String
-part2 content = return . show . sum $ totalRequirement <$> readMasses content
+part2 :: String -> String
+part2 content = show . sum $ totalRequirement <$> readMasses content
 
 
 totalRequirement :: Int -> Int

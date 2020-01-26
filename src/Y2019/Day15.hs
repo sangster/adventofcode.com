@@ -9,36 +9,37 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "354")
         , (part2, Just "370")
         ]
 
 
-part1 input = do status <- program input >>= dispatchDroid
-                 return . show $ status
+part1 input = runST $ do
+    status <- program input >>= dispatchDroid
+    pure . show $ status
   where
+    dispatchDroid :: PrimMonad m => Program m Search -> m Int
     dispatchDroid p = fmap fromJust $ evalStateT startSearch (load' p)
+    startSearch :: PrimMonad m => StateT (Process m Search) m (Maybe Int)
     startSearch = do
         distances <- catMaybes <$> mapM (flip findOxygen 0) movements
-        return $ bool (Just $ minimum distances) Nothing $ null distances
+        pure $ bool (Just $ minimum distances) Nothing $ null distances
 
-
-part2 input = do shipMap <- program input >>= dispatchDroid
-                 show <$> gasTime shipMap M.empty [queue shipMap] 0
+part2 input = runST $ do
+    shipMap <- program input >>= evalStateT startSearch . load'
+    show <$> gasTime shipMap M.empty [queue shipMap] 0
   where
     queue = head . M.keys . M.filter (== System)
-    dispatchDroid p = evalStateT startSearch (load' p)
-    startSearch = do
-        mapM_ mapShip movements
-        seen <$> userState
+    startSearch :: PrimMonad m => StateT (Process m Search) m Seen
+    startSearch = mapM_ mapShip movements >> seen <$> userState
 
 
-gasTime :: Seen -> Seen -> [(X,Y)] -> Int -> IO Int
-gasTime _       _      []     acc = return acc
+gasTime :: PrimMonad m => Seen -> Seen -> [(X,Y)] -> Int -> m Int
+gasTime _       _      []     acc = pure acc
 gasTime shipMap gassed qq acc = do
     if M.size hollows == M.size gassed
-        then return $ acc
+        then pure $ acc
         else gasTime shipMap newGassed (qq >>= options) (succ acc)
   where
     hollows     = M.filter (flip elem [Open, Origin]) shipMap
@@ -47,45 +48,45 @@ gasTime shipMap gassed qq acc = do
     newGassed   = foldr (\loc -> M.insert loc $ (M.!) shipMap loc) gassed qq
 
 
-mapShip :: Movement -> Runtime Search Bool
+mapShip :: PrimMonad m => Movement -> Runtime m Search Bool
 mapShip dir = do
     status <- doMove dir
 
     case status of
         Blocked -> do setUserState $ \s -> s { loc = move (reverse' dir) (loc s) }
-                      return False
+                      pure False
         _       -> do (Search here seen') <- userState
                       deadEnd <- not . or <$> mapM mapShip (unseen here seen')
                       case deadEnd of
-                        True  -> doMove (reverse' dir) >> return False
-                        False -> return True
+                        True  -> doMove (reverse' dir) >> pure False
+                        False -> pure True
 
 
-findOxygen :: Movement -> Int -> Runtime Search (Maybe Int)
+findOxygen :: PrimMonad m => Movement -> Int -> Runtime m Search (Maybe Int)
 findOxygen dir acc = do
     status <- doMove dir
 
     case status of
         Arrived -> do seen' <- seen <$> userState
                       --lift . putStrLn $ Draw.showHashMap Unknown seen'
-                      return . Just . succ $ acc
+                      pure . Just . succ $ acc
         Blocked -> do setUserState $ \s -> s { loc = move (reverse' dir) (loc s) }
-                      return Nothing
+                      pure Nothing
         Moved   -> do (Search here seen') <- userState
                       distances <- catMaybes <$> mapM (flip findOxygen $ acc+1)
                                                       (unseen here seen')
                       case null distances of
-                        True  -> doMove (reverse' dir) >> return Nothing
-                        False -> return $ Just (minimum distances)
+                        True  -> doMove (reverse' dir) >> pure Nothing
+                        False -> pure $ Just (minimum distances)
 
 
-doMove :: Movement -> Runtime Search (Status)
+doMove :: PrimMonad m => Movement -> Runtime m Search (Status)
 doMove dir = do
     push $ fromEnum dir
     execute
     status <- toEnum . head <$> pop
     setUserState $ update (fromStatus status)
-    return status
+    pure status
   where
     update status s = s{ loc = here, seen = M.insert here status (seen s) }
       where here = move dir (loc s)
@@ -94,12 +95,10 @@ doMove dir = do
 type X = Int
 type Y = Int
 
-
 data Search = Search
   { loc :: (X,Y)
   , seen :: Seen
   }
-
 
 instance Default Search where
   def = Search
@@ -107,12 +106,9 @@ instance Default Search where
     , seen = M.fromList [((0,0), Origin)]
     }
 
-
 type Seen = M.HashMap (X,Y) Tile
 
-
 data Movement = North | South | West | East  deriving (Bounded, Show)
-
 
 instance Enum Movement where
   toEnum 1 = North
@@ -151,5 +147,5 @@ fromStatus Moved   = Open
 fromStatus Arrived = System
 
 
-program :: String -> IO (Program Search)
+program :: PrimMonad m => String -> m (Program m Search)
 program = (fmap $ Program aoc19Set) . parseRAM

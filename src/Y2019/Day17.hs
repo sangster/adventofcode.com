@@ -13,14 +13,14 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "5740")
         , (part2, Just "1022165")
         ]
 
 
-part1 input = fmap (show . sum)
-            $ return . alignments
+part1 input = runST $ fmap (show . sum)
+            $ pure . alignments
             =<< parseMap input []
 
 
@@ -32,7 +32,7 @@ alignments map' = alignment <$> filter (isIntersection map') coords'
     coords'   = coords map'
 
 
-part2 input = do
+part2 input = runST $ do
     -- Parse Map and create movement orders.
     m <- parseMap input []
     let solution = renderCommands . extractFunctions $ path m
@@ -51,7 +51,7 @@ part2 input = do
         concat $ mainRoutine:"\n":(functions >>= command):[videoFeed:"\n"]
       where
         mainRoutine  = intercalate "," routineNames
-        routineNames = return . chr . (ord 'A' +) <$> indicies
+        routineNames = pure . chr . (ord 'A' +) <$> indicies
         videoFeed    = 'n'
 
 
@@ -77,11 +77,14 @@ data Map = Map
 
 -- | Return a @Map@, a two dimensional vector), as represented by the ASCII
 --   drawing rendered by the given IntCode program.
-parseMap :: String -> [Data] -> IO Map
+parseMap :: PrimMonad m
+         => String
+         -> [Data]
+         -> m Map
 parseMap input io = do
   cc <- fmap chr <$> (program input >>= (flip executeUntilHalt) io)
 
-  return $ Map
+  pure $ Map
     { tiles = V.fromList (readTile <$> (filter (/= '\n') cc))
     , width = fromJust $ findIndex (== '\n') cc
     }
@@ -193,7 +196,9 @@ dirOf (x,y) (x',y')
     | otherwise = error "same location"
 
 
-program :: String -> IO Program'
+program :: PrimMonad m
+        => String
+        -> m (Program' m)
 program = fmap (Program aoc19Set) . parseRAM
 
 

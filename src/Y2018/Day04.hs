@@ -17,14 +17,14 @@ data Event = Event GuardId Action Minute
 type OrdEvents = [Event]
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "143415")
         , (part2, Just "49944")
         ]
 
 
-part1 input = return ""
-part2 input = return ""
+part1 input = ""
+part2 input = ""
 
 -- part1 :: String
 --       -> String

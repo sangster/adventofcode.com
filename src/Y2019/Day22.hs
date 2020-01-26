@@ -25,13 +25,13 @@ import Math.NumberTheory.Moduli.Class
 import Numeric.Natural
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "2604")
         , (part2, Just "79608410258462")
         ]
 
 
-part1 input = return . render $ (target - card0) / delta
+part1 input = render $ (target - card0) / delta
   where
     numCards       = 10007
     target         = 2019
@@ -39,7 +39,7 @@ part1 input = return . render $ (target - card0) / delta
     (delta, card0) = shuffle numCards shuffleProcess
 
 
-part2 input = return . render $ (card0 * geometricSeries) + (target * deltaExp)
+part2 input = render $ (card0 * geometricSeries) + (target * deltaExp)
   where
     numCards        = 119315717514047
     iterations      = 101741582076661
@@ -75,11 +75,11 @@ move :: Parser Move
 move = do
     move' <- cutMove <|> dealMove <|> newMove
     spaces
-    return move'
+    pure move'
   where
-    cutMove  = string "cut "                 >> number  >>= return . Cut
-    dealMove = string "deal with increment " >> natural >>= return . Deal
-    newMove  = string "deal into new stack"  >> return New
+    cutMove  = string "cut "                 >> number  >>= pure . Cut
+    dealMove = string "deal with increment " >> natural >>= pure . Deal
+    newMove  = string "deal into new stack"  >> pure New
 
 
 render :: SomeMod -> String

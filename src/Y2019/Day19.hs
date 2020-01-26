@@ -19,18 +19,15 @@ import Control.Monad
 import Control.Monad.Trans.Maybe
 
 
-findM :: (Monad m) => (a -> m (Maybe b)) -> [a] -> m (Maybe b)
-findM f = runMaybeT . msum . map (MaybeT . f)
-
-
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "171")
         , (part2, Just "9741242")
         ]
 
 
-part1 input = do status <- program input >>= beamGrid
-                 return . show . length $ filter (== True) status
+part1 input = runST $ do
+    status <- program input >>= beamGrid
+    pure . show . length $ filter (== True) status
   where
     width = [0 .. 49]
     beamGrid prog = sequence [beam prog x y | x <- width, y <- width]
@@ -43,33 +40,35 @@ part1 input = do status <- program input >>= beamGrid
 --   3. Use the magic of geometry to figure out where the solution ought to be.
 --   4. Due to integer division, we likely overshot the true solution, so check
 --      all the neighbors toward the origin.
-part2 input = do prog <- program input
-                 (x,y) <- fromJust <$> findAngles resolution prog
-                          >>= return . calculateXY (fromIntegral squareLen)
+part2 input = runST $ do
+    prog <- program input
+    (x,y) <- fromJust <$> findAngles resolution prog
+             >>= pure . calculateXY (fromIntegral squareLen)
 
-                 (x',y') <- walkBack prog squareLen (ceiling x, ceiling y)
-                 return . show $ outputCode x' y'
+    (x',y') <- walkBack prog squareLen (ceiling x, ceiling y)
+    pure . show $ outputCode x' y'
   where
     resolution = 120
     squareLen  = 100
     outputCode x y = x * 10000 + y
 
 
-program = fmap (Program aoc19Set) . parseRAM
+program :: PrimMonad m => String -> m (Program' m)
+program input = Program aoc19Set <$> parseRAM input
 
 
 -- | Due to the "pixelated" shape of the beam, the calculated solution will
 --   overestimate the true solution. Test the neighbors closer to the origin to
 --   find the true solution.
-walkBack :: Program' -> Int -> (Int,Int) -> IO (Int,Int)
+walkBack :: PrimMonad m => Program' m -> Int -> (Int,Int) -> m (Int,Int)
 walkBack p len (x,y) =
     runMaybeT (foldl' (<|>) empty probes) >>= maybe (pure (x,y)) (walkBack p len)
   where
     coords = init [(x-x', y-y') | x' <- n, y' <- n] where n = [2, 1, 0]
 
-    probes :: [MaybeT IO (Int,Int)]
+    -- TODO: probes :: [MaybeT m (Int,Int)]
     probes = probeNeighbor <$> coords
-    probeNeighbor (x',y') = liftIO fire >>= guard >> return (x',y')
+    probeNeighbor (x',y') = lift fire >>= guard >> pure (x',y')
       where fire = beamSquare len x' y' p
 
 
@@ -90,24 +89,24 @@ data EdgeDir = Up | Down deriving Eq
 
 -- | At a given X value, search for the Y coordinates that bound the beam and
 --   return their heading.
-findAngles :: Int -> Program' -> IO (Maybe (Float, Float))
+findAngles :: PrimMonad m => Int -> Program' m -> m (Maybe (Float, Float))
 findAngles x prog = do
     mid <- fromJust <$> findMiddle 0 limitY
     bot <- findEdge Down 0   mid
     top <- findEdge Up   mid limitY
-    return $ (,) <$> (angle <$> bot) <*> (angle <$> top)
+    pure $ (,) <$> (angle <$> bot) <*> (angle <$> top)
   where
     limitY = x * 2
     angle y = atan $ ((/) `on` fromIntegral) y x
 
     findMiddle min max
-      | max - min == 1 = return Nothing
+      | max - min == 1 = pure Nothing
       | otherwise = do
           midResult <- test midway
           if midResult
-            then return $ Just midway
+            then pure $ Just midway
             else findMiddle min midway >>=
-                 maybe (findMiddle midway max) (return . Just)
+                 maybe (findMiddle midway max) (pure . Just)
       where
         midway = (min + max) `div` 2
         test y = beam prog x y
@@ -127,13 +126,13 @@ findAngles x prog = do
 
 
 -- | Is the beam having an effect at the given coordinates?
-beam :: Program' -> Int -> Int -> IO Bool
+beam :: PrimMonad m => Program' m -> Int -> Int -> m Bool
 beam prog x y =
     all (== 1) <$> evalStateT (execute >> pop) (load' prog){ stdin = [x,y] }
 
 
 -- | Test if a square of the given size fit inside the beam at these coordinates.
-beamSquare :: Int -> Int -> Int -> Program' -> IO Bool
+beamSquare :: PrimMonad m => Int -> Int -> Int -> Program' m -> m Bool
 beamSquare size x y prog = and <$> scatter
   where
     scatter = sequence [beam prog x y | (x,y) <- coords]

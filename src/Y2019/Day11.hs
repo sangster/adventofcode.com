@@ -11,7 +11,7 @@ import qualified Draw
 import Debug.Trace
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "2276")
         , (part2, Just part2Expected)
         ]
@@ -25,12 +25,14 @@ part2Expected = unlines [ "  ██  ███  █    ███    ██ █�
                         ]
 
 
-part1 input = do colors <- program input >>= dispatchBot M.empty
-                 return . show $ M.size colors
+part1 input = runST $ do
+    colors <- program input >>= dispatchBot M.empty
+    pure . show $ M.size colors
 
 
-part2 input = do colors <- program input >>= dispatchBot map
-                 return $ draw colors
+part2 input = runST $ do
+    colors <- program input >>= dispatchBot map
+    pure $ draw colors
   where map = M.insert (0,0) White M.empty
 
 
@@ -39,15 +41,18 @@ type Y = Int
 type ColorMap = M.Map (X, Y) Color
 
 
-data Robot = Robot { proc' :: Process ()
-                   , dir   :: Direction
-                   , loc   :: (X,Y)
-                   }
+data PrimMonad m => Robot m
+  = Robot
+    { proc' :: Process m ()
+    , dir   :: Direction
+    , loc   :: (X,Y)
+    }
 
 
-data Color = Black
-           | White
-    deriving Eq
+data Color
+  = Black
+  | White
+  deriving Eq
 
 
 instance Show Color where
@@ -55,11 +60,12 @@ instance Show Color where
     show _     = Draw.space
 
 
-data Direction = North
-               | East
-               | South
-               | West
-    deriving Show
+data Direction
+  = North
+  | East
+  | South
+  | West
+  deriving Show
 
 
 data Turn = Left
@@ -67,12 +73,15 @@ data Turn = Left
     deriving Show
 
 
-dispatchBot :: ColorMap -> Program () -> IO ColorMap
+dispatchBot :: PrimMonad m
+            => ColorMap
+            -> Program m ()
+            -> m ColorMap
 dispatchBot m p = bot m Robot{ proc' = load' p, dir = North, loc = (0,0) }
   where
     bot map b = do
       ((c, t), proc'') <- runStateT runBot (proc' b){ stdin = [input map b] }
-      act (return map)
+      act (pure map)
           (\_ -> do let map' = M.insert (loc b) c map
                     bot map' (move . (turn t) $ b{ proc' = proc'' }))
           (proc'')
@@ -80,10 +89,11 @@ dispatchBot m p = bot m Robot{ proc' = load' p, dir = North, loc = (0,0) }
     colorAt cm key = maybe Black id $ M.lookup key cm
 
 
-runBot :: Runtime' (Color, Turn)
+runBot :: PrimMonad m
+       => Runtime' m (Color, Turn)
 runBot = do
     dat <- do { execute; execute; pop }
-    return (parseColor $ head dat, parseTurn $ head . tail $ dat)
+    pure (parseColor $ head dat, parseTurn $ head . tail $ dat)
   where
     parseColor 0 = Black
     parseColor _ = White
@@ -91,7 +101,7 @@ runBot = do
     parseTurn  _ = Right
 
 
-turn :: Turn -> Robot -> Robot
+turn :: PrimMonad m => Turn -> Robot m -> Robot m
 turn Left  r@Robot{ dir = North } = r{ dir = West  }
 turn Left  r@Robot{ dir = East  } = r{ dir = North }
 turn Left  r@Robot{ dir = South } = r{ dir = East  }
@@ -102,7 +112,7 @@ turn Right r@Robot{ dir = South } = r{ dir = West  }
 turn Right r@Robot{ dir = West  } = r{ dir = North }
 
 
-move :: Robot -> Robot
+move :: PrimMonad m => Robot m -> Robot m
 move r@Robot{ loc = (x,y), dir = North } = r{ loc = (x  , y+1) }
 move r@Robot{ loc = (x,y), dir = East  } = r{ loc = (x+1, y  ) }
 move r@Robot{ loc = (x,y), dir = South } = r{ loc = (x  , y-1) }
@@ -124,7 +134,9 @@ draw colors = unlines lines
                                                    )
 
 
-program :: String -> IO Program'
+program :: PrimMonad m
+        => String
+        -> m (Program' m)
 program = (fmap $ Program instructions) . parseRAM
   where instructions = [ halt    "HALT" 99
                        , math    " ADD"  1 (+)

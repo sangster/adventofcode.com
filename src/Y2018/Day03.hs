@@ -5,7 +5,7 @@ import qualified Data.List  as L
 import qualified Data.Set   as S
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Nothing)
         , (part2, Nothing)
         ]
@@ -28,13 +28,13 @@ mkClaims content = map mkClaim rows
     mkClaim row = Claim (row !! 0) (row !! 1) (row !! 2) (row !! 3) (row !! 4)
 
 
-part1 content = return .show $ length overlaps
+part1 content = show $ length overlaps
   where
       overlaps = filter ((> 1) . length) groups
       groups = L.group . L.sort $ mkClaims content >>= squares
 
 
-part2 content = return $
+part2 content =
     case maybeWinner of
         Just winner -> show (elfId winner)
         Nothing -> "fail"

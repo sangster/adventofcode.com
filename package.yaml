@@ -23,10 +23,12 @@ dependencies:
   - containers
   - data-default
   - dequeue
+  - extra
   - file-embed
   - hashtables
   - mtl
   - pqueue
+  - primitive
   - safe
   - split
   - timeit

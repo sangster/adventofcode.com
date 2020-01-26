@@ -5,7 +5,7 @@ import Data.Maybe (catMaybes)
 import Safe (headMay)
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Nothing)
         , (part2, Nothing)
         ]
@@ -14,7 +14,7 @@ parts = [ (part1, Nothing)
 type TwoCount   = Int
 type ThreeCount = Int
 
-part1 content = return . show $ has2 * has3
+part1 content = show $ has2 * has3
   where
     (has2, has3) = countRepeats . lines $ content
     countRepeats :: [String] -> (TwoCount, ThreeCount)
@@ -36,7 +36,7 @@ pairs (x1:x2:[]) = [(x1,x2)]
 pairs (x1:tail@(x2:_)) = [(x1,x2)] ++ (pairs tail)
 
 
-part2 content = return $
+part2 content =
     case headMay oneDiffs of
         Just (prefix, suffix) -> prefix ++ (tail suffix)
         _                     -> "???"

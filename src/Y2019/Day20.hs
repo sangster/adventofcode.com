@@ -17,24 +17,23 @@ import qualified Data.Vector           as V
 
 import Parser hiding (queue)
 import qualified Draw
-import Debug.Trace
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "594")
         , (part2, Just "6812")
         ]
 
 
 part1 input = do
-    return . show $ evalState shortestPath search
+    show $ evalState shortestPath search
   where
     maze' = parseMaze input
     search = newSearch maze' (\_ (_,lev) to -> Just (to,lev)) ("AA", 0) ("ZZ", 0)
 
 
 part2 input = do
-    return . show $ evalState shortestPath search
+    show $ evalState shortestPath search
   where
     maze' = parseMaze input
     search = newSearch maze' shifter ("AA", 0) ("ZZ", 0)
@@ -61,7 +60,7 @@ shortestPath = do
     maybe (error . show $ len st) (evalNext $ goal st) $ top
   where
     evalNext goal' (i, dist) =
-      bool (evaluateTile i dist) (return dist) $ i == goal'
+      bool (evaluateTile i dist) (pure dist) $ i == goal'
 
 
 -- | Check if the given location is the solution to our problem.
@@ -71,7 +70,7 @@ evaluateTile (current, lev) dist = do
     st <- get
     bool (checkTile st) shortestPath $ S.member (current, lev) (seen st)
   where
-    checkTile st = bool (searchNeighbors st) (return dist)
+    checkTile st = bool (searchNeighbors st) (pure dist)
                  $ (current, lev) == goal st
 
     searchNeighbors st = do
@@ -104,8 +103,8 @@ pop :: Search (Maybe ((Index, Level), Distance))
 pop = do
   st <- get
   case queueView (queue st) of
-    Nothing        -> return Nothing
-    Just (res, q') -> (put $ st { queue = q' }) >> (return $ Just res)
+    Nothing        -> pure Nothing
+    Just (res, q') -> (put $ st { queue = q' }) >> (pure $ Just res)
 
 
 -- | The maze is just a random-access array of @Tile@.
@@ -193,7 +192,7 @@ neighborGraph maze' graph' = fst $ execState findNeighbors (M.empty, queue)
     findNeighbors :: State (NeighborGraph, Queue Index) ()
     findNeighbors = do
         (ngraph, q) <- get
-        maybe (return ()) (uncurry $ addNeighbor ngraph) $ DQ.popFront q
+        maybe (pure ()) (uncurry $ addNeighbor ngraph) $ DQ.popFront q
 
     addNeighbor ngraph current q' = put (ngraph', newQueue) >> findNeighbors
       where
@@ -269,10 +268,10 @@ neighbors m i =
 
 tile :: Parser Tile
 tile
-   =  (oneOf "# "  >> return Wall)
-  <|> (char  '.'   >> return Open)
-  <|> (char  '\n'  >> return Newline)
-  <|> (satisfy isAsciiUpper >>= return . Door)
+   =  (oneOf "# "  >> pure Wall)
+  <|> (char  '.'   >> pure Open)
+  <|> (char  '\n'  >> pure Newline)
+  <|> (satisfy isAsciiUpper >>= pure . Door)
 
 
 toIndex m (x,y) = y * width m + x

@@ -16,26 +16,29 @@ import Data.Bool  (bool)
 import Util.Computer
 import Util.OpCode
 import Util.RAM
+import Control.Monad.Primitive
 
 
 -- The full Advent of Code 2019 instruction set.
-aoc19Set :: InstructionSet a
-aoc19Set = [ halt    "HALT" 99
-           , math    " ADD"  1 (+)
-           , math    "MULT"  2 (*)
-           , store   "STOR"  3
-           , output  " OUT"  4
-           , jump    " JEQ"  5 (/= 0)
-           , jump    "JNEQ"  6 (== 0)
-           , cmp     "  LT"  7 (<)
-           , cmp     "  EQ"  8 (==)
-           , newBase "BASE"  9
-           ]
+aoc19Set :: PrimMonad m => InstructionSet m a
+aoc19Set =
+  [ halt    "HALT" 99
+  , math    " ADD"  1 (+)
+  , math    "MULT"  2 (*)
+  , store   "STOR"  3
+  , output  " OUT"  4
+  , jump    " JEQ"  5 (/= 0)
+  , jump    "JNEQ"  6 (== 0)
+  , cmp     "  LT"  7 (<)
+  , cmp     "  EQ"  8 (==)
+  , newBase "BASE"  9
+  ]
 
-
+-- halt :: PrimMonad m => [(Mode, Data)] -> Runtime m a ()
+halt :: PrimMonad m => String -> OpCode -> Instruction m a
 halt = mkInstruction 0 halt'
   where
-    halt' :: [(Mode, Data)] -> Runtime a ()
+    halt' :: PrimMonad m => [(Mode, Data)] -> Runtime m a ()
     halt' _ = modify $ \p -> p{ action = Halt }
 
 
@@ -54,19 +57,21 @@ store n = mkInstruction 1 store' n
     store' assocs = do
       dat <- stdin <$> get
       case dat of
+        []     -> error $ n ++ ": stdin empty"
         (i:io) -> do dst <- modeDest assocs 0
                      write dst i
                      modify $ \p -> p{ stdin = io }
                      relativeJump 2
-        _      -> error $ n ++ ": stdin empty"
 
 
+output :: PrimMonad m => String -> OpCode -> Instruction m a
 output = mkInstruction 1 output'
   where
     output' assocs = do
       dat <- modeRead assocs 0
       cur <- cursor
       out <- stdout <$> get
+
       modify $ \p -> p{ action = Signal (cur + 2)
                       , stdout = out ++ [dat]
                       }
@@ -91,6 +96,7 @@ cmp n op f = mkInstruction 3 cmp' n op
       relativeJump 4
 
 
+newBase :: PrimMonad m => String -> OpCode -> Instruction m a
 newBase = mkInstruction 1 newBase'
   where
     newBase' assocs = do
@@ -100,11 +106,12 @@ newBase = mkInstruction 1 newBase'
       relativeJump 2
 
 
-mkInstruction :: Index
-              -> ([(Mode, Data)] -> Runtime a ())
+mkInstruction :: PrimMonad m
+              => Index
+              -> ([(Mode, Data)] -> Runtime m a ())
               -> String
               -> OpCode
-              -> Instruction a
+              -> Instruction m a
 mkInstruction a c n op = Instruction{ name = n
                                     , opcode = op
                                     , argc = a

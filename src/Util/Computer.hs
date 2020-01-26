@@ -24,10 +24,16 @@ module Util.Computer
     , userState
     , setUserState
     , write
+
+    , PrimMonad
+    , PrimState
     , module Control.Monad.State
+    , module Control.Monad.ST
     ) where
 
 import Control.Monad.State
+import Control.Monad.Primitive
+import Control.Monad.ST
 import Data.Default
 
 import Util.OpCode
@@ -35,70 +41,76 @@ import Util.RAM
 
 
 -- | A state transformer representing a Process currently being run.
-type Runtime a b = StateT (Process a) IO b
-type Runtime'  b = Runtime () b
+type Runtime  m a b = StateT (Process m a) m b
+type Runtime' m   b = Runtime m () b
 
 
 -- | A @Program@ and the state needed to execute it.
-data Process a = Process
-    { user   :: a          -- ^ User-defined state.
-    , prog   :: Program a  -- ^ Instruction set and RAM.
-    , action :: Action     -- ^ What the computer should do next.
-    , stdin  :: [Data]     -- ^ Input
-    , stdout :: [Data]     -- ^ Output
-    , base   :: Data       -- ^ The base for relative modes.
+data PrimMonad m => Process m a
+  = Process
+    { user   :: a           -- ^ User-defined state.
+    , prog   :: Program m a -- ^ Instruction set and RAM.
+    , action :: Action      -- ^ What the computer should do next.
+    , stdin  :: [Data]      -- ^ Input
+    , stdout :: [Data]      -- ^ Output
+    , base   :: Data        -- ^ The base for relative modes.
     }
-type Process' = Process ()
+type Process' m = Process m ()
 
 
-data Program a = Program
-    { is  :: InstructionSet a
-    , mem :: RAM
+data PrimMonad m => Program m a
+  = Program
+    { is  :: InstructionSet m a
+    , mem :: RAM (PrimState m)
     }
-type Program' = Program ()
+type Program' m = Program m ()
 
 
-type InstructionSet a = [Instruction a]
-type InstructionSet'  = InstructionSet ()
+type InstructionSet  m a = [Instruction m a]
+type InstructionSet' m   = InstructionSet m ()
 
-data Instruction a = Instruction
+data PrimMonad m => Instruction m a
+  = Instruction
     { name   :: String  -- ^ A useful name for debugging.
     , opcode :: OpCode  -- ^ Its code in memory.
     , argc   :: Index   -- ^ The number of arguments it uses.
-    , call   :: [(Mode, Data)] -> Runtime a ()
+    , call   :: [(Mode, Data)] -> Runtime m a ()
     }
-type Instruction' = Instruction ()
+type Instruction' m = Instruction m ()
 
 
-instance Show (Instruction a) where
-   show i = name i ++ "-" ++ show (opcode i)
+-- instance Show (Instruction a) where
+--    show i = name i ++ "-" ++ show (opcode i)
 
 
 -- | The computer has various types of actions it can perform.
-data Action = Halt          -- ^ Stop execution entirely.
-            | Signal Index  -- ^ Stop execution and respond to a signal. Return at the given index.
-            | Run Index     -- ^ Continue executing the program at the given index.
+data Action
+  = Halt          -- ^ Stop execution entirely.
+  | Signal Index  -- ^ Stop execution and respond to a signal. Return at the given index.
+  | Run Index     -- ^ Continue executing the program at the given index.
   deriving Show
 
 
 -- | Like @maybe@, but for the action of a @Process@.
 -- If the current access is @Halt@ the first argument will be returned,
 -- otherwise the @second@ will be called with the action's @Index@.
-act :: a
+act :: PrimMonad m
+    => a
     -> (Index -> a)
-    -> Process b
+    -> Process m b
     -> a
 act false true proc =
     case action proc of
-      Halt     -> false
-      Signal i -> true i
-      Run    i -> true i
+        Halt     -> false
+        Signal i -> true i
+        Run    i -> true i
 
 
 -- | Create a new @Process@, ready to be executed.
-load :: Program a
+load :: PrimMonad m
+     => Program m a
      -> a
-     -> Process a
+     -> Process m a
 load p a = Process
     { prog   = p
     , action = Run 0
@@ -109,29 +121,29 @@ load p a = Process
     }
 
 
-load' :: Default a
-      => Program a
-      -> Process a
+load' :: PrimMonad m
+      => Default a
+      => Program m a
+      -> Process m a
 load' p = load p def
 
 
-
 -- | Add the given data to the head of @stdin@.
-setStdin :: [Data] -> Runtime a ()
+setStdin :: PrimMonad m => [Data] -> Runtime m a ()
 setStdin dd = modify $ \p -> p{ stdin = dd }
 
 
 -- | Add the given data to the head of @stdin@.
-push :: Data -> Runtime a ()
+push :: PrimMonad m => Data -> Runtime m a ()
 push d = do { dd <- stdin <$> get; setStdin (d:dd) }
 
 
 -- | Empty the @stdout@ and return its contents.
-pop :: Runtime a [Data]
+pop :: PrimMonad m => Runtime m a [Data]
 pop = do
     out <- stdout <$> get
     modify $ \p -> p{ stdout = [] }
-    return out
+    pure out
 
 
 -- | Fetch a datum from memory, defaulting to @0@ if that value hasn't been
@@ -139,70 +151,78 @@ pop = do
 --
 -- The amount of memory will be increased to insure the given index isn't out of
 -- bounds.
-fetch :: Index
-      -> Runtime a Data
-fetch src = do growIfSmall src
-               ram <- mem . prog <$> get
-               lift $ readData ram src
+fetch :: PrimMonad m
+      => Index
+      -> Runtime m a Data
+fetch src = do
+    growIfSmall src
+    ram <- mem . prog <$> get
+    lift $ readData ram src
 
 
 -- | TODO: Fetch user state.
-userState :: Runtime a a
+userState :: (PrimMonad m, Monad m) => Runtime m a a
 userState = user <$> get
 
 
--- | TODO: Fetch user state.
-setUserState :: (a -> a) -> Runtime a a
-setUserState f = do state <- f <$> userState
-                    modify $ \p -> p{ user = state }
-                    return state
+-- | TODO: Set user state.
+setUserState :: PrimMonad m => (a -> a) -> Runtime m a a
+setUserState f = do
+    state <- f <$> userState
+    modify $ \p -> p{ user = state }
+    pure state
 
 
 -- | Write a datum to memory.
 --
 -- The amount of memory will be increased to insure the given index isn't out of
 -- bounds.
-write :: Index
+write :: PrimMonad m
+      => Index
       -> Data
-      -> Runtime a ()
-write dst dat = do growIfSmall dst
-                   ram <- mem . prog <$> get
-                   lift $ writeData ram dst dat
+      -> Runtime m a ()
+write dst dat = do
+    growIfSmall dst
+    ram <- mem . prog <$> get
+    lift $ writeData ram dst dat
 
 
 -- | Grow the amount of available memory to ensure the given index isn't out of
 -- bounds.
-growIfSmall :: Index
-            -> Runtime a ()
+growIfSmall :: PrimMonad m
+            => Index
+            -> Runtime m a ()
 growIfSmall i = do
     ram <- mem . prog <$> get
     if memlen ram > i
-        then return ()
+        then pure ()
         else do cpy <- lift $ grow ram i
                 modify $ \p -> p{ prog = (Program (is . prog $ p) cpy) }
 
 
 -- | Move execution of the program relative to its current @cursor@.
-relativeJump :: Data
-             -> Runtime a ()
-relativeJump n = do cur <- cursor
-                    modify $ \p -> p{ action = Run (cur + n) }
+relativeJump :: PrimMonad m => Data -> Runtime m a ()
+relativeJump n = do
+    cur <- cursor
+    modify $ \p -> p{ action = Run (cur + n) }
 
 
 -- | The position in memory currently being executed.
 -- A negative number will be returned if the program is halted.
-cursor :: Runtime a Index
-cursor = do get >>= return . (act (-1) id)
+cursor :: PrimMonad m => Runtime m a Index
+cursor = get >>= pure . (act (-1) id)
 
 
 -- | Read data from memory using position or immediate mode.
-modeRead :: [(Mode, Data)]
+modeRead :: PrimMonad m
+         => [(Mode, Data)]
          -> Data
-         -> Runtime a Data
-modeRead assocs i = do eitherIndexOrData <- modeLoc assocs i
-                       case eitherIndexOrData of
-                           Left  dat -> return dat
-                           Right idx -> fetch  idx
+         -> Runtime m a Data
+modeRead assocs i = do
+    eitherIndexOrData <- modeLoc assocs i
+    case eitherIndexOrData of
+        Left  dat -> pure  dat
+        Right idx -> fetch idx
 
 
 -- | Read data from memory, interpreting it as memory location.
@@ -210,18 +230,21 @@ modeRead assocs i = do eitherIndexOrData <- modeLoc assocs i
 -- It differs from @modeRead@ by not derefercing @Position@ modes. ie: @Position
 -- 10@ will write to @10@, and not reading the current value of @10@ and using
 -- that address.
-modeDest assocs i = do eitherIndexOrData <- modeLoc assocs i
-                       case eitherIndexOrData of
-                           Left  a -> return a
-                           Right a -> return a
+modeDest assocs i = do
+    eitherIndexOrData <- modeLoc assocs i
+    case eitherIndexOrData of
+        Left  a -> pure a
+        Right a -> pure a
 
 
 -- | @Left@ for an @Immediate@ location or @Right@ for a @Position@ location.
-modeLoc :: [(Mode, Data)]
-         -> Data
-         -> Runtime a (Either Data Data)
+modeLoc :: (PrimMonad m, Functor m)
+        => [(Mode, Data)]
+        -> Data
+        -> Runtime m a (Either Data Data)
 modeLoc assocs i = uncurry loc $ assocs !! i
-  where loc :: Mode -> Data -> Runtime a (Either Data Data)
-        loc Immediate a = return $ Left a
-        loc Position  a = return $ Right a
-        loc Relative  a = do { b <- base <$> get; return . Right $ b + a }
+  where
+    loc :: (PrimMonad m, Functor m) => Mode -> Data -> Runtime m a (Either Data Data)
+    loc Immediate a = pure $ Left a
+    loc Position  a = pure $ Right a
+    loc Relative  a = do { b <- base <$> get; pure . Right $ b + a }

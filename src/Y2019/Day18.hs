@@ -13,19 +13,19 @@ import qualified Data.Vector           as V
 import Parser hiding (queue)
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "5392")
         , (part2, Just "1684")
         ]
 
 
-part1 input = return . show $ evalState findShortestLengthToAllKeys search
+part1 input = show $ evalState findShortestLengthToAllKeys search
   where
     search = newSearch maze' $ head (origins maze')
     maze' = parseMaze input
 
 
-part2 input = return . show . sum $ singleBotMinLen <$> origins maze'
+part2 input = show . sum $ singleBotMinLen <$> origins maze'
   where
     singleBotMinLen = evalState findShortestLengthToAllKeys . newSearch maze'
     maze' = mogrifyMaze $ parseMaze input
@@ -145,7 +145,7 @@ neighborGraph maze' = fst $ execState findNeighbors (M.empty, queue)
     findNeighbors :: State (NeighborGraph, Queue Index) ()
     findNeighbors = do
         (ngraph, q) <- get
-        maybe (return ()) (uncurry $ addNeighbor ngraph) $ DQ.popFront q
+        maybe (pure ()) (uncurry $ addNeighbor ngraph) $ DQ.popFront q
 
     addNeighbor ngraph current q' = put (newGraph, newQueue) >> findNeighbors
       where
@@ -177,10 +177,10 @@ findShortestLengthToAllKeys :: Search Distance
 findShortestLengthToAllKeys = do
     st <- get
     top <- pop
-    maybe (return $ len st) (evalNext $ count st) $ top
+    maybe (pure $ len st) (evalNext $ count st) $ top
   where
     evalNext goal (i, keys, dist) =
-      bool (evaluateTile i keys dist) (return $ dist - 1) $ length keys == goal
+      bool (evaluateTile i keys dist) (pure $ dist - 1) $ length keys == goal
 
 
 -- | Check if the given location and keys are the solution to our problem.
@@ -193,7 +193,7 @@ evaluateTile current keys dist = do
     skipToNext = findShortestLengthToAllKeys
     moreKeys   = nub . sort $ current:keys
 
-    checkTile st = bool (searchNeighbors st keys') (return dist)
+    checkTile st = bool (searchNeighbors st keys') (pure dist)
                  $ length keys' == count st
       where
         keys' = bool keys moreKeys $ isKey (maze st `idx` current)
@@ -214,8 +214,8 @@ pop :: Search (Maybe (Index, KeySet, Distance))
 pop = do
   st <- get
   case Q.minView (queue st) of
-    Nothing        -> return Nothing
-    Just (res, q') -> (put $ st { queue = q' }) >> (return $ Just res)
+    Nothing        -> pure Nothing
+    Just (res, q') -> (put $ st { queue = q' }) >> (pure $ Just res)
 
 
 -- | Add the neighbors around the given location to the search queue.
@@ -251,12 +251,12 @@ parseMaze input = Maze
 
 tile :: Parser Tile
 tile
-   =  (char '#'  >> return Wall)
-  <|> (char '.'  >> return Open)
-  <|> (char '@'  >> return Origin)
-  <|> (char '\n' >> return Newline)
-  <|> (satisfy isAsciiUpper >>= return . Door)
-  <|> (satisfy isAsciiLower >>= return . Key)
+   =  (char '#'  >> pure Wall)
+  <|> (char '.'  >> pure Open)
+  <|> (char '@'  >> pure Origin)
+  <|> (char '\n' >> pure Newline)
+  <|> (satisfy isAsciiUpper >>= pure . Door)
+  <|> (satisfy isAsciiLower >>= pure . Key)
 
 
 toIndex m (x,y) = y * width m + x

@@ -6,47 +6,52 @@ import Util.Program
 import Util.InstructionSet
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "306")
         , (part2, Just "15328")
         ]
 
 
-part1 input = do screen <- program input >>= gameProgram
-                 return . show . M.size $ M.filter (== Block) screen
+part1 input = runST $ do
+    screen <- program input >>= gameProgram
+    pure . show . M.size $ M.filter (== Block) screen
 
 
-part2 input = do score <- program input >>= withQuarters 2 >>= play
-                 return . show $ score
+part2 input = runST $ do
+    score <- program input >>= withQuarters 2 >>= play
+    pure . show $ score
 
 
-withQuarters :: Int -> GameProgram -> IO GameProgram
-withQuarters n prog = do { writeData (mem prog) 0 n; return prog }
+withQuarters :: PrimMonad m => Int -> GameProgram m -> m (GameProgram m)
+withQuarters n prog = do { writeData (mem prog) 0 n; pure prog }
 
 
-play :: GameProgram -> IO Score
+play :: PrimMonad m
+     => GameProgram m
+     -> m Score
 play prog = exec 0 $ load prog M.empty
   where exec s proc = do (score, proc') <- runStateT (gameState s) proc
-                         act (return score) (\_-> exec score proc') proc
+                         act (pure score) (\_-> exec score proc') proc
 
 
-
-gameState :: Score -> GameRuntime Score
+gameState :: PrimMonad m
+          => Score
+          -> GameRuntime m Score
 gameState score = do
     execute >> execute >> execute
     output <- pop
     case output of
-        [-1,0,s] -> return s
+        [-1,0,s] -> pure s
         [x,y,t]  -> do scrn <- userState
                        modify $ \p -> p{ user = (M.insert (x,y) (toEnum t) scrn) }
-                       return score
-        _        -> return score
+                       pure score
+        _        -> pure score
 
 
 type Screen = M.Map (X,Y) Sprite
 
-type GameProgram   = Program Screen
-type GameRuntime a = Runtime Screen a
+type GameProgram m   = Program m Screen
+type GameRuntime m a = Runtime m Screen a
 
 data Sprite = Empty
             | Wall
@@ -74,23 +79,28 @@ type Y     = Int
 type Score = Int
 
 
-gameProgram :: GameProgram -> IO Screen
+gameProgram :: PrimMonad m
+            => GameProgram m
+            -> m Screen
 gameProgram prog = exec M.empty $ load prog M.empty
   where exec es proc = do (es', proc') <- runStateT (buildSprites es) proc
-                          act (return es') (\_-> exec es' proc') proc'
+                          act (pure es') (\_-> exec es' proc') proc'
 
 
-buildSprites :: Screen -> GameRuntime Screen
+buildSprites :: PrimMonad m
+             => Screen
+             -> GameRuntime m Screen
 buildSprites es = do execute >> execute >> execute
                      output <- pop
                      case output of
-                         [x,y,t] -> return $ M.insert (x,y) (toEnum t) es
-                         _       -> return es
+                         [x,y,t] -> pure $ M.insert (x,y) (toEnum t) es
+                         _       -> pure es
 
 
-program :: String -> IO GameProgram
+program :: PrimMonad m
+        => String -> m (GameProgram m)
 program = (fmap $ Program instructions) . parseRAM
-  where instructions :: InstructionSet Screen
+  where instructions :: PrimMonad m => InstructionSet m Screen
         instructions = [ halt    "HALT" 99
                        , math    " ADD"  1 (+)
                        , math    "MULT"  2 (*)
@@ -107,23 +117,28 @@ program = (fmap $ Program instructions) . parseRAM
 -- | An operation that replaces the normal STOR operation.
 -- Instead of storing data from the state's FIFO, this version will store the
 -- direction to move toward the ball
+joy :: PrimMonad m => String -> Data -> Instruction m Screen
 joy = mkInstruction 1 joy'
- where joy' assocs = do screen <- userState
-                        dst    <- modeDest assocs 0
-                        write dst $ joyDirection screen
-                        relativeJump 2
+ where
+   joy' assocs = do
+     screen <- userState
+     dst    <- modeDest assocs 0
+     write dst $ joyDirection screen
+     relativeJump 2
 
 
 -- | Return the unit which will move the paddle toward the ball's X location.
-joyDirection screen = case uncurry compare (findX screen) of
-                          LT -> 1
-                          EQ -> 0
-                          GT -> (-1)
+joyDirection screen =
+    case uncurry compare (findX screen) of
+        LT -> 1
+        EQ -> 0
+        GT -> (-1)
 
 
 -- | Return a tuple of the X locations of the @Paddle@ and @Ball@.
 findX :: Screen -> (X,X)
 findX = M.foldrWithKey query (0,0)
-  where query (x,_) Paddle (_,b) = (x,b)
-        query (x,_) Ball   (p,_) = (p,x)
-        query _     _      prev  = prev
+  where
+    query (x,_) Paddle (_,b) = (x,b)
+    query (x,_) Ball   (p,_) = (p,x)
+    query _     _      prev  = prev

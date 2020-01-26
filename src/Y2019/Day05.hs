@@ -4,20 +4,19 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "7259358")
         , (part2, Just "11826654")
         ]
 
 
-part1 input = show <$> (program input >>= flip executeUntilHalt' [1])
-part2 input = show <$> (program input >>= flip executeUntilHalt' [5])
+part1 input = show $ runST $ program input >>= flip executeUntilHalt' [1]
+part2 input = show $ runST $ program input >>= flip executeUntilHalt' [5]
 
 
-program :: String -> IO Program'
+program :: PrimMonad m => String -> m (Program' m)
 program = (fmap $ Program instructions) . parseRAM
   where
-    instructions :: InstructionSet'
     instructions = [ halt   "HALT" 99
                    , math   " ADD"  1 (+)
                    , math   "MULT"  2 (*)

@@ -4,11 +4,11 @@ import Data.Bool      (bool)
 import Data.Function  (on)
 import Data.List      (minimumBy)
 
-import           Parser
 import qualified Draw
+import           Parser
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "2684")
         , (part2, Just part2Expected)
         ]
@@ -22,14 +22,14 @@ part2Expected = unlines [ "█   █ ██  ███  █   █████ "
                         ]
 
 
-part1 input = return . show $ count White smallest * count Trans smallest
+part1 input = show $ count White smallest * count Trans smallest
   where
     layers'     = layers (parse colors input) 25 6
     smallest    = minimumBy (compare `on` count Black) layers'
     count c lay = sum [bool 0 1 (c == c') | row <- lay, c' <- row]
 
 
-part2 input = return $ show' compiled
+part2 input = show' compiled
   where
     layers'  = layers (parse colors input) 25 6
     compiled = compile layers'
@@ -37,9 +37,10 @@ part2 input = return $ show' compiled
 
 
 type Layer = [[Color]]
-data Color = Black
-           | White
-           | Trans
+data Color
+  = Black
+  | White
+  | Trans
   deriving Eq
 
 
@@ -50,7 +51,7 @@ instance Show Color where
 
 
 colors :: Parser [Color]
-colors = do { ds <- many digit; spaces; return $ color <$> ds }
+colors = do { ds <- many digit; spaces; pure $ color <$> ds }
   where
     color '0' = Black
     color '1' = White

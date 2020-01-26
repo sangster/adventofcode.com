@@ -11,7 +11,7 @@ type Year = String
 type Day  = String
 
 
-parts :: [( (Year, Day), [((String -> IO String), Maybe String)] )]
+parts :: [( (Year, Day), [((String -> String), Maybe String)] )]
 parts =
   daysFor "2018" Year2018.days
   ++
@@ -19,8 +19,8 @@ parts =
 
 
 daysFor :: Year
-        -> [[((String -> IO String), Maybe String)]]
-        -> [( (Year, Day), [((String -> IO String), Maybe String)] )]
+        -> [[((String -> String), Maybe String)]]
+        -> [( (Year, Day), [((String -> String), Maybe String)] )]
 daysFor y pp = [ ((y, fmt d), p) | (d, p) <- zip [1..] pp]
   where
     fmt d | d < 10    = ('0':show d)
@@ -28,7 +28,7 @@ daysFor y pp = [ ((y, fmt d), p) | (d, p) <- zip [1..] pp]
 
 
 -- | Execute the solution for a single December day in a single year.
-callDay :: Year -> Day -> Maybe [(IO String, Maybe String)]
+callDay :: Year -> Day -> Maybe [(String, Maybe String)]
 
 callDay year "last" = callDay year $ (snd . fst) (last dd)
   where

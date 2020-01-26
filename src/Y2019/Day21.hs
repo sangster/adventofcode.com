@@ -6,17 +6,18 @@ import Util.Program                hiding (Run)
 import Control.Monad.Trans.Except
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "19357761")
         , (part2, Just "1142249706")
         ]
 
 
-part1 input = do prog   <- program input
-                 status <- runExceptT $ runScript script prog
-                 case status of
-                   Left  video   -> return video
-                   Right hullDmg -> return $ show hullDmg
+part1 input = runST $ do
+    prog   <- program input
+    status <- runExceptT $ runScript script prog
+    case status of
+        Left  video   -> pure video
+        Right hullDmg -> pure $ show hullDmg
   where
     -- Jump if hole at 1 or 3, but not 4
     script =
@@ -28,11 +29,12 @@ part1 input = do prog   <- program input
       ]
 
 
-part2 input = do prog   <- program input
-                 status <- runExceptT $ runScript script prog
-                 case status of
-                   Left  video   -> return video
-                   Right hullDmg -> return $ show hullDmg
+part2 input = runST $ do
+    prog   <- program input
+    status <- runExceptT $ runScript script prog
+    case status of
+        Left  video   -> pure video
+        Right hullDmg -> pure $ show hullDmg
   where
     script =
       [ not'  1 J
@@ -90,11 +92,11 @@ encode = map ord
 decode = map chr
 
 
-runScript :: [Inst] -> Program' -> ExceptT String IO Data
+runScript :: PrimMonad m => [Inst] -> Program' m -> ExceptT String m Data
 runScript script p = do
-    results <- liftIO $ executeUntilHalt p (encode $ command script)
+    results <- lift $ executeUntilHalt p (encode $ command script)
     if any (> ord maxBound) results
-      then return $ last   results
+      then pure   $ last   results
       else throwE $ decode results
 
 
@@ -104,5 +106,5 @@ command xs =
       else error "too many instructions"
 
 
-program :: String -> IO (Program')
+program :: PrimMonad m => String -> m (Program' m)
 program = (fmap $ Program aoc19Set) . parseRAM

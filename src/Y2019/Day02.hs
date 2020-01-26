@@ -4,18 +4,18 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "2782414")
         , (part2, Just "9820")
         ]
 
 
-part1 input = do
+part1 input = runST $ do
     prog <- program input
     show <$> runAdjustedProject prog 12 2
 
 
-part2 input = do
+part2 input = runST $ do
     prog <- program input
     render <$> findNounAndVerb prog expectedResult 0 0
   where
@@ -23,14 +23,14 @@ part2 input = do
     render = maybe "fail" $ \(noun, verb) -> show $ 100 * noun + verb
 
 
-program :: String -> IO Program'
+program :: PrimMonad m => String -> m (Program' m)
 program = (fmap $ Program instructions) . parseRAM
   where
-    instructions :: InstructionSet'
-    instructions = [ halt "HALT" 99
-                   , math " ADD"  1 (+)
-                   , math "MULT"  2 (*)
-                   ]
+    instructions =
+      [ halt "HALT" 99
+      , math " ADD"  1 (+)
+      , math "MULT"  2 (*)
+      ]
 
 
 runAdjustedProject prog noun verb = do
@@ -40,12 +40,13 @@ runAdjustedProject prog noun verb = do
     readData (mem prog) 0
 
 
-findNounAndVerb :: Program'
+findNounAndVerb :: PrimMonad m
+                => Program' m
                 -> Data     -- expected
                 -> Data     -- noun
                 -> Data     -- verb
-                -> IO (Maybe (Data, Data))
-findNounAndVerb _ _ 100  _   = return Nothing
+                -> m (Maybe (Data, Data))
+findNounAndVerb _ _ 100  _   = pure Nothing
 findNounAndVerb p e noun 100 = findNounAndVerb p e (noun + 1) 0
 
 findNounAndVerb prog expected noun verb = do
@@ -53,5 +54,5 @@ findNounAndVerb prog expected noun verb = do
     result <- runAdjustedProject (Program (is prog) mem') noun verb
 
     if expected == result
-        then return $ Just (noun, verb)
-        else findNounAndVerb prog expected noun $ verb + 1
+      then pure $ Just (noun, verb)
+      else findNounAndVerb prog expected noun $ verb + 1

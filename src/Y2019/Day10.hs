@@ -8,19 +8,19 @@ import qualified Data.Map       as M
 import Parser
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "340")
         , (part2, Just "2628")
         ]
 
 
-part1 input = return . show . length $ visMap M.! best
+part1 input = show . length $ visMap M.! best
   where
     best   = findBest visMap
     visMap = visibleMap $ parse (some asteroid) input
 
 
-part2 input = return . show $ code (destroyPos 200)
+part2 input = show $ code (destroyPos 200)
   where
     destroyPos i = sorted !! (i - 1)
     code (x,y) = x * 100 + y
@@ -35,8 +35,9 @@ type Y = Int
 type Asteroid = (X, Y)
 type VisMap   = M.Map Asteroid [Asteroid]
 
+
 asteroid :: Parser Asteroid
-asteroid = do { void; st <- get; char '#'; void; return (col st, line st) }
+asteroid = do { void; st <- get; char '#'; void; pure (col st, line st) }
   where void = many $ oneOf ".\n"
 
 
@@ -60,11 +61,12 @@ visible as a = as \\ nub obs
 -- | Return the list of coordinates that are obscured by @b@ when viewed from
 -- @a@.
 obscured :: Int -> Int -> Asteroid -> Asteroid -> [(X, Y)]
-obscured w h a b@(x, y) | a == b             = []
-                        | dx == 0 && dy == 0 = []
-                        | dx == 0            = zip (repeat x) yrange
-                        | dy == 0            = zip xrange     (repeat y)
-                        | otherwise          = zip xrange     yrange
+obscured w h a b@(x, y)
+  | a == b             = []
+  | dx == 0 && dy == 0 = []
+  | dx == 0            = zip (repeat x) yrange
+  | dy == 0            = zip xrange     (repeat y)
+  | otherwise          = zip xrange     yrange
   where
     xrange    = tail [x, x + dx .. (bool 0 w $ dx > 0)]
     yrange    = tail [y, y + dy .. (bool 0 h $ dy > 0)]

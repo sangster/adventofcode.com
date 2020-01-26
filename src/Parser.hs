@@ -100,7 +100,7 @@ parse p s = report $ (evalStateT (runParser p) def{ queue = s })
 
 
 unit :: a -> Parser a
-unit a = return a
+unit a = pure a
 
 
 instance Alternative Parser where
@@ -115,7 +115,7 @@ option p q = do
   st <- get
   case runStateT (runParser p) st of
     Left  _        -> q
-    Right (a, st') -> put st' >> return a
+    Right (a, st') -> put st' >> pure a
 
 
 satisfy :: (Char -> Bool) -> Parser Char
@@ -132,7 +132,7 @@ item = get >>= cs . queue
       st <- get
       put st{ queue = cs' }
       putPos c
-      return c
+      pure c
 
     putPos :: Char -> Parser Char
     putPos c = do
@@ -140,7 +140,7 @@ item = get >>= cs . queue
       if c == '\n'
           then put st{ col = 0, line = (line st) + 1 }
           else put st{ col = (col st) + 1 }
-      return c
+      pure c
 
 
 char :: Char -> Parser Char
@@ -148,8 +148,8 @@ char c = satisfy (c ==)
 
 
 string :: String -> Parser String
-string []     = return []
-string (c:cs) = char c >> string cs >> return (c:cs)
+string []     = pure []
+string (c:cs) = char c >> string cs >> pure (c:cs)
 
 
 digit :: Parser Char
@@ -166,13 +166,13 @@ natural = read <$> some (satisfy isDigit)
 
 number :: (Integral a, Read a) => Parser a
 number = do
-  s  <- string "-" <|> return []
+  s  <- string "-" <|> pure []
   cs <- some digit
-  return . read $ s ++ cs
+  pure . read $ s ++ cs
 
 
 token :: Parser a -> Parser a
-token p = do { a <- p; spaces; return a }
+token p = do { a <- p; spaces; pure a }
 
 
 reserved :: String -> Parser String
@@ -199,12 +199,12 @@ chainl :: Parser a
        -> Parser (a -> a -> a)
        -> a
        -> Parser a
-chainl p op a = chainl1 p op <|> return a
+chainl p op a = chainl1 p op <|> pure a
 
 
 chainl1 :: Parser a
         -> Parser (a -> a -> a)
         -> Parser a
-chainl1 p op = do { a <- p; rest a <|> return a }
+chainl1 p op = do { a <- p; rest a <|> pure a }
   where
     rest a = do { f <- op; b <- p; rest (f a b) }

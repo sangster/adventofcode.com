@@ -8,19 +8,19 @@ import Prelude     hiding (Left, Right)
 import Parser
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "209")
         , (part2, Just "43258")
         ]
 
 
-part1 input = return . show $ minimum dists
+part1 input = show $ minimum dists
   where
     dists = distance (0, 0) <$> intersections wires
     wires = parseWires input
 
 
-part2 input = return . show $ minimum dists
+part2 input = show $ minimum dists
   where
     dists   = sum' <$> intersections wires
     sum' xy = sum $ (flip wireLength xy) <$> wires
@@ -82,7 +82,7 @@ intersections :: [Wire]
               -> [(X,Y)]
 intersections wires = catMaybes $ wirePairs >>= uncurry intersect
   where wirePairs       = [(x,y) | (x:rest) <- tails wires, y <- rest]
-        intersect wa wb = do { a <- wa; b <- wb; return $ intersection a b }
+        intersect wa wb = do { a <- wa; b <- wb; pure $ intersection a b }
 
 
 -- | The coordinates at which two line segments intersect, if there is one.
@@ -127,7 +127,7 @@ parseWires = fmap segments . (parse $ some path)
 path :: Parser Path
 path = do moves <- some move
           spaces
-          return moves
+          pure moves
 
 
 -- | Parse a single move expression.
@@ -135,7 +135,7 @@ move :: Parser Move
 move = do d <- direction
           n <- natural
           many $ char ','
-          return $ d n
+          pure $ d n
 
 
 -- | Parse a direction token.
@@ -145,4 +145,4 @@ direction  = prefixOp "U" Up
          <|> prefixOp "L" Left
          <|> prefixOp "R" Right
   where
-    prefixOp x f = string x >> return f
+    prefixOp x f = string x >> pure f

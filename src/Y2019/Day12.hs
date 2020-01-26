@@ -6,13 +6,13 @@ import Data.Function
 import Parser
 
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Just "7471")
         , (part2, Just "376243355967784")
         ]
 
 
-part1 input = return . show $ systemEnergy (steps !! 1000)
+part1 input = show $ systemEnergy (steps !! 1000)
   where moons           = parse (some moon) input
         steps           = iterate step moons
         systemEnergy    = sum . fmap totalEnergy
@@ -21,7 +21,7 @@ part1 input = return . show $ systemEnergy (steps !! 1000)
         kineticEnergy   = sum . (fmap abs) . vel
 
 
-part2 input = return . show $ foldr1 lcm repeats
+part2 input = show $ foldr1 lcm repeats
   where moons   = parse (some moon) input
         repeats = findRepeatStep moons <$> dims (head moons)
 
@@ -53,7 +53,7 @@ moon = do x <- coord "<x="
           y <- coord ", y="
           z <- coord ", z="
           char '>' >> spaces
-          return $ [(x,0), (y,0), (z,0)]
+          pure $ [(x,0), (y,0), (z,0)]
   where coord prefix = do { string prefix; number }
 
 
