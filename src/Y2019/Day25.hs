@@ -34,11 +34,11 @@ execCommands prog commands = do
     fmap chr <$> exec prog (concat $ command <$> commands)
 
 
-part2 input = "Merry Christmas!"
+part2 _ = "Merry Christmas!"
 
 
 findKeycode :: PrimMonad m => Program' m -> [Room] -> [[Item]] -> m Int
-findKeycode _ _ [] = pure 99
+findKeycode _ _ [] = pure 0
 findKeycode prog rooms (items:rest) = do
     dialogue <- execCommands prog steps
     if "Santa" `isInfixOf` dialogue
