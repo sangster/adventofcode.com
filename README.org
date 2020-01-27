@@ -1,5 +1,9 @@
 #+TITLE: Advent of Code
 
+* Status
+
+ - 2019 :: 50★
+
 * Usage
 
 #+BEGIN_SRC shell
