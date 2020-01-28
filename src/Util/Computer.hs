@@ -24,6 +24,7 @@ module Util.Computer
     , userState
     , setUserState
     , write
+    , cpyProc
 
     , PrimMonad
     , PrimState
@@ -35,6 +36,7 @@ import Control.Monad.State
 import Control.Monad.Primitive
 import Control.Monad.ST
 import Data.Default
+import Data.Function
 
 import Util.OpCode
 import Util.RAM
@@ -79,8 +81,8 @@ data PrimMonad m => Instruction m a
 type Instruction' m = Instruction m ()
 
 
--- instance Show (Instruction a) where
---    show i = name i ++ "-" ++ show (opcode i)
+instance PrimMonad m => Eq (Instruction m a) where
+  (==) = (==) `on` name
 
 
 -- | The computer has various types of actions it can perform.
@@ -125,7 +127,7 @@ load' :: PrimMonad m
       => Default a
       => Program m a
       -> Process m a
-load' p = load p def
+load' = flip load def
 
 
 -- | Add the given data to the head of @stdin@.
@@ -151,13 +153,8 @@ pop = do
 --
 -- The amount of memory will be increased to insure the given index isn't out of
 -- bounds.
-fetch :: PrimMonad m
-      => Index
-      -> Runtime m a Data
-fetch src = do
-    growIfSmall src
-    ram <- mem . prog <$> get
-    lift $ readData ram src
+fetch :: PrimMonad m => Index -> Runtime m a Data
+fetch src = growIfSmall src >> mem . prog <$> get >>= flip readData src
 
 
 -- | TODO: Fetch user state.
@@ -181,10 +178,8 @@ write :: PrimMonad m
       => Index
       -> Data
       -> Runtime m a ()
-write dst dat = do
-    growIfSmall dst
-    ram <- mem . prog <$> get
-    lift $ writeData ram dst dat
+write dst dat = growIfSmall dst
+             >> mem . prog <$> get >>= \r -> writeData r dst dat
 
 
 -- | Grow the amount of available memory to ensure the given index isn't out of
@@ -210,7 +205,7 @@ relativeJump n = do
 -- | The position in memory currently being executed.
 -- A negative number will be returned if the program is halted.
 cursor :: PrimMonad m => Runtime m a Index
-cursor = get >>= pure . (act (-1) id)
+cursor = get >>= pure . act (-1) id
 
 
 -- | Read data from memory using position or immediate mode.
@@ -248,3 +243,8 @@ modeLoc assocs i = uncurry loc $ assocs !! i
     loc Immediate a = pure $ Left a
     loc Position  a = pure $ Right a
     loc Relative  a = do { b <- base <$> get; pure . Right $ b + a }
+
+
+-- | Make a copy of the given Process.
+cpyProc :: PrimMonad m => Process m a -> m (Process m a)
+cpyProc p = memcpy (mem $ prog p) >>= \m -> pure p{ prog = (prog p){ mem = m } }

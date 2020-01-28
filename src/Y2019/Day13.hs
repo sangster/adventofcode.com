@@ -97,21 +97,9 @@ buildSprites es = do execute >> execute >> execute
                          _       -> pure es
 
 
-program :: PrimMonad m
-        => String -> m (GameProgram m)
-program = (fmap $ Program instructions) . parseRAM
-  where instructions :: PrimMonad m => InstructionSet m Screen
-        instructions = [ halt    "HALT" 99
-                       , math    " ADD"  1 (+)
-                       , math    "MULT"  2 (*)
-                       , joy     " JOY"  3        -- Swap out STOR operation
-                       , output  " OUT"  4
-                       , jump    " JEQ"  5 (/= 0)
-                       , jump    "JNEQ"  6 (== 0)
-                       , cmp     "  LT"  7 (<)
-                       , cmp     "  EQ"  8 (==)
-                       , newBase "BASE"  9
-                       ]
+program :: PrimMonad m => String -> m (GameProgram m)
+program = fmap (Program instructions) . parseRAM
+  where instructions = mergeSets aoc19Set [joy " JOY" 3]
 
 
 -- | An operation that replaces the normal STOR operation.

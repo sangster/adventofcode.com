@@ -66,7 +66,7 @@ boot n mem = do
     mkNic addr = do
       program <- memcpy mem >>= pure . Program networkSet
       pure (addr, (load program False){ stdin = [addr] })
-
+    networkSet = mergeSets aoc19Set [netStore "STOR" 3]
 
 -- | Run each node in the Network, in order, starting with the given Addr.
 -- Each one will run until raising a signal. Packets sent to the NAT (addr 255)
@@ -117,21 +117,6 @@ restartNetwork onRepeat net =
            >>= pure . insertNode net{ natHistory = last xy : natHistory net } 0
     active p = p{ stdin = xy, user = False }
     xy       = [fst $ natMem net, snd $ natMem net]
-
-
-networkSet :: PrimMonad m => InstructionSet m IsIdle
-networkSet =
-  [ halt      "HALT" 99
-  , math      " ADD"  1 (+)
-  , math      "MULT"  2 (*)
-  , netStore  "STOR"  3
-  , output    " OUT"  4
-  , jump      " JEQ"  5 (/= 0)
-  , jump      "JNEQ"  6 (== 0)
-  , cmp       "  LT"  7 (<)
-  , cmp       "  EQ"  8 (==)
-  , newBase   "BASE"  9
-  ]
 
 
 netStore :: PrimMonad m => String -> OpCode -> Instruction m IsIdle

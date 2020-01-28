@@ -8,15 +8,15 @@ module Util.InstructionSet
     , cmp
     , newBase
     , mkInstruction
+    , mergeSets
     ) where
 
-
+import Control.Monad.Primitive
 import Data.Bool  (bool)
 
 import Util.Computer
 import Util.OpCode
 import Util.RAM
-import Control.Monad.Primitive
 
 
 -- The full Advent of Code 2019 instruction set.
@@ -117,3 +117,12 @@ mkInstruction a c n op = Instruction{ name = n
                                     , argc = a
                                     , call = c
                                     }
+
+
+-- | Combine the two instruction sets, preferring those from the latter set
+-- where there are duplicates.
+mergeSets :: PrimMonad m
+          => InstructionSet m a
+          -> InstructionSet m a
+          -> InstructionSet m a
+mergeSets dst src = dst' ++ src where dst' = filter (not . flip elem src) dst
