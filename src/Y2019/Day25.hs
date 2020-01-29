@@ -30,7 +30,7 @@ part1 input = runST $ do
     findKeycode prog rooms (itemSequences rooms)
   where
     program :: PrimMonad m => String -> m (Program' m)
-    program       = fmap (Program set') . parseRAM
+    program       = fmap (Program haltIfNoStdinSet) . parseRAM
     itemSequences = fmap sort . subsequences . filter safeItem . concatMap items
 
 
@@ -43,6 +43,38 @@ mapShip input = program input >>= explore
   where
     program :: PrimMonad m => String -> m (Program m (Search m))
     program = fmap (Program exploreSet) . parseRAM
+
+
+explore :: PrimMonad m => Program m (Search m) -> m [Room]
+explore prog' = exploreLoop $ load prog' search
+  where
+    search = Search{ seen = [], next = [], curr = Nothing, move = Nothing }
+
+
+exploreLoop :: PrimMonad m => Process m (Search m) -> m [Room]
+exploreLoop proc = do
+    proc' <- execStateT execute proc
+    case action proc' of
+      Run _ -> exploreLoop  proc'
+      _     -> handleSignal proc'
+  where
+    handleSignal proc' = do
+      let next' = next $ user proc'
+
+      if not $ null next'
+        then do
+          let ((proc'', dir):rest) = next'
+          exploreLoop $ proc''
+            { stdin = command $ Go dir
+            , user = (user proc''){ next = rest
+                                  , move = Just dir
+                                  , seen = (joinSeen proc' proc'')
+                                  }
+            }
+        else pure $ seen (user proc')
+    joinSeen a b = nub $ (seen $ user a) ++ (seen $ user b)
+
+
 
 
 -- | Trying different combinations of items, find the correct weight needed to
@@ -142,11 +174,13 @@ pathToSanta rooms = path ++ [forwardDir]
     backDir    = fst . fromJust $ back checkpoint
     forwardDir = head . delete backDir $ doors checkpoint
 
+
 takeAndReturn :: [Room] -> Item -> [Command]
 takeAndReturn rooms it = (Go <$> forward) ++ [Take it] ++ (Go <$> backward)
   where
     forward  = pathToItem rooms it
     backward = reverse $ opposite <$> forward
+
 
 command :: Command -> [Data]
 command cmd = ord <$> (toS cmd ++ "\n")
@@ -173,45 +207,12 @@ exec prog' io' = loop prog' io' [] 0 0
     rerun (dat, proc') c = loop (prog proc') (stdin proc') dat c (base proc')
 
 
-explore :: PrimMonad m => Program m (Search m) -> m [Room]
-explore prog' = exploreLoop $ load prog' search
+-- | This instruction set will halt the application if data is requested from
+-- STDIN, but nothing is available.
+haltIfNoStdinSet :: PrimMonad m => InstructionSet m a
+haltIfNoStdinSet = mergeSets aoc19Set [storeOrHalt "STOR" 3]
   where
-    search = Search
-      { seen = []
-      , next = []
-      , curr = Nothing
-      , move = Nothing
-      }
-
-
-exploreLoop :: PrimMonad m => Process m (Search m) -> m [Room]
-exploreLoop p = do
-    proc <- execStateT execute p
-    case action proc of
-      Run _ -> exploreLoop  proc
-      _     -> handleSignal proc
-
-  where
-    handleSignal proc = do
-      let next' = next $ user proc
-
-      if not $ null next'
-        then do
-          let ((proc', dir):rest) = next'
-          exploreLoop $ proc'
-            { stdin = command $ Go dir
-            , user = (user proc'){ next = rest, move = Just dir, seen = (joinSeen proc proc') }
-            }
-        else pure $ seen (user proc)
-
-
-joinSeen a b = nub $ (seen $ user a) ++ (seen $ user b)
-
-
-set' :: PrimMonad m => InstructionSet m a
-set' = mergeSets aoc19Set [mystore' "STOR" 3]
-  where
-    mystore' n = mkInstruction 1 store' n
+    storeOrHalt n = mkInstruction 1 store' n
       where
         store' assocs = do
           dat <- stdin <$> get
@@ -243,7 +244,7 @@ exploreSet = mergeSets aoc19Set [storeRoom "STOR" 3, outputAndContinue " OUT" 4]
         parseRoom out = do
           search <- userState
           let from = (,) <$> move search <*> curr search
-          maybe (pure ()) continueSearch $ parse (room from) (chr <$> out)
+          maybe (pure ()) continueExploration $ parse (room from) (chr <$> out)
 
     outputAndContinue = mkInstruction 1 output'
       where
@@ -255,8 +256,9 @@ exploreSet = mergeSets aoc19Set [storeRoom "STOR" 3, outputAndContinue " OUT" 4]
           modify $ \p -> p{ action = Run (cur + 2), stdout = out ++ [dat] }
 
 
-continueSearch :: PrimMonad m => Room -> Runtime m (Search m) ()
-continueSearch room = userState >>= \s -> unless (elem room $ seen s) (continue room)
+continueExploration :: PrimMonad m => Room -> Runtime m (Search m) ()
+continueExploration room = userState
+                       >>= \s -> unless (elem room $ seen s) (continue room)
 
 
 continue :: PrimMonad m => Room -> Runtime m (Search m) ()
@@ -281,46 +283,22 @@ continue room = do
 
 -- | Parse a Room record from its description.
 room :: Maybe (Dir, Room) -> Parser (Maybe Room)
-room from = (command >> pure Nothing) <|> room' from
-  where
-    command = spaces >> reserved "Command?"
-
-    room' from = do
-      n <- name
-      description
+room from = do
+      n <- spaces >> name
+      _ <- desc
       d <- doors
-      let b = Nothing
       i <- items <|> pure []
-      command
+      reserved "Command?"
+      let b = maybe Nothing (\(d, r) -> Just (opposite d, r)) from
 
-      pure . Just $ Room
-        { name = n
-        , doors = d
-        , back = maybe Nothing (\(d, r) -> Just (opposite d, r)) from
-        , items = i
-        }
-
-    name = do
-      spaces
-      reserved "=="
-      n <- some $ satisfy (/= '=')
-      reserved "=="
-      spaces
-      pure $ init n
-
-    description = do
-      desc <- many $ satisfy (/= '\n')
-      spaces
-      pure desc
+      pure . Just $ Room{ name = n, doors = d, back = b, items = i }
+  where
+    name = do { reserved "=="; n <- untilCh '='; reserved "=="; pure $ init n }
+    desc = do { desc <- untilCh '\n'; spaces; pure desc }
 
     doors = reserved "Doors here lead:" >> many dir
       where
-        dir = do
-          reserved "-"
-          d <- north <|> south <|> east <|> west
-          spaces
-          pure d
-
+        dir   = reserved "-" >> north <|> south <|> east <|> west
         north = reserved "north" >> pure North
         south = reserved "south" >> pure South
         east  = reserved "east"  >> pure East
@@ -328,8 +306,6 @@ room from = (command >> pure Nothing) <|> room' from
 
     items = reserved "Items here:" >> many item
       where
-        item = do
-          reserved "-"
-          i <- some $ satisfy (/= '\n')
-          spaces
-          pure i
+        item = do { reserved "-"; i <- untilCh '\n'; spaces; pure i }
+
+    untilCh ch = many $ satisfy (/= ch)
