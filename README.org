@@ -1,5 +1,7 @@
 #+TITLE: Advent of Code
 
+*[[file:src/Y2020/][List of 2020 Solutions]]*
+
 * Status
 
 | Year | Stars | Complete? |
