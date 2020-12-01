@@ -2,23 +2,27 @@
 
 * Status
 
- - 2019 :: 50★
+ - 2020 :: 00★
+ - 2019 :: *50★*
+ - 2018 :: 28★
+ - 2017 :: 00★
+ - 2016 :: 00★
+ - 2015 :: 00★
 
 * Usage
 
 #+BEGIN_SRC shell
 stack install
 
-stack exec aoc 2019 01    # Execute the given day.
-stack exec aoc 2019 last  # Execute the most recent day with a source file.
-stack exec aoc 2019 all   # Execute every day with a source file.
+stack exec aoc 2020 01    # Execute the given day.
+stack exec aoc 2020 last  # Execute the most recent day with a source file.
+stack exec aoc 2020 all   # Execute every day with a source file.
 #+END_SRC
 
 * Notes
 
 In the greatest of hackathon traditions, these solutions follow the Easiest
 Thing That Works™ methodology.
-
 
 * Creating a new Day source file
 

@@ -5,6 +5,7 @@ import Control.Applicative  (liftA2)
 import           Input     (lookupInput)
 import qualified Year2018
 import qualified Year2019
+import qualified Year2020
 
 
 type Year = String
@@ -12,10 +13,9 @@ type Day  = String
 
 
 parts :: [( (Year, Day), [((String -> String), Maybe String)] )]
-parts =
-  daysFor "2018" Year2018.days
-  ++
-  daysFor "2019" Year2019.days
+parts = daysFor "2018" Year2018.days
+     ++ daysFor "2019" Year2019.days
+     ++ daysFor "2020" Year2020.days
 
 
 daysFor :: Year
