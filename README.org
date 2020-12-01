@@ -41,13 +41,13 @@ must exist, even if then problem doesn't supply one.
 I would prefer if this were automated, but that will be a TODO for now.
 
 #+BEGIN_SRC haskell
-module Y2019.Day01 (parts) where
+module Y2020.Day01 (parts) where
 
-parts :: [((String -> IO String), Maybe String)]
+parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Nothing)
         , (part2, Nothing)
         ]
 
-part1 input = return ""
-part2 input = return ""
+part1 input = ""
+part2 input = ""
 #+END_SRC
