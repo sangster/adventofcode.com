@@ -28,9 +28,9 @@ part2 input = ""
 
 -- part1 :: String
 --       -> String
--- part1 content = show $ sleepiestGuard * (sleepiestMinute sleepiestGuardEvents)
+-- part1 input = show $ sleepiestGuard * (sleepiestMinute sleepiestGuardEvents)
 --   where
---     events = guardEvents . parseEvents $ lines content
+--     events = guardEvents . parseEvents $ lines input
 --     sleepiestGuardEvents = events IM.! sleepiestGuard
 --     sleepiestGuard = fst $ IM.foldrWithKey f (-1, 0) events where
 --         f id es b@(_, sum) = bool b (id, sleepSum es) $ sleepSum es >= sum
@@ -38,9 +38,9 @@ part2 input = ""
 
 -- part2 :: String
 --       -> String
--- part2 content = show $ min * gId
+-- part2 input = show $ min * gId
 --   where
---     events = guardEvents . parseEvents $ lines content
+--     events = guardEvents . parseEvents $ lines input
 --     (gId, (min, count)) = head $ sortBy (\(_,(_,a)) (_,(_,b)) -> compare b a) $ IM.assocs counterMap
 --     counterMap = IM.map mostIn events
 --     mostIn es = largest . IM.assocs . sleepCounter $ es

@@ -16,7 +16,7 @@ parseSigned ('-':str) = 0 - read str
 parseSigned str       = error $ "'"++str++"' is not a signed integer"
 
 
-part1 content = show $ sum . (map parseSigned) . lines $ content
+part1 input = show $ sum . (map parseSigned) . lines $ input
 
 
 type FreqQueue = [Int]
@@ -34,5 +34,5 @@ findRepeat numbers =
             history' = IntSet.insert freq' history
 
 
-part2 content = show $ findRepeat numbers
-  where numbers = (map parseSigned) . lines $ content :: FreqQueue
+part2 input = show $ findRepeat numbers
+  where numbers = (map parseSigned) . lines $ input :: FreqQueue

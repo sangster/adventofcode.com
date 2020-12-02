@@ -20,21 +20,21 @@ squares (Claim _ x y w h) = [(x', y') | x' <- [x..(x+w-1)], y' <- [y..(y+h-1)]]
 
 
 mkClaims :: String -> [Claim]
-mkClaims content = map mkClaim rows
+mkClaims input = map mkClaim rows
   where
-    rows           = map ints $ lines content
+    rows           = map ints $ lines input
     ints line      = map read (words $ map filterDigit $ line) :: [Int]
     filterDigit x  = if isDigit x then x else ' '
     mkClaim row = Claim (row !! 0) (row !! 1) (row !! 2) (row !! 3) (row !! 4)
 
 
-part1 content = show $ length overlaps
+part1 input = show $ length overlaps
   where
       overlaps = filter ((> 1) . length) groups
-      groups = L.group . L.sort $ mkClaims content >>= squares
+      groups = L.group . L.sort $ mkClaims input >>= squares
 
 
-part2 content =
+part2 input =
     case maybeWinner of
         Just winner -> show (elfId winner)
         Nothing -> "fail"
@@ -43,11 +43,11 @@ part2 content =
       allIn x = all (\y -> y `S.member` noOverlaps) (squares x)
       noOverlaps = S.fromAscList . concat $ filter ((== 1) . length) groups
       groups = L.group . L.sort $ allClaims >>= squares
-      allClaims = mkClaims content
+      allClaims = mkClaims input
 
 
 part2new :: String -> String
-part2new content =
+part2new input =
     case maybeWinner of
         Just winner -> show (elfId winner)
         Nothing -> "fail"
@@ -56,4 +56,4 @@ part2new content =
       allIn x = all (\y -> y `S.member` noOverlaps) (squares x)
       noOverlaps = S.fromAscList . concat $ filter ((== 1) . length) groups
       groups = L.group . L.sort $ allClaims >>= squares
-      allClaims = mkClaims content
+      allClaims = mkClaims input

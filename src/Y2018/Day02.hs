@@ -14,9 +14,9 @@ parts = [ (part1, Nothing)
 type TwoCount   = Int
 type ThreeCount = Int
 
-part1 content = show $ has2 * has3
+part1 input = show $ has2 * has3
   where
-    (has2, has3) = countRepeats . lines $ content
+    (has2, has3) = countRepeats . lines $ input
     countRepeats :: [String] -> (TwoCount, ThreeCount)
     countRepeats [] = (0, 0)
     countRepeats (x:xs) =
@@ -36,13 +36,13 @@ pairs (x1:x2:[]) = [(x1,x2)]
 pairs (x1:tail@(x2:_)) = [(x1,x2)] ++ (pairs tail)
 
 
-part2 content =
+part2 input =
     case headMay oneDiffs of
         Just (prefix, suffix) -> prefix ++ (tail suffix)
         _                     -> "???"
   where
     oneDiffs = catMaybes $ (uncurry common) <$> pairs sorted
-    sorted = sort . lines $ content
+    sorted = sort . lines $ input
 
     common :: String -> String -> Maybe (Prefix, Suffix)
     common xs ys =

@@ -13,15 +13,15 @@ type Entries = U.Vector Int
 
 
 part1 :: String -> String
-part1 content = show $ x * y
+part1 input = show $ x * y
   where
-    Just (x, y) = findTwoParts 2020 $ readEntries content
+    Just (x, y) = findTwoParts 2020 $ readEntries input
 
 
 part2 :: String -> String
-part2 content = show $ x * y * z
+part2 input = show $ x * y * z
   where
-    Just (x, y, z) = findThreeParts 2020 $ readEntries content
+    Just (x, y, z) = findThreeParts 2020 $ readEntries input
 
 
 readEntries :: String -> Entries

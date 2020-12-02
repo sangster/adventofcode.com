@@ -8,7 +8,7 @@ parts = [ (part1, Just "9704")
         ]
 
 
--- part1 content = return $ (foldl process [head content] $ tail content)
+-- part1 input = return $ (foldl process [head input] $ tail input)
 --   where
 --     process a (b:bs)
 

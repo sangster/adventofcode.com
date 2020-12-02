@@ -27,6 +27,7 @@ module Parser
   , (<|>)
 
     -- * Simple types
+  , item
   , char
   , digit
   , digit'
