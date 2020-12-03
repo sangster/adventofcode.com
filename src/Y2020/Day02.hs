@@ -3,7 +3,7 @@ module Y2020.Day02 (parts) where
 import Parser
 
 
-data Password = Password Int Int Char String
+data Password = Password Int Int Char String  deriving Show
 
 
 parts = [ (part1, Just "465")
