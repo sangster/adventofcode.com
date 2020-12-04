@@ -14,6 +14,7 @@ module Parser
   , PState (..)
 
     -- * Execution
+  , evalParser
   , parse
 
     -- * Utilities
@@ -83,11 +84,17 @@ data ParseError = UnexpectedToken Char
     deriving Show
 
 
+evalParser :: Parser a
+          -> String
+          -> Either ParseError a
+evalParser p s = evalStateT (runParser p) def{ queue = s }
+
+
 parse :: forall a. Show a
       => Parser a
       -> String
       -> a
-parse p s = report $ (evalStateT (runParser p) def{ queue = s })
+parse p s = report $ evalParser p s
   where
     report :: Either ParseError a -> a
     report (Right a) = a

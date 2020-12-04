@@ -3,7 +3,7 @@ module Year2020 (days) where
 import qualified Y2020.Day01
 import qualified Y2020.Day02
 import qualified Y2020.Day03
--- import qualified Y2020.Day04
+import qualified Y2020.Day04
 -- import qualified Y2020.Day05
 -- import qualified Y2020.Day06
 -- import qualified Y2020.Day07
@@ -31,7 +31,7 @@ days =
   [ Y2020.Day01.parts
   , Y2020.Day02.parts
   , Y2020.Day03.parts
-  -- , Y2020.Day04.parts
+  , Y2020.Day04.parts
   -- , Y2020.Day05.parts
   -- , Y2020.Day06.parts
   -- , Y2020.Day07.parts
