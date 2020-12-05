@@ -32,6 +32,7 @@ dependencies:
   - primitive
   - safe
   - split
+  - template-haskell >= 2.14
   - timeit
   - transformers
   - unordered-containers

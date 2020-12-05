@@ -18,6 +18,7 @@ module Parser
   , parse
 
     -- * Utilities
+  , eof
   , satisfy
   , oneOf
   , noneOf
@@ -108,7 +109,7 @@ parse p s = report $ evalParser p s
 
 
 unit :: a -> Parser a
-unit a = pure a
+unit = pure
 
 
 instance Alternative Parser where
@@ -149,6 +150,14 @@ item = get >>= cs . queue
           then put st{ col = 0, line = (line st) + 1 }
           else put st{ col = (col st) + 1 }
       pure c
+
+
+-- Assert that we've reached the end of the input
+eof :: Parser Bool
+eof = get >>= cs . queue
+  where
+    cs []    = unit True
+    cs (c:_) = throwError $ UnexpectedToken c
 
 
 char :: Char -> Parser Char
