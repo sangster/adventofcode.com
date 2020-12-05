@@ -1,6 +1,6 @@
 #+TITLE: Advent of Code
 
-*[[file:src/Y2020/][List of 2020 Solutions]]*
+*[[file:src/Y2015/][List of 2015 Solutions]]*
 
 * Status
 
