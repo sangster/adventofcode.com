@@ -4,7 +4,7 @@ import qualified Y2015.Day01
 import qualified Y2015.Day02
 import qualified Y2015.Day03
 import qualified Y2015.Day04
--- import qualified Y2015.Day05
+import qualified Y2015.Day05
 -- import qualified Y2015.Day06
 -- import qualified Y2015.Day07
 -- import qualified Y2015.Day08
@@ -32,7 +32,7 @@ days =
   , Y2015.Day02.parts
   , Y2015.Day03.parts
   , Y2015.Day04.parts
-  -- , Y2015.Day05.parts
+  , Y2015.Day05.parts
   -- , Y2015.Day06.parts
   -- , Y2015.Day07.parts
   -- , Y2015.Day08.parts
