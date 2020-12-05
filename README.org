@@ -6,21 +6,16 @@
 
 | Year | Stars | Complete? |
 |------+-------+-----------|
-| 2020 | 10★   |           |
-| 2019 | *50★* | X         |
-| 2018 | 28★   |           |
-| 2017 | 00★   |           |
-| 2016 | 00★   |           |
-| 2015 | 00★   |           |
+| 2015 | 08★   |           |
 
 * Usage
 
 #+BEGIN_SRC shell
 stack install
 
-stack exec aoc 2020 01    # Execute the given day.
-stack exec aoc 2020 last  # Execute the most recent day with a source file.
-stack exec aoc 2020 all   # Execute every day with a source file.
+stack exec aoc 2015 01    # Execute the given day.
+stack exec aoc 2015 last  # Execute the most recent day with a source file.
+stack exec aoc 2015 all   # Execute every day with a source file.
 #+END_SRC
 
 * Notes
@@ -41,7 +36,7 @@ must exist, even if then problem doesn't supply one.
 I would prefer if this were automated, but that will be a TODO for now.
 
 #+BEGIN_SRC haskell
-module Y2020.Day01 (parts) where
+module Y2015.Day01 (parts) where
 
 parts :: [((String -> String), Maybe String)]
 parts = [ (part1, Nothing)
