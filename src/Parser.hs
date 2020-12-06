@@ -153,10 +153,11 @@ item = get >>= cs . queue
 
 
 -- Assert that we've reached the end of the input
-eof :: Parser Bool
+-- See https://en.wikipedia.org/wiki/End-of-Text_character
+eof :: Parser Char
 eof = get >>= cs . queue
   where
-    cs []    = unit True
+    cs []    = unit '\ETX'
     cs (c:_) = throwError $ UnexpectedToken c
 
 
