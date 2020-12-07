@@ -27,6 +27,8 @@ module Parser
   , some
   , many
   , (<|>)
+  , splitMany
+  , splitSome
 
     -- * Simple types
   , item
@@ -239,3 +241,17 @@ chainl1 :: Parser a
 chainl1 p op = do { a <- p; rest a <|> pure a }
   where
     rest a = do { f <- op; b <- p; rest (f a b) }
+
+
+splitMany :: Show b => Parser a -> Parser b -> Parser [b]
+splitMany sep parser = splitSome sep parser <|> pure []
+
+
+splitSome :: Show b => Parser a -> Parser b -> Parser [b]
+splitSome sep parser = do
+    p <- parser
+    st <- get
+    case runStateT (runParser sep) st of
+      Left  _        -> pure [p]
+      Right (_, st') -> do put st'
+                           (:) <$> pure p <*> splitSome sep parser
