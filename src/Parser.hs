@@ -48,6 +48,7 @@ module Parser
 
 import Data.Bool
 import Data.Char
+import Data.List (splitAt)
 import Data.Default
 import Control.Applicative
 import Control.Monad.State.Strict
@@ -80,7 +81,7 @@ instance Default PState where
     }
 
 
-data ParseError = UnexpectedToken Char
+data ParseError = UnexpectedToken Char Int Int
                 | EOF
     deriving Show
 
@@ -102,10 +103,19 @@ parse p s = report $ evalParser p s
     report (Left e)  = do
       error . unlines $
         [ "did not read entire string."
-        , "    result: " ++ (show e)
+        , "    result: " ++ (prettyError e)
         , ""
         , " remaining: " ++ s
         ]
+
+    prettyError (UnexpectedToken x l c) =
+        unlines . concat $ [[err], before, [arrow], after]
+      where
+        err = "Unexpected token '"++[x]++"' at "++show l++":"++show c++":\n===="
+        (before, after) = splitAt (l+1) $ lines s
+        arrow = reverse $ '^' : take (c-1) (repeat '-')
+    prettyError e = show e
+
 
 
 unit :: a -> Parser a
@@ -129,8 +139,11 @@ option p q = do
 
 satisfy :: (Char -> Bool) -> Parser Char
 satisfy f = do
-  c <- item
-  bool (throwError $ UnexpectedToken c) (unit c) $ f c
+  x <- item
+  if f x
+    then unit x
+    else do (PState _ l c) <- get
+            throwError $ UnexpectedToken x l c
 
 
 item :: Parser Char
@@ -155,10 +168,10 @@ item = get >>= cs . queue
 -- Assert that we've reached the end of the input
 -- See https://en.wikipedia.org/wiki/End-of-Text_character
 eof :: Parser Char
-eof = get >>= cs . queue
+eof = get >>= cs
   where
-    cs []    = unit '\ETX'
-    cs (c:_) = throwError $ UnexpectedToken c
+    cs (PState [] _ _)    = unit '\ETX'
+    cs (PState (x:_) l c) = throwError $ UnexpectedToken x l c
 
 
 char :: Char -> Parser Char
