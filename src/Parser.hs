@@ -16,6 +16,7 @@ module Parser
     -- * Execution
   , evalParser
   , parse
+  , abort
 
     -- * Utilities
   , eof
@@ -85,7 +86,8 @@ instance Default PState where
 
 data ParseError = UnexpectedToken Char Int Int
                 | EOF
-    deriving Show
+                | Abort
+                deriving Show
 
 
 evalParser :: Parser a
@@ -118,6 +120,9 @@ parse p s = report $ evalParser p s
         arrow = reverse $ '^' : take (c-1) (repeat '-')
     prettyError e = show e
 
+
+abort :: Parser a
+abort = throwError Abort
 
 
 unit :: a -> Parser a
