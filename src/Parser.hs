@@ -199,7 +199,7 @@ natural = read <$> some (satisfy isDigit)
 
 number :: (Integral a, Read a) => Parser a
 number = do
-  s  <- string "-" <|> pure []
+  s  <- string "-" <|> (char '+' >> pure []) <|> pure []
   cs <- some digit
   pure . read $ s ++ cs
 
