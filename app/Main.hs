@@ -1,10 +1,9 @@
 module Main where
 
-import Data.List          (intercalate)
+import Data.List          (filter, intercalate)
+import Days
 import System.Environment (getArgs)
 import System.TimeIt
-
-import Days
 
 
 main :: IO ()
@@ -17,7 +16,7 @@ main = do
 
 
 appAllDays :: String -> IO ()
-appAllDays year = mapM_ renderDay (fst <$> parts)
+appAllDays year = mapM_ renderDay (filter (\(y,_) -> year == y) $ fst <$> parts)
   where
     renderDay (y,d) = do
       putStr $ y++"-12-"++d++"\n"++footer
