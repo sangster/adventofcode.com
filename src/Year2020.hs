@@ -10,7 +10,7 @@ import qualified Y2020.Day07
 import qualified Y2020.Day08
 import qualified Y2020.Day09
 import qualified Y2020.Day10
--- import qualified Y2020.Day11
+import qualified Y2020.Day11
 -- import qualified Y2020.Day12
 -- import qualified Y2020.Day13
 -- import qualified Y2020.Day14
@@ -38,7 +38,7 @@ days =
   , Y2020.Day08.parts
   , Y2020.Day09.parts
   , Y2020.Day10.parts
-  -- , Y2020.Day11.parts
+  , Y2020.Day11.parts
   -- , Y2020.Day12.parts
   -- , Y2020.Day13.parts
   -- , Y2020.Day14.parts
