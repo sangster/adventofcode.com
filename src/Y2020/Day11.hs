@@ -1,9 +1,10 @@
 module Y2020.Day11 (parts) where
 
-import           Data.Bool
-import           Data.Default
-import           Data.Maybe
-import qualified Data.Vector as V
+import           Data.Bool     (bool)
+import           Data.List     (findIndex)
+import           Data.Default  (Default, def)
+import           Data.Maybe    (catMaybes, fromJust)
+import qualified Data.Vector   as V
 
 
 parts :: [((String -> String), Maybe String)]
@@ -51,10 +52,9 @@ instance Eq Ferry where
 parseFerry :: String -> Ferry
 parseFerry input = def{ width = w, height = h, seating = seats }
   where
-    w = length $ head lines'
-    h = length lines'
+    w = fromJust $ findIndex (== '\n') input
+    h = V.length seats `div` w
     seats = V.fromList $ seatList input
-    lines' = lines input
 
     seatList []       = []
     seatList ('L':xs) = Empty   : seatList xs
@@ -65,20 +65,42 @@ parseFerry input = def{ width = w, height = h, seating = seats }
 countOccupied Ferry{ seating = s } = V.length $ V.filter (== Occupied) s
 
 
+findStableSeating :: Ferry -> Ferry
+findStableSeating f = case nextGeneration f of
+                        Nothing -> f
+                        Just f' -> findStableSeating f'
+
+
+nextGeneration :: Ferry -> Maybe Ferry
+nextGeneration f@Ferry{ seating = seats, neighborTolerance = nt } =
+    bool Nothing (Just f') $ f /= f'
+  where
+    f' = f{ seating = V.imap nextGen seats }
+    nextGen i Missing  = Missing
+    nextGen i Empty    = bool Occupied Empty $ occupiedNeighbors f i > 0
+    nextGen i Occupied = bool Occupied Empty $ occupiedNeighbors f i >= nt
+
+
+occupiedNeighbors :: Ferry -> Int -> Int
+occupiedNeighbors f@Ferry{ neighborCoords = coords } idx =
+    foldr addSeat 0 $ coords f (x,y)
+  where
+    (y,x) = idx `divMod` width f
+    addSeat xy sum = bool sum (sum+1) (seatGet f xy == Occupied)
+
+
 seatGet :: Ferry -> (Int, Int) -> Seat
 seatGet f (x,y) = seating f V.! (y * width f + x)
 
 
 adjacentCoords :: Ferry -> (Int, Int) -> [(Int, Int)]
-adjacentCoords f@Ferry{ width = w, height = h } (x,y) =
-    filter (inBounds f) options
+adjacentCoords f (x,y) = filter (inBounds f) options
   where
     options = (\(fx, fy) -> (fx x, fy y)) <$> unitCoords
 
 
 visibleCoords :: Ferry -> (Int, Int) -> [(Int, Int)]
-visibleCoords f@Ferry{ width = w, height = h } (x,y) =
-    filter (inBounds f) options
+visibleCoords f (x,y) = filter (inBounds f) options
   where
     options = catMaybes $ findSeat (x,y) <$> unitCoords
     findSeat (x',y') (fx, fy)
@@ -101,28 +123,3 @@ inBounds Ferry{ width = w, height = h } (x,y)
   | x <  0 || y <  0 = False
   | x >= w || y >= h = False
   | otherwise        = True
-
-
-findStableSeating :: Ferry -> Ferry
-findStableSeating f = case nextGeneration f of
-                        Nothing -> f
-                        Just f' -> findStableSeating f'
-
-
-nextGeneration :: Ferry -> Maybe Ferry
-nextGeneration f@Ferry{ seating = seats, neighborTolerance = nt } =
-    bool Nothing (Just f') $ f /= f'
-  where
-    f' = f{ seating = V.imap nextGen seats }
-    nextGen i Missing  = Missing
-    nextGen i Empty    = bool Occupied Empty $ occupiedNeighbors f i > 0
-    nextGen i Occupied = bool Occupied Empty $ occupiedNeighbors f i >= nt
-
-
-occupiedNeighbors :: Ferry -> Int -> Int
-occupiedNeighbors f@Ferry{ width = w, height = h, neighborCoords = coords } i =
-    foldr addSeat 0 $ coords f (x,y)
-  where
-    (y,x) = i `divMod` width f
-    addSeat xy sum = bool sum (sum+1) $ s == Occupied
-      where s = seatGet f xy
