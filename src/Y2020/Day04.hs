@@ -3,22 +3,23 @@ module Y2020.Day04 (parts) where
 import Data.Maybe (isJust)
 import Parser
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "256")
+
+parts = ( (part1, Just "256")
         , (part2, Just "198")
-        ]
+        , parse $ some passport
+        )
 
 
-part1 input = show . length $ filter valid passports
+part1 :: [Passport] -> String
+part1 passports = show . length $ filter valid passports
   where
-    passports = parse (some passport) input
     valid (Passport entries) = all (hasField entries)
                         $ filter required [minBound..]
 
 
-part2 input = show . length $ filter valid passports
+part2 :: [Passport] -> String
+part2 passports = show . length $ filter valid passports
   where
-    passports = parse (some passport) input
     valid pass = and $ [validFields, validEntries] <*> pure pass
     validFields (Passport entries) = all (hasField entries)
                                    $ filter required [minBound..]

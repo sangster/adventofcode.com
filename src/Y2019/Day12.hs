@@ -6,24 +6,24 @@ import Data.Function
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "7471")
+parts = ( (part1, Just "7471")
         , (part2, Just "376243355967784")
-        ]
+        , parse (some moon)
+        )
 
 
-part1 input = show $ systemEnergy (steps !! 1000)
-  where moons           = parse (some moon) input
-        steps           = iterate step moons
+part1 :: [Moon] -> String
+part1 moons = show $ systemEnergy (steps !! 1000)
+  where steps           = iterate step moons
         systemEnergy    = sum . fmap totalEnergy
         totalEnergy m   = potentialEnergy m * kineticEnergy m
         potentialEnergy = sum . (fmap abs) . pos
         kineticEnergy   = sum . (fmap abs) . vel
 
 
-part2 input = show $ foldr1 lcm repeats
-  where moons   = parse (some moon) input
-        repeats = findRepeatStep moons <$> dims (head moons)
+part2 :: [Moon] -> String
+part2 moons = show $ foldr1 lcm repeats
+  where repeats = findRepeatStep moons <$> dims (head moons)
 
 
 type Moon      = [(Position, Velocity)]

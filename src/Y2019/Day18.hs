@@ -13,22 +13,20 @@ import qualified Data.Vector           as V
 import Parser hiding (queue)
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "5392")
+parts = ( (part1, Just "5392")
         , (part2, Just "1684")
-        ]
+        , parseMaze
+        )
 
 
-part1 input = show $ evalState findShortestLengthToAllKeys search
+part1 maze' = show $ evalState findShortestLengthToAllKeys search
   where
     search = newSearch maze' $ head (origins maze')
-    maze' = parseMaze input
 
 
-part2 input = show . sum $ singleBotMinLen <$> origins maze'
+part2 maze' = show . sum $ singleBotMinLen <$> origins maze'
   where
     singleBotMinLen = evalState findShortestLengthToAllKeys . newSearch maze'
-    maze' = mogrifyMaze $ parseMaze input
 
 
 data SearchState = SearchState

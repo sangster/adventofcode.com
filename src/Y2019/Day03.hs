@@ -8,23 +8,23 @@ import Prelude     hiding (Left, Right)
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "209")
+parts = ( (part1, Just "209")
         , (part2, Just "43258")
-        ]
+        , parseWires
+        )
 
 
-part1 input = show $ minimum dists
+part1 :: [Wire] -> String
+part1 wires = show $ minimum dists
   where
     dists = distance (0, 0) <$> intersections wires
-    wires = parseWires input
 
 
-part2 input = show $ minimum dists
+part2 :: [Wire] -> String
+part2 wires = show $ minimum dists
   where
     dists   = sum' <$> intersections wires
     sum' xy = sum $ (flip wireLength xy) <$> wires
-    wires   = parseWires input
 
 
 -- Models

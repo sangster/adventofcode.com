@@ -5,10 +5,10 @@ import qualified Data.List  as L
 import qualified Data.Set   as S
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Nothing)
+parts = ( (part1, Nothing)
         , (part2, Nothing)
-        ]
+        , mkClaims
+        )
 
 
 data Claim = Claim { elfId, x, y, w, h :: !Int }
@@ -28,22 +28,23 @@ mkClaims input = map mkClaim rows
     mkClaim row = Claim (row !! 0) (row !! 1) (row !! 2) (row !! 3) (row !! 4)
 
 
-part1 input = show $ length overlaps
+part1 :: [Claim] -> String
+part1 claims = show $ length overlaps
   where
       overlaps = filter ((> 1) . length) groups
-      groups = L.group . L.sort $ mkClaims input >>= squares
+      groups = L.group . L.sort $ claims >>= squares
 
 
-part2 input =
+part2 :: [Claim] -> String
+part2 claims =
     case maybeWinner of
         Just winner -> show (elfId winner)
         Nothing -> "fail"
   where
-      maybeWinner = L.find allIn allClaims
+      maybeWinner = L.find allIn claims
       allIn x = all (\y -> y `S.member` noOverlaps) (squares x)
       noOverlaps = S.fromAscList . concat $ filter ((== 1) . length) groups
-      groups = L.group . L.sort $ allClaims >>= squares
-      allClaims = mkClaims input
+      groups = L.group . L.sort $ claims >>= squares
 
 
 part2new :: String -> String

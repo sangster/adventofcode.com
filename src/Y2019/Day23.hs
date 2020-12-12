@@ -10,17 +10,19 @@ import Util.OpCode
 import Util.Program
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "24954")
+parts = ( (part1, Just "24954")
         , (part2, Just "17091")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = show $ runST $ do
     net <- parseRAM input >>= boot 50
     runContT (callCC $ communicate net pure) (pure . snd . natMem)
 
 
+part2 :: String -> String
 part2 input = show $ runST $ do
     net <- parseRAM input >>= boot 50
     runContT (callCC $ findRepeat net) (pure . snd . natMem)

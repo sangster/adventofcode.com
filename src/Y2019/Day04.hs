@@ -2,27 +2,26 @@ module Y2019.Day04 (parts) where
 
 import Control.Monad  (liftM2)
 import Data.List      (group)
-
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "2050")
+parts = ( (part1, Just "2050")
         , (part2, Just "1390")
-        ]
+        , parse range
+        )
 
 
-part1 input = show $ length valids
+part1 :: [Int] -> String
+part1 passwords = show $ length valids
   where
     valids    = filter isValid passwords
-    passwords = parse range input
 
 
-part2 input = show $ length valids
+part2 :: [Int] -> String
+part2 passwords = show $ length valids
   where
     valids    = filter (liftM2 (&&) isValid isValid') passwords
     isValid'  = (any $ (== 2) . length) . group . digits
-    passwords = parse range input
 
 
 range :: Parser [Int]

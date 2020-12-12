@@ -1,17 +1,16 @@
 module Y2019.Day08 (parts) where
 
-import Data.Bool      (bool)
-import Data.Function  (on)
-import Data.List      (minimumBy)
-
+import           Data.Bool      (bool)
+import           Data.Function  (on)
+import           Data.List      (minimumBy)
 import qualified Draw
 import           Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "2684")
+parts = ( (part1, Just "2684")
         , (part2, Just part2Expected)
-        ]
+        , \input -> layers (parse colors input) 25 6
+        )
 
 part2Expected = unlines [ "█   █ ██  ███  █   █████ "
                         , "█   ██  █ █  █ █   █   █ "
@@ -22,16 +21,16 @@ part2Expected = unlines [ "█   █ ██  ███  █   █████ "
                         ]
 
 
-part1 input = show $ count White smallest * count Trans smallest
+part1 :: [Layer] -> String
+part1 layers' = show $ count White smallest * count Trans smallest
   where
-    layers'     = layers (parse colors input) 25 6
     smallest    = minimumBy (compare `on` count Black) layers'
     count c lay = sum [bool 0 1 (c == c') | row <- lay, c' <- row]
 
 
-part2 input = show' compiled
+part2 :: [Layer] -> String
+part2 layers' = show' compiled
   where
-    layers'  = layers (parse colors input) 25 6
     compiled = compile layers'
     show' l  = unlines $ [concatMap show row | row <- l]
 

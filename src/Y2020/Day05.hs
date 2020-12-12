@@ -5,20 +5,19 @@ import Data.List (maximum, sort)
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "874")
+parts = ( (part1, Just "874")
         , (part2, Just "594")
-        ]
+        , map codeToSeat . parse (some seatCode)
+        )
 
 
-part1 input = show . seatId $ maximum seats
+part1 :: [Seat] -> String
+part1 seats = show . seatId $ maximum seats
+
+
+part2 :: [Seat] -> String
+part2 seats = show $ seatId emptySeat
   where
-    seats = codeToSeat <$> parse (some seatCode) input
-
-
-part2 input = show $ seatId emptySeat
-  where
-    seats = codeToSeat <$> parse (some seatCode) input
     emptySeat = idToSeat $ missingId ids
       where
         ids = seatId <$> sort seats

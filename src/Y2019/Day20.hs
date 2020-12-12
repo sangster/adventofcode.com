@@ -19,23 +19,21 @@ import Parser hiding (queue)
 import qualified Draw
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "594")
+parts = ( (part1, Just "594")
         , (part2, Just "6812")
-        ]
+        , parseMaze
+        )
 
 
-part1 input = do
+part1 maze' = do
     show $ evalState shortestPath search
   where
-    maze' = parseMaze input
     search = newSearch maze' (\_ (_,lev) to -> Just (to,lev)) ("AA", 0) ("ZZ", 0)
 
 
-part2 input = do
+part2 maze' = do
     show $ evalState shortestPath search
   where
-    maze' = parseMaze input
     search = newSearch maze' shifter ("AA", 0) ("ZZ", 0)
     shifter maze' (from, level) to
       | isOutside maze' from = bool Nothing (Just (to, level-1)) $ level /= 0

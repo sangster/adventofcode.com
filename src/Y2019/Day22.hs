@@ -25,26 +25,26 @@ import Math.NumberTheory.Moduli.Class
 import Numeric.Natural
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "2604")
+parts = ( (part1, Just "2604")
         , (part2, Just "79608410258462")
-        ]
+        , parse (some move)
+        )
 
 
-part1 input = render $ (target - card0) / delta
+part1 :: [Move] -> String
+part1 shuffleProcess = render $ (target - card0) / delta
   where
     numCards       = 10007
     target         = 2019
-    shuffleProcess = parse (some move) input
     (delta, card0) = shuffle numCards shuffleProcess
 
 
-part2 input = render $ (card0 * geometricSeries) + (target * deltaExp)
+part2 :: [Move] -> String
+part2 shuffleProcess = render $ (card0 * geometricSeries) + (target * deltaExp)
   where
     numCards        = 119315717514047
     iterations      = 101741582076661
     target          = 2020
-    shuffleProcess  = parse (some move) input
     (delta, card0)  = shuffle numCards shuffleProcess
     deltaExp        = powSomeMod delta iterations
     geometricSeries = (1 - deltaExp) / (1 - delta)

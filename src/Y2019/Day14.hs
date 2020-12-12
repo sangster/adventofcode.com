@@ -10,27 +10,27 @@ import           Data.Maybe
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "1046184")
+parts = ( (part1, Just "1046184")
         , (part2, Just "1639374")
-        ]
+        , parse recipes
+        )
 
 
-part1 input = show . fromJust
-            $ evalState (runBuild request) factory
+part1 recipes' = show . fromJust
+               $ evalState (runBuild request) factory
   where
     request = oreNeeded "FUEL" 1
     factory = Factory { cargo     = mkCargo [("ORE", maxBound)]
-                      , reactions = parse recipes input
+                      , reactions = recipes'
                       }
 
 
-part2 input = show
-            $ evalState (runBuild request) factory
+part2 recipes' = show
+               $ evalState (runBuild request) factory
   where
     request = fuelCapacity
     factory = Factory { cargo     = mkCargo [("ORE", 1000000000000)]
-                      , reactions = parse recipes input
+                      , reactions = recipes'
                       }
 
 

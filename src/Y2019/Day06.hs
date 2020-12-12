@@ -4,31 +4,30 @@ import Control.Monad
 import Data.Char
 import Data.List
 import Data.Map.Strict
-
 import Parser
+
+
+parts = ( (part1, Just "162439")
+        , (part2, Just "367")
+        , orbitMap . parse (some orbit)
+        )
+
+
+part1 :: OrbitMap -> String
+part1 orbits = show . sum $ elems counts
+  where
+    counts = countDirectAndIndirectOrbits orbits
+
+
+part2 :: OrbitMap -> String
+part2 orbits = show . transfers $ path orbits "YOU" "SAN"
+ where
+    transfers = (flip (-) 2) . length
 
 
 type ObjectId = String
 type OrbitMap = Map ObjectId [ObjectId]
 data Orbit    = Orbit ObjectId ObjectId      deriving Show
-
-
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "162439")
-        , (part2, Just "367")
-        ]
-
-
-part1 input = show . sum $ elems counts
-  where
-    counts = countDirectAndIndirectOrbits orbits
-    orbits = orbitMap $ parse (some orbit) input
-
-
-part2 input = show . transfers $ path orbits "YOU" "SAN"
- where
-    orbits    = orbitMap $ parse (some orbit) input
-    transfers = (flip (-) 2) . length
 
 
 orbit :: Parser Orbit

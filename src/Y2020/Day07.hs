@@ -7,20 +7,16 @@ import           Data.List (intercalate, foldr)
 import           Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "378")
+parts = ( (part1, Just "378")
         , (part2, Just "27526")
-        ]
+        , M.fromList . parse (some rule)
+        )
 
 
-part1 input = show . length $ canEventuallyFit rules "shiny gold"
-  where
-    rules = M.fromList $ parse (some rule) input
+part1 rules = show . length $ canEventuallyFit rules "shiny gold"
 
 
-part2 input = show $ countBags rules "shiny gold"
-  where
-    rules = M.fromList $ parse (some rule) input
+part2 rules = show $ countBags rules "shiny gold"
 
 
 type Bag = String

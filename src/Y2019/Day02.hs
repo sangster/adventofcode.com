@@ -4,10 +4,10 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "2782414")
+parts = ( (part1, Just "2782414")
         , (part2, Just "9820")
-        ]
+        , id
+        )
 
 
 part1 input = runST $ do

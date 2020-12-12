@@ -17,10 +17,10 @@ data Event = Event GuardId Action Minute
 type OrdEvents = [Event]
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "143415")
+parts = ( (part1, Just "143415")
         , (part2, Just "49944")
-        ]
+        , id
+        )
 
 
 part1 input = ""

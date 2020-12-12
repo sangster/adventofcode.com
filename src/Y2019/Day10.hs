@@ -8,25 +8,27 @@ import qualified Data.Map       as M
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "340")
+parts = ( (part1, Just "340")
         , (part2, Just "2628")
-        ]
+        , parse (some asteroid)
+        )
 
 
-part1 input = show . length $ visMap M.! best
+part1 :: [Asteroid] -> String
+part1 asteroids = show . length $ visMap M.! best
   where
     best   = findBest visMap
-    visMap = visibleMap $ parse (some asteroid) input
+    visMap = visibleMap asteroids
 
 
-part2 input = show $ code (destroyPos 200)
+part2 :: [Asteroid] -> String
+part2 asteroids = show $ code (destroyPos 200)
   where
     destroyPos i = sorted !! (i - 1)
     code (x,y) = x * 100 + y
     sorted = sortBy (compare `on` laserBearing best) $ visMap M.! best
     best   = findBest visMap
-    visMap = visibleMap $ parse (some asteroid) input
+    visMap = visibleMap asteroids
 
 
 type X = Int

@@ -3,10 +3,10 @@ module Y2018.Day01 (parts) where
 import qualified Data.IntSet as IntSet
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Nothing)
+parts = ( (part1, Nothing)
         , (part2, Nothing)
-        ]
+        , map parseSigned . lines
+        )
 
 
 {- converts a textual number like -123, +123 into an Int -}
@@ -16,7 +16,8 @@ parseSigned ('-':str) = 0 - read str
 parseSigned str       = error $ "'"++str++"' is not a signed integer"
 
 
-part1 input = show $ sum . (map parseSigned) . lines $ input
+part1 :: FreqQueue -> String
+part1 numbers = show $ sum numbers
 
 
 type FreqQueue = [Int]
@@ -34,5 +35,5 @@ findRepeat numbers =
             history' = IntSet.insert freq' history
 
 
-part2 input = show $ findRepeat numbers
-  where numbers = (map parseSigned) . lines $ input :: FreqQueue
+part2 :: FreqQueue -> String
+part2 numbers = show $ findRepeat numbers

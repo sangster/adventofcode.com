@@ -12,13 +12,14 @@ import           Data.List.Split   (chunksOf)
 import Parser hiding (queue)
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "32506911")
+parts = ( (part1, Just "32506911")
         , (part2, Just "2025")
-        ]
+        , parseGrid
+        )
 
 
-part1 input = show $ findRepeat [] $ parseGrid input
+part1 :: DeepGrid -> String
+part1 grid = show $ findRepeat [] grid
   where
     findRepeat :: [Biodiversity] -> DeepGrid -> Biodiversity
     findRepeat history dgrid
@@ -51,7 +52,8 @@ part1 input = show $ findRepeat [] $ parseGrid input
       where (x, y) = toCoord dg i
 
 
-part2 input = show . countBugs $ iterateLast step 200 $ parseGrid input
+part2 :: DeepGrid -> String
+part2 grid = show . countBugs $ iterateLast step 200 grid
   where
     countBugs :: DeepGrid -> Int
     countBugs dgrid = sum . fmap countLayerBugs $ M.elems (layers dgrid)

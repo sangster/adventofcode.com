@@ -19,12 +19,13 @@ import Control.Monad
 import Control.Monad.Trans.Maybe
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "171")
+parts = ( (part1, Just "171")
         , (part2, Just "9741242")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = runST $ do
     status <- program input >>= beamGrid
     pure . show . length $ filter (== True) status
@@ -40,6 +41,7 @@ part1 input = runST $ do
 --   3. Use the magic of geometry to figure out where the solution ought to be.
 --   4. Due to integer division, we likely overshot the true solution, so check
 --      all the neighbors toward the origin.
+part2 :: String -> String
 part2 input = runST $ do
     prog <- program input
     (x,y) <- fromJust <$> findAngles resolution prog

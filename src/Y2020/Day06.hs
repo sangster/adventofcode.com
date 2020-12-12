@@ -4,21 +4,20 @@ import qualified Data.HashSet as S
 import           Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "7128")
+parts = ( (part1, Just "7128")
         , (part2, Just "3640")
-        ]
+        , parse (some group)
+        )
 
 
-part1 input = show . sum $ (S.size . S.unions) <$> groups
-  where
-    groups = parse (some group) input
+part1 :: [Group] -> String
+part1 groups = show . sum $ (S.size . S.unions) <$> groups
 
 
-part2 input = show . sum $ (S.size . intersect) <$> groups
+part2 :: [Group] -> String
+part2 groups = show . sum $ (S.size . intersect) <$> groups
   where
     intersect (x:xs) = foldr S.intersection x xs
-    groups = parse (some group) input
 
 
 type Answers = S.HashSet Char

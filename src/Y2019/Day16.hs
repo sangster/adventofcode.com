@@ -6,18 +6,16 @@ import qualified Data.Vector.Unboxed as U
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "61149209")
+parts = ( (part1, Just "61149209")
         , (part2, Just "16178430")
-        ]
+        , parse (some digit')
+        )
 
 
 type Nums = U.Vector Int
 
 
-part1 input = extractMessage fftPhase 8 100 nums
- where
-   nums = U.fromList $ parse (some digit') input
+part1 nums = extractMessage fftPhase 8 100 (U.fromList nums)
 
 
 fftPhase :: Nums -> Nums
@@ -29,12 +27,11 @@ fftPhase nums = U.imap nextDigit nums
     sumProd col acc i n = acc + n * multiple (col+1) (col+i)
 
 
-part2 input = extractMessage (G.scanr' ((flip mod 10 .) . (+)) 0) 8 100
-            $ U.unsafeDrop (offset 7)
-            $ longNums 10000
+part2 nums = extractMessage (G.scanr' ((flip mod 10 .) . (+)) 0) 8 100
+           $ U.unsafeDrop (offset 7)
+           $ longNums 10000
  where
    longNums n = U.fromList $ take (n * length nums) $ cycle nums
-   nums       = parse (some digit') input
    offset   n = read . concat . map show . take n $ nums
 
 
