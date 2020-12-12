@@ -64,11 +64,11 @@ move = do d <- dir
           n <- natural
           pure $ Move d n
   where
-    dir = (char 'E' >> pure East)
-      <|> (char 'S' >> pure South)
-      <|> (char 'W' >> pure West)
-      <|> (char 'N' >> pure North)
-      <|> (char 'F' >> pure Forward)
+    dir = (symbol East    $ char 'E')
+      <|> (symbol South   $ char 'S')
+      <|> (symbol West    $ char 'W')
+      <|> (symbol North   $ char 'N')
+      <|> (symbol Forward $ char 'F')
 
 
 turn :: Parser Nav
@@ -76,8 +76,8 @@ turn = do r <- isRight
           n <- natural
           pure . Turn $ bool (360-n) n r
   where
-    isRight = (char 'L' >> pure False)
-          <|> (char 'R' >> pure True)
+    isRight = (symbol False $ char 'L')
+          <|> (symbol True  $ char 'R')
 
 
 rotateDeg :: Int -> Dir -> Dir

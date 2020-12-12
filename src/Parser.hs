@@ -30,6 +30,7 @@ module Parser
   , (<|>)
   , splitMany
   , splitSome
+  , symbol
 
     -- * Simple types
   , item
@@ -259,3 +260,7 @@ splitSome sep parser = do
       Left  _        -> pure [p]
       Right (_, st') -> do put st'
                            (:) <$> pure p <*> splitMany sep parser
+
+
+symbol :: a -> Parser b -> Parser a
+symbol x p = p >> pure x

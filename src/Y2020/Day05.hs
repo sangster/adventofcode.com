@@ -45,10 +45,10 @@ seatCode = do spaces
 
 
 direction :: Parser Bool
-direction = (char 'F' >> pure False)
-        <|> (char 'B' >> pure True)
-        <|> (char 'L' >> pure False)
-        <|> (char 'R' >> pure True)
+direction = (symbol False $ char 'F')
+        <|> (symbol True  $ char 'B')
+        <|> (symbol False $ char 'L')
+        <|> (symbol True  $ char 'R')
 
 
 codeToSeat :: SeatCode -> Seat

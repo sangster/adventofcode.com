@@ -51,7 +51,7 @@ requiredSet = do spaces >> string "contain" >> spaces
                  req <- emptyReq <|> someReq
                  pure req
   where
-    emptyReq = spaces >> string "no other bags" >> pure S.empty
+    emptyReq = spaces >> symbol S.empty (string "no other bags")
     someReq = S.fromList <$> splitSome (char ',') requirement
     requirement = do { spaces; n <- natural; b <- bag; pure (b, n) }
 

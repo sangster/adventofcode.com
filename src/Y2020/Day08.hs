@@ -39,9 +39,9 @@ instruction = do spaces
 
 
 opcode :: Parser Opcode
-opcode = (reserved "acc" >> pure Acc)
-     <|> (reserved "jmp" >> pure Jmp)
-     <|> (reserved "nop" >> pure Nop)
+opcode = (symbol Acc $ reserved "acc")
+     <|> (symbol Jmp $ reserved "jmp")
+     <|> (symbol Nop $ reserved "nop")
 
 
 -- | fst :: Completed without repeating? snd :: Accumulator at end

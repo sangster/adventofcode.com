@@ -63,14 +63,14 @@ entry = do field' <- field
 
 
 field :: Parser Field
-field = (string "byr" >> pure BirthYear)
-    <|> (string "iyr" >> pure IssueYear)
-    <|> (string "eyr" >> pure ExpirationYear)
-    <|> (string "hgt" >> pure Height)
-    <|> (string "hcl" >> pure HairColor)
-    <|> (string "ecl" >> pure EyeColor)
-    <|> (string "pid" >> pure PassportId)
-    <|> (string "cid" >> pure CountryId)
+field = (symbol BirthYear      $ string "byr")
+    <|> (symbol IssueYear      $ string "iyr")
+    <|> (symbol ExpirationYear $ string "eyr")
+    <|> (symbol Height         $ string "hgt")
+    <|> (symbol HairColor      $ string "hcl")
+    <|> (symbol EyeColor       $ string "ecl")
+    <|> (symbol PassportId     $ string "pid")
+    <|> (symbol CountryId      $ string "cid")
 
 
 validEntry :: Entry -> Bool
@@ -86,8 +86,8 @@ validEntry (field, word) = validate field
         validHeight (Metric, h)   = h >= 150 && h <= 193
         validHeight (American, h) = h >=  59 && h <=  76
         height = do h <- natural
-                    lenUnit <- (string "cm" >> pure Metric)
-                           <|> (string "in" >> pure American)
+                    lenUnit <- (symbol Metric   $ string "cm")
+                           <|> (symbol American $ string "in")
                     pure (lenUnit, h)
     validate HairColor = check color ((== 6) . length)
       where
