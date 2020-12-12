@@ -57,7 +57,6 @@ import Control.Applicative
 import Control.Monad.State.Strict
 import Control.Monad.Except
 
-
 newtype Parser a = Parser { runParser :: StateT PState (Either ParseError) a }
   deriving
     ( Functor
@@ -259,4 +258,4 @@ splitSome sep parser = do
     case runStateT (runParser sep) st of
       Left  _        -> pure [p]
       Right (_, st') -> do put st'
-                           (:) <$> pure p <*> splitSome sep parser
+                           (:) <$> pure p <*> splitMany sep parser
