@@ -1,17 +1,20 @@
-module Days (parts, callDay) where
+module Days (parts, callDayTimed) where
 
-import Control.Applicative (liftA2)
-import Input (lookupInput)
+import           Control.Applicative (liftA2)
+import           Control.Exception (evaluate)
+import           Control.Monad.IO.Class (MonadIO, liftIO)
+import           Control.Monad.Trans.Maybe (MaybeT(..))
+import           Input (lookupInput)
+import           Solution
+import           System.TimeIt (timeItT)
 import qualified Year2018
 import qualified Year2019
 import qualified Year2020
-import Debug.Trace
-import Data.Maybe
-import Solution
 
 
-type Year = String
-type Day  = String
+type Year    = String
+type Day     = String
+type Runtime = Double
 
 
 parts :: [( (Year, Day), Solveable DaySolution)]
@@ -30,21 +33,37 @@ daysFor y parts = [ ((y, fmt d), p) | (d, p) <- zip [1..] parts]
 
 
 -- | Execute the solution for a single December day in a single year.
-callDay :: Year -> Day -> Maybe [(String, Maybe String)]
-
-callDay year "last" = callDay year $ (snd . fst) (last dd)
+-- The 3 "Runtimes" are how long parsing, Part A, and Part B took, respectively.
+callDayTimed :: MonadIO m
+             => Year
+             -> Day
+             -> MaybeT m (Runtime, Runtime, Runtime, [(String, Maybe String)])
+callDayTimed year "last" = callDayTimed year $ (snd . fst) (last dd)
   where
     dd = filter ((== year) . fst . fst) parts
+callDayTimed year day = do
+    part  <- MaybeT . pure $ lookup (year, day) parts
+    input <- MaybeT . pure . lookupInput $ year ++ "/" ++ day
+    liftIO $ call part input
 
-callDay year day = liftA2 call part input
-  where
-    part  = lookup (year, day) parts
-    input = lookupInput $ year ++ "/" ++ day
 
+call :: MonadIO m
+     => Solveable DaySolution
+     -> String
+     -> m (Runtime, Runtime, Runtime, [(String, Maybe String)])
+call (MkSolveable s) input = do
+    (timeP, input') <- timeItT . evaluate' $ parseInput s input
+    (timeA, resA)   <- timeItT . evaluate' $ fa input'
+    (timeB, resB)   <- timeItT . evaluate' $ fb input'
 
-call (MkSolveable s) x =
-    [(fa x', mayA), (fb x', mayB)]
+    pure (timeP, timeA, timeB, [(resA, mayA), (resB, mayB)])
   where
     (fa, mayA) = partA s
     (fb, mayB) = partB s
-    x' = parseInput s x
+
+
+-- Lazily evaluate
+evaluate' :: MonadIO m
+          => a
+          -> m a
+evaluate' = liftIO . evaluate
