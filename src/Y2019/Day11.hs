@@ -11,10 +11,10 @@ import qualified Draw
 import Debug.Trace
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "2276")
+parts = ( (part1, Just "2276")
         , (part2, Just part2Expected)
-        ]
+        , id
+        )
 
 part2Expected = unlines [ "  ██  ███  █    ███    ██ ████  ██  █  █   "
                         , " █  █ █  █ █    █  █    █    █ █  █ █  █   "
@@ -25,11 +25,13 @@ part2Expected = unlines [ "  ██  ███  █    ███    ██ █�
                         ]
 
 
+part1 :: String -> String
 part1 input = runST $ do
     colors <- program input >>= dispatchBot M.empty
     pure . show $ M.size colors
 
 
+part2 :: String -> String
 part2 input = runST $ do
     colors <- program input >>= dispatchBot map
     pure $ draw colors

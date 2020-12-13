@@ -4,13 +4,17 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "7259358")
+parts = ( (part1, Just "7259358")
         , (part2, Just "11826654")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = show $ runST $ program input >>= flip executeUntilHalt' [1]
+
+
+part2 :: String -> String
 part2 input = show $ runST $ program input >>= flip executeUntilHalt' [5]
 
 

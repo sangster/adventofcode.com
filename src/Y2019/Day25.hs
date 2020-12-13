@@ -12,10 +12,10 @@ import Util.OpCode
 import Util.Program hiding (name)
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "278664")
+parts = ( (part1, Just "278664")
         , (part2, Just "Merry Christmas!")
-        ]
+        , id
+        )
 
 
 -- | Strategy:
@@ -24,6 +24,7 @@ parts = [ (part1, Just "278664")
 --     3. Try to get past the Security Checkpoint with each permutation,
 --        filtering out permutations that contain sublists that are already too
 --        heavy.
+part1 :: String -> String
 part1 input = runST $ do
     rooms <- mapShip input
     prog  <- program input
@@ -34,6 +35,7 @@ part1 input = runST $ do
     itemSequences = fmap sort . subsequences . filter safeItem . concatMap items
 
 
+part2 :: a -> String
 part2 _ = "Merry Christmas!"
 
 

@@ -13,12 +13,13 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "5740")
+parts = ( (part1, Just "5740")
         , (part2, Just "1022165")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = runST $ fmap (show . sum)
             $ pure . alignments
             =<< parseMap input []
@@ -32,6 +33,7 @@ alignments map' = alignment <$> filter (isIntersection map') coords'
     coords'   = coords map'
 
 
+part2 :: String -> String
 part2 input = runST $ do
     -- Parse Map and create movement orders.
     m <- parseMap input []

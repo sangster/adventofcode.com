@@ -1,5 +1,6 @@
 module Year2020 (days) where
 
+import           Solution
 import qualified Y2020.Day01
 import qualified Y2020.Day02
 import qualified Y2020.Day03
@@ -28,29 +29,29 @@ import qualified Y2020.Day12
 
 
 days =
-  [ Y2020.Day01.parts
-  , Y2020.Day02.parts
-  , Y2020.Day03.parts
-  , Y2020.Day04.parts
-  , Y2020.Day05.parts
-  , Y2020.Day06.parts
-  , Y2020.Day07.parts
-  , Y2020.Day08.parts
-  , Y2020.Day09.parts
-  , Y2020.Day10.parts
-  , Y2020.Day11.parts
-  , Y2020.Day12.parts
-  -- , Y2020.Day13.parts
-  -- , Y2020.Day14.parts
-  -- , Y2020.Day15.parts
-  -- , Y2020.Day16.parts
-  -- , Y2020.Day17.parts
-  -- , Y2020.Day18.parts
-  -- , Y2020.Day19.parts
-  -- , Y2020.Day20.parts
-  -- , Y2020.Day21.parts
-  -- , Y2020.Day22.parts
-  -- , Y2020.Day23.parts
-  -- , Y2020.Day24.parts
-  -- , Y2020.Day25.parts
+  [ solve Y2020.Day01.parts
+  , solve Y2020.Day02.parts
+  , solve Y2020.Day03.parts
+  , solve Y2020.Day04.parts
+  , solve Y2020.Day05.parts
+  , solve Y2020.Day06.parts
+  , solve Y2020.Day07.parts
+  , solve Y2020.Day08.parts
+  , solve Y2020.Day09.parts
+  , solve Y2020.Day10.parts
+  , solve Y2020.Day11.parts
+  , solve Y2020.Day12.parts
+  -- , solve Y2020.Day13.parts
+  -- , solve Y2020.Day14.parts
+  -- , solve Y2020.Day15.parts
+  -- , solve Y2020.Day16.parts
+  -- , solve Y2020.Day17.parts
+  -- , solve Y2020.Day18.parts
+  -- , solve Y2020.Day19.parts
+  -- , solve Y2020.Day20.parts
+  -- , solve Y2020.Day21.parts
+  -- , solve Y2020.Day22.parts
+  -- , solve Y2020.Day23.parts
+  -- , solve Y2020.Day24.parts
+  -- , solve Y2020.Day25.parts
   ]

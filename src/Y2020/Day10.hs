@@ -4,16 +4,16 @@ import           Data.List (foldr, sort)
 import qualified Data.Vector as V
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "2244")
+parts = ( (part1, Just "2244")
         , (part2, Just "3947645370368")
-        ]
+        , parseAdapters
+        )
 
 
-part1 input = show . uncurry (*) . count1and3 . diffs $ parseAdapters input
+part1 adapters = show . uncurry (*) . count1and3 $ diffs adapters
 
 
-part2 input = show . numArrangements $ parseAdapters input
+part2 adapters = show $ numArrangements adapters
 
 
 parseAdapters :: String -> [Int]

@@ -6,12 +6,13 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "338603")
+parts = ( (part1, Just "338603")
         , (part2, Just "63103596")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = runST $ do
     prog <- program input
     res  <- sequence $ run prog 0 <$> phasePermutations 0 5
@@ -21,6 +22,7 @@ part1 input = runST $ do
     run' i amp@(Amp p _) = last . snd <$> runAmp amp [p, i]
 
 
+part2 :: String -> String
 part2 input = runST $ do
     prog <- program input
     res  <- sequence $ run prog 0 <$> phasePermutations 5 5

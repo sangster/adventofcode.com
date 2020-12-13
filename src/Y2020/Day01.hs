@@ -1,27 +1,28 @@
 module Y2020.Day01 (parts) where
 
-import Data.List (sort)
+import           Data.List (sort)
 import qualified Data.Vector.Unboxed as U
 
 
-parts = [ (part1, Just "788739")
+parts = ( (part1, Just "788739")
         , (part2, Just "178724430")
-        ]
+        , readEntries
+        )
+
+
+part1 :: Entries -> String
+part1 entries = show $ x * y
+  where
+    Just (x, y) = findTwoParts 2020 entries
+
+
+part2 :: Entries -> String
+part2 entries = show $ x * y * z
+  where
+    Just (x, y, z) = findThreeParts 2020 entries
 
 
 type Entries = U.Vector Int
-
-
-part1 :: String -> String
-part1 input = show $ x * y
-  where
-    Just (x, y) = findTwoParts 2020 $ readEntries input
-
-
-part2 :: String -> String
-part2 input = show $ x * y * z
-  where
-    Just (x, y, z) = findThreeParts 2020 $ readEntries input
 
 
 readEntries :: String -> Entries

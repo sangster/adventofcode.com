@@ -10,23 +10,24 @@ type Preamble = (S.HashSet Int, Q.BankersDequeue Int)
 type Queue    = [Int]
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "23278925")
+parts = ( (part1, Just "23278925")
         , (part2, Just "4011064")
-        ]
+        , map read . lines :: String -> Queue
+        )
 
 
-part1 input = show $ findMissingSum pre qs
+part1 :: Queue -> String
+part1 items = show $ findMissingSum pre qs
   where
-    (pre, qs) = preambleAndQueue 25 $ read <$> lines input
+    (pre, qs) = preambleAndQueue 25 items
 
 
-part2 input = show $ head contiguous + last contiguous
+part2 :: Queue -> String
+part2 items = show $ head contiguous + last contiguous
   where
     contiguous = sort . fromJust $ findContiguous missing items
     missing    = findMissingSum pre qs
     (pre, qs)  = preambleAndQueue 25 items
-    items      = read <$> lines input
 
 
 preambleAndQueue :: Int -> [Int] -> (Preamble, Queue)

@@ -9,12 +9,13 @@ import Util.InstructionSet
 import Util.Program
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "354")
+parts = ( (part1, Just "354")
         , (part2, Just "370")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = runST $ do
     status <- program input >>= dispatchDroid
     pure . show $ status
@@ -26,6 +27,8 @@ part1 input = runST $ do
         distances <- catMaybes <$> mapM (flip findOxygen 0) movements
         pure $ bool (Just $ minimum distances) Nothing $ null distances
 
+
+part2 :: String -> String
 part2 input = runST $ do
     shipMap <- program input >>= evalStateT startSearch . load'
     show <$> gasTime shipMap M.empty [queue shipMap] 0

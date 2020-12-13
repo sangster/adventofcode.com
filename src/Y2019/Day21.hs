@@ -6,12 +6,13 @@ import Util.Program                hiding (Run)
 import Control.Monad.Trans.Except
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "19357761")
+parts = ( (part1, Just "19357761")
         , (part2, Just "1142249706")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = runST $ do
     prog   <- program input
     status <- runExceptT $ runScript script prog
@@ -29,6 +30,7 @@ part1 input = runST $ do
       ]
 
 
+part2 :: String -> String
 part2 input = runST $ do
     prog   <- program input
     status <- runExceptT $ runScript script prog

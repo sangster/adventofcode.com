@@ -4,16 +4,16 @@ import Data.Bool (bool)
 import Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "362")
+parts = ( (part1, Just "362")
         , (part2, Just "29895")
-        ]
+        , parse (splitSome spaces nav)
+        )
 
 
-part1 input = show . manhattanDistance . fst
-            $ foldl doNav ((0,0), East) navs
+part1 :: [Nav] -> String
+part1 navs = show . manhattanDistance . fst
+           $ foldl doNav ((0,0), East) navs
   where
-    navs = parse (splitSome spaces nav) input
     doNav (xy,    b) (Turn d  ) = (xy, rotateDeg d b)
     doNav ((x,y), b) (Move d n) = (doMove d, b)
       where
@@ -24,11 +24,10 @@ part1 input = show . manhattanDistance . fst
         doMove Forward = doMove b
 
 
-part2 input = show . manhattanDistance . fst
-            $ foldl doNav ((0,0), (10,1)) navs
+part2 :: [Nav] -> String
+part2 navs = show . manhattanDistance . fst
+           $ foldl doNav ((0,0), (10,1)) navs
   where
-    navs = parse (splitSome spaces nav) input
-
     doNav (xy,     wxy     ) (Turn d        ) = (xy, rotateWaypointDeg d wxy)
     doNav ((x, y), (wx, wy)) (Move Forward n) = ((x+wx*n, y+wy*n), (wx, wy))
     doNav (xy,     (wx, wy)) (Move d       n) = (xy, moveWaypoint d)

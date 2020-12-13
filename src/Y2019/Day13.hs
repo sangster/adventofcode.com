@@ -6,17 +6,19 @@ import Util.Program
 import Util.InstructionSet
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "306")
+parts = ( (part1, Just "306")
         , (part2, Just "15328")
-        ]
+        , id
+        )
 
 
+part1 :: String -> String
 part1 input = runST $ do
     screen <- program input >>= gameProgram
     pure . show . M.size $ M.filter (== Block) screen
 
 
+part2 :: String -> String
 part2 input = runST $ do
     score <- program input >>= withQuarters 2 >>= play
     pure . show $ score

@@ -7,21 +7,19 @@ import qualified Data.Vector as V
 import           Parser
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "1451")
+parts = ( (part1, Just "1451")
         , (part2, Just "1160")
-        ]
+        , V.fromList . parse (some instruction)
+        )
 
 
-part1 input = show $ accumAtRepeat instructions
+part1 instructions = show $ accumAtRepeat instructions
   where
-    instructions = V.fromList $ parse (some instruction) input
     accumAtRepeat = snd . execute
 
 
-part2 input = show $ accumAtEnd $ fromJust fixedInstructions
+part2 instructions = show $ accumAtEnd $ fromJust fixedInstructions
   where
-    instructions = V.fromList $ parse (some instruction) input
     fixedInstructions = find reachesEnd $ hackedInstructionSets instructions
     accumAtEnd = snd . execute
     reachesEnd = fst . execute

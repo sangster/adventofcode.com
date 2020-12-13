@@ -7,24 +7,26 @@ import           Data.Maybe    (catMaybes, fromJust)
 import qualified Data.Vector   as V
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Just "2494")
+parts = ( (part1, Just "2494")
         , (part2, Just "2306")
-        ]
+        , parseFerry
+        )
 
 
-part1 input = show . countOccupied $ findStableSeating ferry
+part1 :: Ferry -> String
+part1 ferry = show . countOccupied $ findStableSeating ferry'
   where
-    ferry = (parseFerry input){ neighborTolerance = 4
-                              , neighborCoords    = adjacentCoords
-                              }
+    ferry' = ferry{ neighborTolerance = 4
+                  , neighborCoords    = adjacentCoords
+                  }
 
 
-part2 input = show . countOccupied $ findStableSeating ferry
+part2 :: Ferry -> String
+part2 ferry = show . countOccupied $ findStableSeating ferry'
   where
-    ferry = (parseFerry input) { neighborTolerance = 5
-                               , neighborCoords    = visibleCoords
-                               }
+    ferry' = ferry{ neighborTolerance = 5
+                  , neighborCoords    = visibleCoords
+                  }
 
 
 data Seat = Missing | Empty | Occupied deriving Eq

@@ -5,18 +5,18 @@ import Data.Maybe (catMaybes)
 import Safe (headMay)
 
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Nothing)
+parts = ( (part1, Nothing)
         , (part2, Nothing)
-        ]
+        , lines
+        )
 
 
 type TwoCount   = Int
 type ThreeCount = Int
 
-part1 input = show $ has2 * has3
+part1 lines' = show $ has2 * has3
   where
-    (has2, has3) = countRepeats . lines $ input
+    (has2, has3) = countRepeats lines'
     countRepeats :: [String] -> (TwoCount, ThreeCount)
     countRepeats [] = (0, 0)
     countRepeats (x:xs) =
@@ -36,13 +36,13 @@ pairs (x1:x2:[]) = [(x1,x2)]
 pairs (x1:tail@(x2:_)) = [(x1,x2)] ++ (pairs tail)
 
 
-part2 input =
+part2 lines' =
     case headMay oneDiffs of
         Just (prefix, suffix) -> prefix ++ (tail suffix)
         _                     -> "???"
   where
     oneDiffs = catMaybes $ (uncurry common) <$> pairs sorted
-    sorted = sort . lines $ input
+    sorted = sort lines'
 
     common :: String -> String -> Maybe (Prefix, Suffix)
     common xs ys =
