@@ -6,6 +6,7 @@ import Data.List (intercalate)
 import Days
 import System.Environment (getArgs)
 import Text.Printf (printf)
+import Util.Color
 
 
 main :: IO ()
@@ -13,11 +14,12 @@ main = do
     args <- getArgs
     case args of
         [year, "all"] -> appAllDays year
-        [year, day]   -> (runMaybeT $appSingleDay year day) >>= printOrError year day
-        _             -> error $ "expected one argument, got " ++ show args
+        [year, day]   -> runMaybeT (appSingleDay year day) >>= printOrError year day
+        _             -> error' $ "expected one argument, got " ++ show args
   where
-    printOrError _ _ (Just str) = putStrLn str
-    printOrError y d Nothing    = printf "source or input missing: %s-12-%s" y d
+    printOrError y d (Just report) = printf "%s\n%s%s\n" (dateStr y d) footer report
+    printOrError y d Nothing = error' $ printf "source or input missing: %s-12-%s" y d
+    error' = errorWithoutStackTrace . ansiForeground Dull Red
 
 
 appAllDays :: String
@@ -28,7 +30,7 @@ appAllDays year = mapM_ renderDay (filter ((year ==) . fst) $ fst <$> parts)
       dayResult <- runMaybeT (appSingleDay year d)
       case dayResult of
         Nothing     -> pure ()
-        Just report -> printf "%s-12-%s\n%s%s\n" y d footer report
+        Just report -> printf "%s\n%s%s\n" (dateStr y d) footer report
 
 
 appSingleDay :: MonadIO m
@@ -44,8 +46,15 @@ appSingleDay year day = do
       where
         reports = uncurry fmt <$> zip [1..] results
         fmt n (result, e) = formatPart n e result
-        timing = printf "%.2fs = %.2fs + %.2fs + %.2fs\n"
-                        (timeP + timeA + timeB) timeP timeA timeB
+        timing = printf "%s = %s + %s + %s\n"
+                        (speed $ timeP + timeA + timeB)
+                        (speed timeP) (speed timeA) (speed timeB)
+        speed n
+          | n < 0.2   = ansiForeground Dull Blue str
+          | n < 0.5   = ansiForeground Dull Yellow str
+          | otherwise = ansiForeground Dull Red str
+          where
+            str = printf "%.2fs" n
 
 
 formatPart :: Int
@@ -58,12 +67,20 @@ formatPart number expected result
   where
     shortEnough     = length result < 70
     singleLine      = not $ elem '\n' result
-    valid           = maybe "?" isSuccess expected
-    isSuccess ex    = if result == ex then " " else "X"
+    valid           = maybe (ansiForeground Dull Yellow "?") isSuccess expected
+    isSuccess ex    = if result == ex
+                        then ansiForeground Dull Green "✔"
+                        else ansiForeground Dull Red "✘"
     strip  []       = []
     strip ('\n':[]) = []
     strip (c:cc)    = c:(strip cc)
 
 
 footer :: String
-footer = "=================================\n"
+footer = ansiForeground Vivid Black "=================================\n"
+
+
+dateStr :: String -> String -> String
+dateStr y d = ansiForeground Dull Cyan y
+           ++ "-12-"
+           ++ ansiForeground Dull Magenta d
