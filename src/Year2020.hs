@@ -13,7 +13,7 @@ import qualified Y2020.Day09
 import qualified Y2020.Day10
 import qualified Y2020.Day11
 import qualified Y2020.Day12
--- import qualified Y2020.Day13
+import qualified Y2020.Day13
 -- import qualified Y2020.Day14
 -- import qualified Y2020.Day15
 -- import qualified Y2020.Day16
@@ -41,7 +41,7 @@ days =
   , solve Y2020.Day10.parts
   , solve Y2020.Day11.parts
   , solve Y2020.Day12.parts
-  -- , solve Y2020.Day13.parts
+  , solve Y2020.Day13.parts
   -- , solve Y2020.Day14.parts
   -- , solve Y2020.Day15.parts
   -- , solve Y2020.Day16.parts

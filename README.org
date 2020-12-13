@@ -6,7 +6,7 @@
 
 | Year | Stars | Complete? |
 |------+-------+-----------|
-| 2020 | 24★   |           |
+| 2020 | 26★   |           |
 | 2019 | *50★* | X         |
 | 2018 | 28★   |           |
 | 2017 | 00★   |           |
@@ -43,11 +43,14 @@ I would prefer if this were automated, but that will be a TODO for now.
 #+BEGIN_SRC haskell
 module Y2020.Day01 (parts) where
 
-parts :: [((String -> String), Maybe String)]
-parts = [ (part1, Nothing)
+parts = ( (part1, Nothing)
         , (part2, Nothing)
-        ]
+        , id
+        )
 
+part1 :: a -> String
 part1 input = ""
+
+part2 :: a -> String
 part2 input = ""
 #+END_SRC
