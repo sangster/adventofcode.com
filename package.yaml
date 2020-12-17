@@ -27,6 +27,7 @@ dependencies:
   - dequeue
   - extra
   - file-embed
+  - hashable
   - hashtables
   - mtl
   - pqueue
