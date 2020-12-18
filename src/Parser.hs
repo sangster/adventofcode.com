@@ -58,6 +58,7 @@ import Control.Applicative
 import Control.Monad.State.Strict
 import Control.Monad.Except
 
+
 newtype Parser a = Parser { runParser :: StateT PState (Either ParseError) a }
   deriving
     ( Functor
@@ -243,9 +244,13 @@ chainl p op a = chainl1 p op <|> pure a
 chainl1 :: Parser a
         -> Parser (a -> a -> a)
         -> Parser a
-chainl1 p op = do { a <- p; rest a <|> pure a }
+chainl1 p op = do a <- p
+                  rest a <|> pure a
   where
-    rest a = do { f <- op; b <- p; rest (f a b) }
+    rest  a = rest' a <|> pure a
+    rest' a = do f <- op
+                 b <- p
+                 rest $ f a b
 
 
 splitMany :: Show b => Parser a -> Parser b -> Parser [b]
