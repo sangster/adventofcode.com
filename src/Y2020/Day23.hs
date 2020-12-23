@@ -1,3 +1,5 @@
+{-# Language FlexibleContexts #-}
+
 module Y2020.Day23 (parts) where
 
 import Data.Bool (bool)
@@ -19,7 +21,7 @@ part1 cups = scoreGame cups 100
     scoreGame cs n = runST $ do
       arr <- buildArray cs
       play arr (head cs) n
-      score arr
+      showLabelsAfter 1 arr
 
 
 part2 :: [Cup] -> String
@@ -38,6 +40,8 @@ part2 cups = show . uncurry (*) $ findStars cups' 10000000
 type Cup = Int
 
 
+-- | Build a 1-indexed array, where each element starts as @index+1@, except the
+-- last, which starts as 1.
 buildArray :: [Cup] -> ST s (STUArray s Int Cup)
 buildArray cs = do
     arr <- newArray_ bounds
@@ -50,6 +54,8 @@ buildArray cs = do
     pairs (x:x':xs) = (x,x') : pairs (x':xs)
 
 
+-- | Play a number of rounds, starting with @start@. Returns the card that will
+-- be "current" next round.
 play :: STUArray s Int Cup
      -> Cup
      -> Int
@@ -57,6 +63,7 @@ play :: STUArray s Int Cup
 play cups start nRounds = iterateM nRounds (move cups) (pure start)
 
 
+-- | Play a single move of the game. Return the next "current" cup.
 move :: STUArray s Int Cup
      -> Cup
      -> ST s Cup
@@ -80,17 +87,18 @@ move arr curr = do
     findDest cs max n = bool n (findDest cs max $ n-1) $ elem n cs
 
 
+-- | Sort of like @iterate@, but for monads.
 iterateM :: Monad m => Int -> (a -> m a) -> m a -> m a
 iterateM 0 _ mx = mx
 iterateM n f mx = iterateM (n-1) f (mx >>= f)
 
 
-score :: STUArray s Int Cup
-      -> ST s String
-score = score' 1
+-- | Combine the labels for every @Cup@, clockwise from @n@.
+showLabelsAfter :: Cup -> STUArray s Int Cup -> ST s String
+showLabelsAfter start cs = score' start cs
   where
-    score' n arr = do
-      next <- readArray arr n
-      if next == 1
-      then pure ""
-      else (show next ++) <$> score' next arr
+    score' c arr = do
+      next <- readArray arr c
+      if next == start
+        then pure ""
+        else (show next ++) <$> score' next arr
