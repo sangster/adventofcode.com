@@ -50,7 +50,8 @@ executables:
     source-dirs:         app
     ghc-options:
       - -threaded
-      - -O
+      - -O2
+      - -optc-O3
       - -rtsopts
       - -optc-ffast-math
       - -with-rtsopts=-N

@@ -3,7 +3,7 @@ module Y2020.Day24 (parts) where
 
 import           Data.Bool (bool)
 import           Data.Foldable (foldr')
-import qualified Data.HashMap.Strict as M
+import qualified Data.HashSet as S
 import           Parser
 
 
@@ -25,7 +25,7 @@ part2 floor = show . countBlack
 data Dir    = E | SE | SW | W | NW | NE deriving (Bounded, Enum, Show)
 type Path   = [Dir]
 type Coords = (Int, Int, Int)
-data Floor  = Floor{ floorTiles :: M.HashMap Coords Bool
+data Floor  = Floor{ floorTiles :: S.HashSet Coords
                    , minCoords  :: Coords
                    , maxCoords  :: Coords
                    }
@@ -43,14 +43,9 @@ path = some dir
 
 
 mapFloorTiles :: [Path] -> Floor
-mapFloorTiles = foldr' flipTile $ Floor M.empty (0,0,0) (0,0,0)
+mapFloorTiles = foldr' flipTile $ Floor S.empty (0,0,0) (0,0,0)
   where
-    flipTile t f = insertWith f (const not) (move (0,0,0) t) True
-
-
-move :: Coords -> Path -> Coords
-move from []     = from
-move from (l:ls) = move (step from l) ls
+    flipTile t f = toggle f (foldl step (0,0,0) t)
 
 
 step :: Coords -> Dir -> Coords
@@ -63,11 +58,11 @@ step (x,y,z) NE = (x+1, y  , z-1)
 
 
 countBlack :: Floor -> Int
-countBlack = M.foldr ((+) . bool 0 1) 0 . floorTiles
+countBlack = S.size . floorTiles
 
 
 flipAll :: Floor -> Floor
-flipAll floor = foldr' flip floor{ floorTiles = M.empty } (allCoords floor)
+flipAll floor = foldr' flip floor{ floorTiles = S.empty } (allCoords floor)
   where
     flip xyz floor'
       | blackTile && (nBlack == 0 || nBlack > 2) = set False
@@ -79,11 +74,11 @@ flipAll floor = foldr' flip floor{ floorTiles = M.empty } (allCoords floor)
         neighbors = step xyz <$> [minBound..maxBound]
 
         set False = floor'
-        set True  = insertWith floor' const xyz True
+        set True  = toggle floor' xyz
 
 
 isBlack :: Floor -> Coords -> Bool
-isBlack = flip (M.lookupDefault False) . floorTiles
+isBlack = flip S.member . floorTiles
 
 
 allCoords :: Floor -> [Coords]
@@ -97,12 +92,13 @@ allCoords f = [ (x,y,z)
     (minX,minY,minZ) = minCoords f
     (maxX,maxY,maxZ) = maxCoords f
 
-
-insertWith :: Floor -> (Bool -> Bool -> Bool) -> Coords -> Bool -> Floor
-insertWith floor f xyz val =
-    Floor{ floorTiles = M.insertWith f xyz val (floorTiles floor)
+toggle :: Floor -> Coords -> Floor
+toggle floor xyz =
+    Floor{ floorTiles = (bool S.insert S.delete blackTile) xyz tiles
          , minCoords  = select minimum xyz (minCoords floor)
          , maxCoords  = select maximum xyz (maxCoords floor)
          }
   where
+    blackTile   = isBlack floor xyz
+    tiles       = floorTiles floor
     select f (x,y,z) (x',y',z') = (f [x,x'], f [y,y'], f [z,z'])
