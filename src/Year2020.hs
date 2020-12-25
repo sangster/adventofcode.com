@@ -25,7 +25,7 @@ import qualified Y2020.Day21
 import qualified Y2020.Day22
 import qualified Y2020.Day23
 import qualified Y2020.Day24
--- import qualified Y2020.Day25
+import qualified Y2020.Day25
 
 
 days =
@@ -53,5 +53,5 @@ days =
   , solve Y2020.Day22.parts
   , solve Y2020.Day23.parts
   , solve Y2020.Day24.parts
-  -- , solve Y2020.Day25.parts
+  , solve Y2020.Day25.parts
   ]
