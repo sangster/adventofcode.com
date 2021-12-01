@@ -10,6 +10,7 @@ import           System.TimeIt (timeItT)
 import qualified Year2018
 import qualified Year2019
 import qualified Year2020
+import qualified Year2021
 
 
 type Year    = String
@@ -21,6 +22,7 @@ parts :: [( (Year, Day), Solveable DaySolution)]
 parts = daysFor "2018" Year2018.days
      ++ daysFor "2019" Year2019.days
      ++ daysFor "2020" Year2020.days
+     ++ daysFor "2021" Year2021.days
 
 
 daysFor :: Year

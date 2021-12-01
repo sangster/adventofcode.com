@@ -1,26 +1,28 @@
 #+TITLE: Advent of Code
 
-*[[file:src/Y2020/][List of 2020 Solutions]]*
+*[[file:src/Y2021/][List of 2021 Solutions]]*
 
 * Status
 
 | Year | Stars | Complete? |
 |------+-------+-----------|
-| 2020 | *50★* | X         |
-| 2019 | *50★* | X         |
-| 2018 | 28★   |           |
-| 2017 | 00★   |           |
-| 2016 | 00★   |           |
-| 2015 | 00★   |           |
+| <c>  |  <c>  |    <c>    |
+| 2021 |  00★  |           |
+| 2020 | *50★* |     ✔     |
+| 2019 | *50★* |     ✔     |
+| 2018 |  28★  |           |
+| 2017 |  00★  |           |
+| 2016 |  00★  |           |
+| 2015 |  00★  |           |
 
 * Usage
 
 #+BEGIN_SRC shell
 stack install
 
-stack exec aoc 2020 01    # Execute the given day.
-stack exec aoc 2020 last  # Execute the most recent day with a source file.
-stack exec aoc 2020 all   # Execute every day with a source file.
+stack exec aoc 2021 01    # Execute the given day.
+stack exec aoc 2021 last  # Execute the most recent day with a source file.
+stack exec aoc 2021 all   # Execute every day with a source file.
 #+END_SRC
 
 * Notes
@@ -41,16 +43,16 @@ must exist, even if then problem doesn't supply one.
 I would prefer if this were automated, but that will be a TODO for now.
 
 #+BEGIN_SRC haskell
-module Y2020.Day01 (parts) where
+  module Y2021.Day01 (parts) where
 
-parts = ( (part1, Nothing)
-        , (part2, Nothing)
-        , id
-        )
+  parts = ( (part1, Nothing)
+          , (part2, Nothing)
+          , id
+          )
 
-part1 :: a -> String
-part1 input = ""
+  part1 :: a -> String
+  part1 input = ""
 
-part2 :: a -> String
-part2 input = ""
+  part2 :: a -> String
+  part2 input = ""
 #+END_SRC
