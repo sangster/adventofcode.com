@@ -34,10 +34,7 @@ data Dir = Forward | Down | Up deriving Show
 parseInstructions :: String -> [Instruction]
 parseInstructions = parse (splitSome (char '\n') instruction)
   where
-    instruction = do d <- dir
-                     _ <- char ' '
-                     dist <- natural
-                     pure (d, dist)
+    instruction = do { d <- dir; _ <- char ' '; dist <- natural; pure (d, dist) }
     dir = symbol Forward (string "forward")
       <|> symbol Down    (string "down")
       <|> symbol Up      (string "up")
