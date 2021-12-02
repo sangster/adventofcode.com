@@ -19,9 +19,11 @@
 #+BEGIN_SRC shell
 stack install
 
-stack exec aoc 2021 01    # Execute the given day.
-stack exec aoc 2021 last  # Execute the most recent day with a source file.
-stack exec aoc 2021 all   # Execute every day with a source file.
+stack run 2021 01    # Execute the given day.
+stack run 2021 last  # Execute the most recent day with a source file.
+stack run 2021 all   # Execute every day with a source file.
+
+stack --profile run 2021 01 -- +RTS -p -RTS # Profile the given day.
 #+END_SRC
 
 * Notes

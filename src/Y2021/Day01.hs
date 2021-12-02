@@ -1,5 +1,7 @@
 module Y2021.Day01 (parts) where
 
+import Parser
+
 parts = ( (part1, Just "1624")
         , (part2, Just "1653")
         , parseDepths
@@ -21,7 +23,7 @@ part2 = show . length . filter (uncurry (<)) . pairs . windowSums
 type Depth = Int
 
 parseDepths :: String -> [Depth]
-parseDepths = fmap read . lines
+parseDepths = parse (splitSome (char '\n') natural)
 
 -- | Return adjacent pairs from the given list.
 pairs :: [a] -> [(a, a)]

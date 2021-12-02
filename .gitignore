@@ -5,3 +5,4 @@
 .stack-work-profile/
 *.cabal
 *~
+/aoc.prof
