@@ -41,6 +41,7 @@ part2 diag = show $ oxygenRating * co2Rating
         (numSet, numUnset) = countBits words' p
 
 
+-- | Represents the input data.
 data Diagnostic = Diagnostic { width :: Int
                              , words :: [Word]
                              }
@@ -51,8 +52,8 @@ bigEndianRange :: Diagnostic -> [Int]
 bigEndianRange d = reverse [0 .. width d - 1]
 
 
--- | Return a pair containing the word length and a list of each bit-string
---   represented on each line of the given string.
+-- | Return a Diagnostic containing the word length and a list of each
+--   bit-string represented on each line of the given string.
 parseDiagnostic :: String -> Diagnostic
 parseDiagnostic input = Diagnostic { width = width', words = words' }
   where
