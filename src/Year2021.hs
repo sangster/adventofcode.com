@@ -3,7 +3,7 @@ module Year2021 (days) where
 import           Solution
 import qualified Y2021.Day01
 import qualified Y2021.Day02
--- import qualified Y2021.Day03
+import qualified Y2021.Day03
 -- import qualified Y2021.Day04
 -- import qualified Y2021.Day05
 -- import qualified Y2021.Day06
@@ -31,7 +31,7 @@ import qualified Y2021.Day02
 days =
   [ solve Y2021.Day01.parts
   , solve Y2021.Day02.parts
-  -- , solve Y2021.Day03.parts
+  , solve Y2021.Day03.parts
   -- , solve Y2021.Day04.parts
   -- , solve Y2021.Day05.parts
   -- , solve Y2021.Day06.parts
