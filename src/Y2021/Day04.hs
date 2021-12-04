@@ -3,7 +3,7 @@ module Y2021.Day04 (parts) where
 import Data.Bool
 import Data.List
 import Data.List.Split (chunksOf)
-import Parser hiding (col)
+import Parser
 
 parts = ( (part1, Just "35670")
         , (part2, Just "22704")
@@ -65,20 +65,19 @@ callNextNumber g@Game { calls = cs, boards = bs } =
 isWinner :: Board -> Bool
 isWinner = any winningLine . boardLines
   where
-    winningLine = all (\(Cell _ mark) -> mark == Marked)
+    winningLine = all $ \(Cell _ mark) -> mark == Marked
 
 
 -- | Return the horizontal and vertical lines to be scored.
 boardLines :: Board -> [[Cell]]
 boardLines b = rows ++ cols
- where
-   cs = cells b
-   rows = chunksOf (width b) cs
-   cols = getCol <$> [0.. width b - 1]
-   getCol n = col (drop n cs) (height b)
-     where
-       col _   0 = []
-       col cs' y = head cs' : col (drop (width b) cs') (y-1)
+  where
+    rows = chunksOf (width b) $ cells b
+    cols = getCol <$> [0 .. width b - 1]
+    getCol n = getCol' (drop n $ cells b) (height b)
+      where
+        getCol' _  0 = []
+        getCol' cs y = head cs : getCol' (drop (width b) cs) (y-1)
 
 
 -- | Mark the given board, if it contains the called number.
