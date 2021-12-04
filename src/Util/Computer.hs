@@ -82,7 +82,7 @@ type Instruction' m = Instruction m ()
 
 
 instance PrimMonad m => Eq (Instruction m a) where
-  (==) = (==) `on` name
+  (==) = (==) `on` opcode
 
 
 -- | The computer has various types of actions it can perform.
