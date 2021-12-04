@@ -78,9 +78,3 @@ formatPart number expected result
 
 footer :: String
 footer = ansiForeground Vivid Black "=================================\n"
-
-
-dateStr :: String -> String -> String
-dateStr y d = ansiForeground Dull Cyan y
-           ++ "-12-"
-           ++ ansiForeground Dull Magenta d
