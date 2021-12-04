@@ -19,14 +19,17 @@ parts = ( (part1, Just "5392")
         )
 
 
+part1 :: Maze -> String
 part1 maze' = show $ evalState findShortestLengthToAllKeys search
   where
     search = newSearch maze' $ head (origins maze')
 
 
-part2 maze' = show . sum $ singleBotMinLen <$> origins maze'
+part2 :: Maze -> String
+part2 maze' = show . sum $ singleBotMinLen <$> origins maze''
   where
-    singleBotMinLen = evalState findShortestLengthToAllKeys . newSearch maze'
+    singleBotMinLen = evalState findShortestLengthToAllKeys . newSearch maze''
+    maze'' = mogrifyMaze maze'
 
 
 data SearchState = SearchState
