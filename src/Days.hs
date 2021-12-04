@@ -1,4 +1,9 @@
-module Days (parts, callDayTimed) where
+module Days
+  ( parts
+  , callDayTimed
+  , mostRecentDay
+  , dateStr
+  ) where
 
 import           Control.Applicative (liftA2)
 import           Control.Exception (evaluate)
@@ -7,6 +12,7 @@ import           Control.Monad.Trans.Maybe (MaybeT(..))
 import           Input (lookupInput)
 import           Solution
 import           System.TimeIt (timeItT)
+import           Util.Color
 import qualified Year2018
 import qualified Year2019
 import qualified Year2020
@@ -38,13 +44,18 @@ callDayTimed :: MonadIO m
              => Year
              -> Day
              -> MaybeT m (Runtime, Runtime, Runtime, [(String, Maybe String)])
-callDayTimed year "last" = callDayTimed year $ (snd . fst) (last dd)
-  where
-    dd = filter ((== year) . fst . fst) parts
-callDayTimed year day = do
+callDayTimed year "last" = callDayTimed year (mostRecentDay year)
+callDayTimed year day    = do
     part  <- MaybeT . pure $ lookup (year, day) parts
     input <- MaybeT . pure . lookupInput $ year ++ "/" ++ day
     liftIO $ call part input
+
+
+-- | Return the most recent Day in the given year that has a solution so far.
+mostRecentDay :: Year -> Day
+mostRecentDay year = (snd . fst) (last dd)
+  where
+    dd = filter ((== year) . fst . fst) parts
 
 
 call :: MonadIO m
@@ -62,8 +73,16 @@ call (MkSolveable s) input = do
     (fb, mayB) = partB s
 
 
--- Lazily evaluate
+-- | Lazily evaluate
 evaluate' :: MonadIO m
           => a
           -> m a
 evaluate' = liftIO . evaluate
+
+
+-- | Render the date in a colorful way.
+dateStr :: Year -> Day -> String
+dateStr y "last" = dateStr y (mostRecentDay y)
+dateStr y d      = ansiForeground Dull Cyan y
+                ++ "-12-"
+                ++ ansiForeground Dull Magenta d
