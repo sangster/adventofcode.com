@@ -6,7 +6,7 @@
 
 | Year | Stars | Complete? |
 |------+-------+-----------|
-| 2021 |  06★  |           |
+| 2021 |  08★  |           |
 | 2020 | *50★* |     ✔     |
 | 2019 | *50★* |     ✔     |
 | 2018 |  28★  |           |
@@ -44,16 +44,16 @@ must exist, even if then problem doesn't supply one.
 I would prefer if this were automated, but that will be a TODO for now.
 
 #+BEGIN_SRC haskell
-  module Y2021.Day01 (parts) where
+module Y2021.Day01 (parts) where
 
-  parts = ( (part1, Nothing)
-          , (part2, Nothing)
-          , id
-          )
+parts = ( (part1, Nothing)
+        , (part2, Nothing)
+        , id
+        )
 
-  part1 :: a -> String
-  part1 input = ""
+part1 :: a -> String
+part1 input = ""
 
-  part2 :: a -> String
-  part2 input = ""
+part2 :: a -> String
+part2 input = ""
 #+END_SRC
