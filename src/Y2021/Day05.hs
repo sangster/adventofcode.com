@@ -42,12 +42,8 @@ isDiagonal ((x1, y1), (x2, y2)) | x1 == x2  = False
 linePoints :: VentLine -> [Point]
 linePoints ((x1, y1), (x2, y2)) = points x1 y1
   where
-    dx  = delta x2 x1
-    dy  = delta y2 y1
-    delta a b = case compare a b of
-                  EQ -> 0
-                  LT -> (-1)
-                  GT -> 1
+    dx  = signum $ x2 - x1
+    dy  = signum $ y2 - y1
     points x y | x == x2 && y == y2 = [(x,y)]
                | otherwise          = (x,y) : points (x+dx) (y+dy)
 
