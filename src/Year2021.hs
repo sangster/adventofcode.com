@@ -6,7 +6,7 @@ import qualified Y2021.Day02
 import qualified Y2021.Day03
 import qualified Y2021.Day04
 import qualified Y2021.Day05
--- import qualified Y2021.Day06
+import qualified Y2021.Day06
 -- import qualified Y2021.Day07
 -- import qualified Y2021.Day08
 -- import qualified Y2021.Day09
@@ -34,7 +34,7 @@ days =
   , solve Y2021.Day03.parts
   , solve Y2021.Day04.parts
   , solve Y2021.Day05.parts
-  -- , solve Y2021.Day06.parts
+  , solve Y2021.Day06.parts
   -- , solve Y2021.Day07.parts
   -- , solve Y2021.Day08.parts
   -- , solve Y2021.Day09.parts
