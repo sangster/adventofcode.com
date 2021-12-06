@@ -50,8 +50,5 @@ linePoints ((x1, y1), (x2, y2)) = points x1 y1
 
 -- | Return a Map of every Point to the number of lines which intersect it.
 intersectionMap :: [VentLine] -> M.HashMap Point Int
-intersectionMap []     = M.empty
-intersectionMap (v:vs) = foldr (\p m -> M.insertWith (+) p 1 m) rest points
-  where
-    points = linePoints v
-    rest   = intersectionMap vs
+intersectionMap = foldr (\p -> M.insertWith (+) p 1) M.empty
+                . concatMap linePoints
