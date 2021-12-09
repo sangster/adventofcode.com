@@ -1,9 +1,9 @@
 module Y2021.Day09 (parts) where
 
-import           Data.Bool
+import           Data.Bool (bool)
 import qualified Data.HashSet as S
-import           Data.List
-import           Data.Maybe
+import           Data.List (findIndex, sort)
+import           Data.Maybe (catMaybes, fromJust)
 import qualified Data.Vector as V
 import           Parser
 
