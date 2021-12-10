@@ -43,7 +43,7 @@ part2 lines = show $ scores !! (length scores `div` 2)
 
 data Result = Ok                -- ^ Found no errors.
             | Corrupt Char      -- ^ Encountered an unexpected +closes+ char.
-            | Incomplete String -- ^ A list of unclocked +opens+.
+            | Incomplete String -- ^ A list of unclosed +opens+.
             deriving Show
 
 
