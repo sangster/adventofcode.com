@@ -77,4 +77,4 @@ formatPart number expected result
 
 
 footer :: String
-footer = ansiForeground Vivid Black "=================================\n"
+footer = ansiForeground Vivid Black "=================================" ++ "\n"
