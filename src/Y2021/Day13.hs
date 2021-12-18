@@ -6,7 +6,7 @@ import Parser
 
 
 parts = ( (part1, Just "788")
-        , (part2, Just part2Expected)
+        , (part2, Just $ unlines part2Expected)
         , parse manualPage
         )
 
@@ -17,7 +17,6 @@ part2Expected = [ "█  █   ██ ███  █  █ ████ █  █ �
                 , "█ █  █  █ █  █ █ █  █    █  █ █  █ █  █"
                 , "█  █  ██  ███  █  █ ████  ██  ███   ███"
                 ]
-
 
 part1 :: ([Point], [Fold]) -> String
 part1 (points, folds) = show . length . nub $ foldAt points $ head folds
