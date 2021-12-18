@@ -1,8 +1,8 @@
 module Y2021.Day14 (parts) where
 
-import Parser
-import Data.Char
+import           Data.Char
 import qualified Data.HashMap.Strict as M
+import           Parser
 
 parts = ( (part1, Just "2375")
         , (part2, Just "1976896901756")
