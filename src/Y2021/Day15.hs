@@ -31,8 +31,8 @@ growMap n m = CharMap2D { mapCells  = V.fromList cells
     cells = [cellVal x y | y <- [0 .. h' - 1] , x <- [0 .. w' - 1]]
     w  = mapWidth  m
     h  = mapHeight m
-    w' = w * 5
-    h' = h * 5
+    w' = w * n
+    h' = h * n
 
     cellVal x y = mod1 $ (orig + (x `div` w) + (y `div` h))
       where
