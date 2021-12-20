@@ -55,6 +55,8 @@ newtype BITS a = BITS { runBITS :: MaybeT (State (String, Binary)) a }
     )
 
 
+-- | Evaluation a BITS function, with a default value (in case Nothing is
+--   returned), a function to call when it succeeds, and an initial state.
 evalBITS :: b -> (a -> b) -> (String, Binary) -> BITS a -> b
 evalBITS def f st p = case evalState (runMaybeT $ runBITS p) st of
                       Just ss -> f ss
@@ -63,11 +65,10 @@ evalBITS def f st p = case evalState (runMaybeT $ runBITS p) st of
 
 nextBit :: BITS Bool
 nextBit = BITS . MaybeT . state
-        $ \case
-            ("",   [])   -> (Nothing, ("", []))
-            (s:ss, [])   -> let (b:bs) = hexCharToNibble s
-                            in (Just b, (ss, bs))
-            (ss, (b:bs)) -> (Just b, (ss, bs))
+        $ \case ("",   [])   -> (Nothing, ("", []))
+                (s:ss, [])   -> let (b:bs) = hexCharToNibble s
+                                in (Just b, (ss, bs))
+                (ss, (b:bs)) -> (Just b, (ss, bs))
 
 
 takeBits :: Int -> BITS Binary
@@ -102,8 +103,7 @@ packet = do v <- version
 -- | Parse a given number of Packets.
 packetsN :: Int -> BITS [Packet]
 packetsN 0 = pure []
-packetsN n = do p <- packet
-                packetsN (n-1) >>= pure . (p:)
+packetsN n = do { p <- packet; liftM (p:) $ packetsN (n-1) }
 
 
 literal :: Version -> BITS Packet
