@@ -1,5 +1,3 @@
---
---
 {-# LANGUAGE ScopedTypeVariables, GeneralizedNewtypeDeriving #-}
 -- |
 -- Module : Parser
@@ -50,9 +48,7 @@ module Parser
   , module Control.Monad.State.Strict
   ) where
 
-import Data.Bool
 import Data.Char
-import Data.List (splitAt)
 import Data.Default
 import Control.Applicative
 import Control.Monad.State.Strict

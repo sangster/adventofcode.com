@@ -1,11 +1,13 @@
+{-# LANGUAGE ImportQualifiedPost #-}
+
 module Y2021.Day15 (parts) where
 
-import           Control.Monad.State.Strict
-import           Data.Bool (bool)
-import qualified Data.HashSet          as S
-import qualified Data.PQueue.Prio.Min  as Q
-import qualified Data.Vector as V
-import           Util.CharMap2D
+import Control.Monad.State.Strict
+import Data.Bool                  (bool)
+import Data.HashSet               qualified as S
+import Data.PQueue.Prio.Min       qualified as Q
+import Data.Vector                qualified as V
+import Util.CharMap2D
 
 parts = ( (part1, Just "441")
         , (part2, Just "2849")
