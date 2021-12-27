@@ -1,12 +1,13 @@
 {-# LANGUAGE ImportQualifiedPost, NamedFieldPuns #-}
 module Y2021.Day19 (parts) where
 
-import Parser
+import Data.Function (on)
+import Data.HashMap.Strict qualified as M
+import Data.HashSet        qualified as S
+import Data.Hashable
 import Data.List
 import Data.Maybe
-import Data.Function (on)
-import Data.Hashable
-import Data.HashSet qualified as S
+import Parser
 
 
 parts = ( (part1, Just "335")
@@ -24,10 +25,14 @@ part2 ss = show $ foldr (\(a,b) acc -> maximum [distance a b, acc]) 0 pairs
   where
     pairs = [(a,b) | a <- ss, b <- ss, a /= b]
 
-    distance a b = abs (x-x') + abs (y-y') + abs (z-z')
+    distance a b = manhattenDistance a' b'
       where
-        (x ,y ,z ) = fromJust $ scannerCoords a
-        (x',y',z') = fromJust $ scannerCoords b
+        a' = fromJust $ scannerCoords a
+        b' = fromJust $ scannerCoords b
+
+
+manhattenDistance :: Coord -> Coord -> Int
+manhattenDistance (x,y,z) (x',y',z') = abs (x-x') + abs (y-y') + abs (z-z')
 
 
 -- | Changes the Coords of every scanner's beacons to be relative to the first
@@ -48,37 +53,58 @@ fixCoords ss = fst (remap head' ([], (tail ss)))
 -- | Changes the Coords of a single scanner's beacons, if possible, to be
 --   relative to the first and calculate the Coords of each Scanner.
 fixCoordsSingle :: Scanner -> Scanner -> Maybe Scanner
-fixCoordsSingle root s =
-    case findRotationAndOffset root s of
-      Just  f -> Just s{ beacons = S.map f (beacons s)
-                       , scannerCoords = Just $ f (0,0,0)
-                       }
-      Nothing -> Nothing
-
-
-findRotationAndOffset :: Scanner -> Scanner -> Maybe (Coord -> Coord)
-findRotationAndOffset src dst = find' $ S.toList (beacons src)
+fixCoordsSingle root s = do f <- findRotationAndOffset root s
+                            pure s{ beacons = S.map f (beacons s)
+                                  , scannerCoords = Just $ f (0,0,0)
+                                  , distances = distances' f
+                                  }
   where
-    -- | Iterate over src beacons.
-    find' :: [Coord] -> Maybe (Coord -> Coord)
-    find' []     = Nothing
-    find' (b:bs) = (find'' $ S.toList (beacons dst)) <|> find' bs
-      where
-        originB = (translateF b) `S.map` (beacons src)
-        find'' []       = Nothing
-        find'' (b':bs') = findRotation rotationsF <|> find'' bs'
-          where
-            originB' = (translateF b') `S.map` (beacons dst)
+    distances' f = (\(a,b) -> (f a, f b)) `M.map` distances s
 
-            findRotation :: [(Coord -> Coord)] -> Maybe (Coord -> Coord)
-            findRotation [] = Nothing
-            findRotation (f:fs) =
-                if hasOverlappingCount originB 12 $ f <$> S.toList originB'
+
+-- | Iterate over pairs of beacons, likely to be the same, from the two give
+--   Scanners and return the first rotation function that makes at least 12
+--   beacons match.
+--
+--   TODO: This is a bit slow.
+findRotationAndOffset :: Scanner -> Scanner -> Maybe (Coord -> Coord)
+findRotationAndOffset src dst = find' $ candidateBeacons src dst
+  where
+    find' :: [(Coord, Coord)] -> Maybe (Coord -> Coord)
+    find' []            = Nothing
+    find' ((s, d):rest) = findRotation d <|> find' rest
+      where
+        originS = translateF s `S.map` beacons src
+
+        findRotation :: Coord -> Maybe (Coord -> Coord)
+        findRotation b' = findRotation' rotationsF
+          where
+            originB' = translateF b' `S.map` beacons dst
+
+            findRotation' :: [(Coord -> Coord)] -> Maybe (Coord -> Coord)
+            findRotation' [] = Nothing
+            findRotation' (f:fs) =
+                if hasOverlappingCount originS 12 $ f <$> S.toList originB'
                 then Just $ translate' . f . translateF b'
-                else findRotation fs
+                else findRotation' fs
               where
                 translate' (x,y,z) = (x+dx, y+dy, z+dz)
-                (dx, dy, dz) = b
+                (dx, dy, dz) = s
+
+        -- | Translate a Coord so that the first Coord is its origin.
+        translateF :: Coord -> Coord -> Coord
+        translateF  (dx,dy,dz) = (\(x,y,z) -> (x-dx, y-dy, z-dz))
+
+
+-- | Group beacons from the two given Scanners that are probably the same.
+candidateBeacons :: Scanner -> Scanner -> [(Coord, Coord)]
+candidateBeacons a b = same $ M.toList (distances a)
+  where
+    same :: [(Int, (Coord, Coord))] -> [(Coord, Coord)]
+    same [] = []
+    same ((k,v):es) = case distances b M.!? k of
+                        Just v' -> (fst v, fst v') : same es
+                        Nothing -> same es
 
 
 -- | Do at least N elements in the list of Coords exist in the set?
@@ -88,11 +114,6 @@ hasOverlappingCount _ _ [] = False
 hasOverlappingCount src n (c:cs)
   | S.member c src = hasOverlappingCount src (n-1) cs
   | otherwise      = hasOverlappingCount src n cs
-
-
--- | Translate a Coord so that the first Coord is its origin.
-translateF :: Coord -> Coord -> Coord
-translateF  (dx,dy,dz) = (\(x,y,z) -> (x-dx, y-dy, z-dz))
 
 
 -- | 24 Cube rotation functions.
@@ -118,6 +139,7 @@ rotationsF = rotateAroundZ >>= (<$> rotateAroundFaces) . (.)
 type Coord = (Int, Int, Int) -- ^ (X, Y, Z)
 data Scanner = Scanner { sid :: Int
                        , beacons :: S.HashSet Coord
+                       , distances :: M.HashMap Int (Coord, Coord)
                        , scannerCoords :: Maybe Coord
                        } deriving Show
 
@@ -131,6 +153,9 @@ scanner = do s  <- string "--- scanner " >> natural
              pure $ Scanner { sid = s
                             , beacons = S.fromList bs
                             , scannerCoords = Nothing
+                            , distances = M.fromList (distances' bs)
                             }
   where
     beacon = liftM (\(x:y:z:_) -> (x,y,z)) $ splitSome (char ',') number
+    distances' bs = (\(a,b) -> (manhattenDistance a b, (a,b))) <$> pairs bs
+    pairs bs = [(a,b) | a <- bs, b <- bs, a /= b]
