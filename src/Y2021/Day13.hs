@@ -6,7 +6,7 @@ import Parser
 
 
 parts = ( (part1, Just "788")
-        , (part2, Just $ unlines part2Expected)
+        , (part2, Just $ intercalate "\n" part2Expected)
         , parse manualPage
         )
 
