@@ -1,3 +1,4 @@
+{-# LANGUAGE ImportQualifiedPost #-}
 module Days
   ( parts
   , callDayTimed
@@ -5,18 +6,18 @@ module Days
   , dateStr
   ) where
 
-import           Control.Applicative (liftA2)
-import           Control.Exception (evaluate)
-import           Control.Monad.IO.Class (MonadIO, liftIO)
-import           Control.Monad.Trans.Maybe (MaybeT(..))
-import           Input (lookupInput)
-import           Solution
-import           System.TimeIt (timeItT)
-import           Util.Color
-import qualified Year2018
-import qualified Year2019
-import qualified Year2020
-import qualified Year2021
+import Control.Applicative (liftA2)
+import Control.Exception (evaluate)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Trans.Maybe (MaybeT(..))
+import Input (lookupInput)
+import Solution
+import System.TimeIt (timeItT)
+import Util.Color
+import Year2018 qualified
+import Year2019 qualified
+import Year2020 qualified
+import Year2021 qualified
 
 
 type Year    = String
