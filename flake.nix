@@ -42,22 +42,24 @@
 
           usage() {
             cat <<EOF
-          Usage: $scriptName [-h] [-t timeout] [arg...]
+          Usage: $scriptName [-hs] [-l FILE] [-t timeout] [arg...]
 
           Execute the application automatically upon file change.
 
           Available options:
 
-          -h, --help      Print this help and exit
-          -t, --timeout   Kill app after N seconds
+          -h, --help      Print this help and exit.
+          -l, --log       Copy STDOUT & STDERR to FILE.
+          -s, --start     Run once when first starting.
+          -t, --timeout   Kill app after N seconds.
           EOF
             exit
           }
 
           opts() {
             getopt -n "$scriptName" \
-                   -o ht: \
-                   -l help,timeout: \
+                   -o hl:st: \
+                   -l help,log:,start,timeout: \
                    -- "$@"
           }
 
@@ -65,11 +67,15 @@
             eval set -- "$(opts "$@")"
 
             # default values of variables set from params
+            at_start=0
             timeout=90
+            logfile=""
 
             while :; do
               case "''${1-}" in
               -h | --help) usage ;;
+              -s | --start) at_start=1 ;;
+              -l | --log) logfile="$2"; shift ;;
               -t | --timeout) timeout="$2"; shift ;;
               --) shift; break ;;
               -?*) die "Unknown option: $1" ;;
@@ -85,17 +91,31 @@
 
           parse_params "$@"
 
+          function run() {
+            timeout "$timeout" stack run "''${args[@]}"
+            echo ---
+          }
+
+          function logRun() {
+            if [ -n "$logfile" ]; then
+              run 2>&1 | ${pkgs.coreutils}/bin/tee "$logfile"
+            else
+              run
+            fi
+          }
+
+          [ $at_start -eq 1 ] && logRun
+
           ${pkgs.inotify-tools}/bin/inotifywait -m \
+              -q \
               -e CLOSE_WRITE \
               -r app \
               -r inputs \
               -r src \
-              --exclude '[.]#.*' \
-              --exclude '#.*' \
+              --exclude '\([.]#.*\)|\(#.*\)' \
             | while read file; do
                echo "inotify event: $file"
-               timeout "$timeout" stack run "''${args[@]}"
-               echo ----
+               logRun
             done
         '';
       };

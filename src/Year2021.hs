@@ -23,7 +23,7 @@ import qualified Y2021.Day19
 import qualified Y2021.Day20
 import qualified Y2021.Day21
 import qualified Y2021.Day22
--- import qualified Y2021.Day23
+import qualified Y2021.Day23
 -- import qualified Y2021.Day24
 -- import qualified Y2021.Day25
 
@@ -51,7 +51,7 @@ days =
   , solve Y2021.Day20.parts
   , solve Y2021.Day21.parts
   , solve Y2021.Day22.parts
-  -- , solve Y2021.Day23.parts
+  , solve Y2021.Day23.parts
   -- , solve Y2021.Day24.parts
   -- , solve Y2021.Day25.parts
   ]

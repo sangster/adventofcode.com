@@ -3,6 +3,7 @@
 module Util.CharMap2D
     ( CharMap2D(..)
     , MapCoord
+    , map2dSize
     , map2dCoords
     , map2dCoordToIndex
     , map2dIndexToCoord
@@ -44,6 +45,10 @@ instance Show a => Show (CharMap2D a) where
   show m = intercalate "\n" [row y | y <- [0 .. mapHeight m - 1]]
     where
       row y = concat [show $ map2dCell m (x,y) | x <- [0 .. mapWidth m - 1]]
+
+
+map2dSize :: CharMap2D a -> Int
+map2dSize = V.length . mapCells
 
 
 -- | Every Index in the OctopusMap.
