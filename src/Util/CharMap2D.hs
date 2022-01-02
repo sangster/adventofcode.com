@@ -1,8 +1,9 @@
-{-# LANGUAGE GADTs, NamedFieldPuns #-}
+{-# LANGUAGE GADTs, ImportQualifiedPost, NamedFieldPuns #-}
 
 module Util.CharMap2D
     ( CharMap2D(..)
     , MapCoord
+    , map2dPutCells
     , map2dSize
     , map2dCoords
     , map2dCoordToIndex
@@ -20,14 +21,16 @@ module Util.CharMap2D
     , map2dMap
     , map2dMapWithCoords
     , map2dParser
+    , map2dToListWithCoords
     ) where
 
-import           Data.Char  (ord)
-import           Data.Bool  (bool)
-import           Data.List  (findIndex, intercalate)
-import           Data.Maybe (catMaybes, fromJust)
-import qualified Data.Vector as V
-import           Parser
+import Data.Bool     (bool)
+import Data.Char     (ord)
+import Data.Function (on)
+import Data.List     (findIndex, intercalate)
+import Data.Maybe    (catMaybes, fromJust)
+import Data.Vector   qualified as V
+import Parser
 
 
 data CharMap2D a where
@@ -42,9 +45,26 @@ type MapCoord = (Int, Int)
 
 
 instance Show a => Show (CharMap2D a) where
-  show m = intercalate "\n" [row y | y <- [0 .. mapHeight m - 1]]
+  show m = intercalate "\n" [row y | y <- [0 .. h-1]]
+        ++ "\n" ++ show w ++ "x" ++ show h
     where
-      row y = concat [show $ map2dCell m (x,y) | x <- [0 .. mapWidth m - 1]]
+      row y = concat [show $ map2dCell m (x,y) | x <- [0 .. w-1]]
+      w = mapWidth m
+      h = mapHeight m
+
+
+instance Eq a => Eq (CharMap2D a) where
+  a == b = and [ ((==) `on` mapWidth ) a b
+               , ((==) `on` mapHeight) a b
+               , ((==) `on` mapCells ) a b
+               ]
+
+
+map2dPutCells :: CharMap2D a -> [a] -> CharMap2D a
+map2dPutCells m cs | map2dSize m /= map2dSize m' = error "Wrong number of cells"
+                   | otherwise                   =  m'
+  where
+    m' = m{ mapCells = V.fromList cs }
 
 
 map2dSize :: CharMap2D a -> Int
@@ -54,9 +74,9 @@ map2dSize = V.length . mapCells
 -- | Every Index in the OctopusMap.
 map2dCoords :: CharMap2D a -> [MapCoord]
 map2dCoords m = [ (x,y)
-              | y <- [0 .. mapHeight m - 1]
-              , x <- [0 .. mapWidth  m - 1]
-              ]
+                | y <- [0 .. mapHeight m - 1]
+                , x <- [0 .. mapWidth  m - 1]
+                ]
 
 
 map2dCoordToIndex :: CharMap2D a -> MapCoord -> Int
@@ -173,4 +193,10 @@ map2dMap f m = m{ mapCells = V.map f $ mapCells m }
 map2dMapWithCoords :: (MapCoord -> a -> b) -> CharMap2D a -> CharMap2D b
 map2dMapWithCoords f m = m{ mapCells = V.imap f' $ mapCells m }
   where
-    f' i v = f (map2dIndexToCoord m i) v
+    f' i a = f (map2dIndexToCoord m i) a
+
+
+map2dToListWithCoords :: CharMap2D a -> [(MapCoord, a)]
+map2dToListWithCoords m = f <$> (V.toList $ mapCells m) `zip` [0..]
+  where
+    f (a,i) = (map2dIndexToCoord m i, a)
