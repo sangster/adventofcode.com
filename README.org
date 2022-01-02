@@ -6,7 +6,7 @@
 
 | Year | Stars | Complete? |
 |------+-------+-----------|
-| 2021 |  44★  |           |
+| 2021 |  48★  |           |
 | 2020 | *50★* |     ✔     |
 | 2019 | *50★* |     ✔     |
 | 2018 |  28★  |           |
@@ -23,10 +23,12 @@ stack run 2021 01    # Execute the given day.
 stack run 2021 last  # Execute the most recent day with a source file.
 stack run 2021 all   # Execute every day with a source file.
 
+stack ghci src/Y2021/Day1.hs # REPL
 stack --profile run 2021 last -- +RTS -p -RTS # Profile the day.
 
 # Profile memory usage.
 stack --profile run  2021 last -- +RTS -p -hy && stack exec -- hp2ps -e8in -c aoc.hp
+
 #+END_SRC
 
 * Notes

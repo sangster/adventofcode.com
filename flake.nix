@@ -112,7 +112,7 @@
               -r app \
               -r inputs \
               -r src \
-              --exclude '\([.]#.*\)|\(#.*\)' \
+              --exclude '/[.#].*' \
             | while read file; do
                echo "inotify event: $file"
                logRun
