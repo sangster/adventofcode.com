@@ -1,12 +1,13 @@
 module Y2020.Day09 (parts) where
 
-import qualified Data.Dequeue as Q
+import qualified Deque.Lazy as Q
 import qualified Data.HashSet as S
 import           Data.List
 import           Data.Maybe
+import           GHC.Exts (fromList)
 
 
-type Preamble = (S.HashSet Int, Q.BankersDequeue Int)
+type Preamble = (S.HashSet Int, Q.Deque Int)
 type Queue    = [Int]
 
 
@@ -33,7 +34,7 @@ part2 items = show $ head contiguous + last contiguous
 preambleAndQueue :: Int -> [Int] -> (Preamble, Queue)
 preambleAndQueue n items = (q, rest)
   where
-    q = (S.fromList pre, Q.fromList pre)
+    q = (S.fromList pre, fromList pre)
     (pre, rest) = splitAt n items
 
 
@@ -43,10 +44,11 @@ findMissingSum (set, deq) (q:qs)
   | otherwise = q
   where
     hasMatch = isJust $ findSumOf (set, deq) q
+findMissingSum _ _ = error "empty queue"
 
 
 findSumOf :: Preamble -> Int -> Maybe (Int, Int)
-findSumOf p@(set, deq) n
+findSumOf p@(_, deq) n
   | Q.null deq = Nothing
   | includes p' target = Just (n', target)
   | otherwise = findSumOf p' n
@@ -56,7 +58,7 @@ findSumOf p@(set, deq) n
 
 
 push :: Preamble -> Int -> Preamble
-push p n = (S.insert n s', Q.pushBack d' n)
+push p n = (S.insert n s', Q.snoc n d')
   where
     (_, (s', d')) = pop p
 
@@ -64,7 +66,7 @@ push p n = (S.insert n s', Q.pushBack d' n)
 pop :: Preamble -> (Int, Preamble)
 pop (s, d) = (n, (s', d'))
   where
-    (n, d') = fromJust $ Q.popFront d
+    (n, d') = fromJust $ Q.uncons d
     s'      = S.delete n s
 
 
@@ -73,7 +75,7 @@ includes (s, _) n = S.member n s
 
 
 findContiguous :: Int -> Queue -> Maybe [Int]
-findContiguous target []    = Nothing
+findContiguous _      []    = Nothing
 findContiguous target queue = case find' target queue of
                                 Just n  -> Just n
                                 Nothing -> findContiguous target (tail queue)

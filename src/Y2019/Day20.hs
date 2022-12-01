@@ -7,7 +7,7 @@ module Y2019.Day20 (parts) where
 
 import           Data.Bool
 import           Data.Char
-import qualified Data.Dequeue          as DQ
+import qualified Deque.Lazy            as DQ
 import qualified Data.HashMap.Strict   as M
 import qualified Data.HashSet          as S
 import           Data.List
@@ -153,7 +153,7 @@ type Distance      = Int
 type Level         = Int
 type NeighborGraph = M.HashMap Index  [(Index, Distance)]
 type PQueue a      = Q.MinPQueue a
-type Queue a       = DQ.BankersDequeue a
+type Queue a       = DQ.Deque a
 type LevelShift    = (Maze -> (Index,Level) -> Index -> Maybe (Index,Level))
 
 queueView = Q.minView
@@ -184,26 +184,26 @@ neighborGraph :: Maze -> DoorGraph -> NeighborGraph
 neighborGraph maze' graph' = fst $ execState findNeighbors (M.empty, queue)
   where
     doors      = allDoors graph'
-    queue      = foldl' DQ.pushBack DQ.empty (S.toList doors)
+    queue      = foldl' (flip DQ.snoc) mempty (S.toList doors)
     isLocation = flip S.member doors
 
     findNeighbors :: State (NeighborGraph, Queue Index) ()
     findNeighbors = do
         (ngraph, q) <- get
-        maybe (pure ()) (uncurry $ addNeighbor ngraph) $ DQ.popFront q
+        maybe (pure ()) (uncurry $ addNeighbor ngraph) $ DQ.uncons q
 
     addNeighbor ngraph current q' = put (ngraph', newQueue) >> findNeighbors
       where
         ngraph'     = M.insert current (concat [neighbors', neighbors'']) ngraph
-        neighbors'  = hunt (DQ.pushBack DQ.empty (current,0)) S.empty []
+        neighbors'  = hunt (DQ.snoc (current,0) mempty) S.empty []
         neighbors'' = map (\i -> (i,1)) adjs
         adjs        = fromJust $ adjacents graph' current
 
-        newQueue       = foldl' DQ.pushBack q' queueNeighbors
+        newQueue       = foldl' (flip DQ.snoc) q' queueNeighbors
         queueNeighbors = filter (not . flip M.member ngraph) (fst <$> neighbors')
 
         hunt :: Queue (Index, Distance) -> S.HashSet Index -> [(Index, Distance)] -> [(Index, Distance)]
-        hunt q seen ns = step seen ns (DQ.popFront q)
+        hunt q seen ns = step seen ns (DQ.uncons q)
         step _    ns Nothing = ns
         step seen ns (Just ((j, dist), q')) =
             bool skip continue $ not (S.member j seen)
@@ -214,7 +214,7 @@ neighborGraph maze' graph' = fst $ execState findNeighbors (M.empty, queue)
             storeLocation = hunt q' (S.insert j seen) ((j, dist):ns)
             branch = hunt (foldl' (enqueue dist) q' (neighbors maze' j))
                           (S.insert j seen) ns
-            enqueue dist q k = DQ.pushBack q (k, dist + 1)
+            enqueue dist q k = DQ.snoc (k, dist + 1) q
 
 
 parseMaze :: String -> Maze

@@ -1,9 +1,9 @@
-name:                aoc
-version:             0.1.1.0
-github:              "sangster/adventofcode.com"
-license:             BSD3
-author:              "Jon Sangster"
-copyright:           "GPL-3"
+name: aoc
+version: 0.2.0.0
+github: "sangster/adventofcode.com"
+license: BSD3
+author: "Jon Sangster"
+copyright: "GPL-3"
 
 data-files:
   - inputs/2018/*
@@ -25,7 +25,7 @@ dependencies:
   - bytestring
   - containers
   - data-default
-  - dequeue
+  - deque
   - extra
   - file-embed
   - hashable
@@ -48,8 +48,8 @@ library:
 
 executables:
   aoc:
-    main:                Main.hs
-    source-dirs:         app
+    main: Main.hs
+    source-dirs: app
     ghc-options:
       - -threaded
       - -O2
