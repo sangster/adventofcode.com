@@ -6,7 +6,6 @@ module Days
   , dateStr
   ) where
 
-import Control.Applicative (liftA2)
 import Control.Exception (evaluate)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..))
@@ -18,6 +17,7 @@ import Year2018 qualified
 import Year2019 qualified
 import Year2020 qualified
 import Year2021 qualified
+import Year2022 qualified
 
 
 type Year    = String
@@ -30,6 +30,7 @@ parts = daysFor "2018" Year2018.days
      ++ daysFor "2019" Year2019.days
      ++ daysFor "2020" Year2020.days
      ++ daysFor "2021" Year2021.days
+     ++ daysFor "2022" Year2022.days
 
 
 daysFor :: Year
@@ -37,7 +38,7 @@ daysFor :: Year
         -> [((Year, Day), Solveable DaySolution)]
 daysFor y parts = [ ((y, fmt d), p) | (d, p) <- zip [1..] parts]
   where
-    fmt d | d < 10    = ('0':show d)
+    fmt d | d < 10    = '0':show d
           | otherwise = show d
 
 

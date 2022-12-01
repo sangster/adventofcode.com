@@ -6,6 +6,7 @@
 
 | Year | Stars | Complete? |
 |------+-------+-----------|
+| 2022 |  02★  |           |
 | 2021 | *50★* |     ✔     |
 | 2020 | *50★* |     ✔     |
 | 2019 | *50★* |     ✔     |
@@ -19,15 +20,15 @@
 #+BEGIN_SRC shell
 stack install
 
-stack run 2021 01    # Execute the given day.
-stack run 2021 last  # Execute the most recent day with a source file.
-stack run 2021 all   # Execute every day with a source file.
+stack run 2022 01    # Execute the given day.
+stack run 2022 last  # Execute the most recent day with a source file.
+stack run 2022 all   # Execute every day with a source file.
 
-stack ghci src/Y2021/Day01.hs # REPL
-stack --profile run 2021 last -- +RTS -p -RTS # Profile the day.
+stack ghci src/Y2022/Day01.hs # REPL
+stack --profile run 2022 last -- +RTS -p -RTS # Profile the day.
 
 # Profile memory usage.
-stack --profile run  2021 last -- +RTS -p -hy && stack exec -- hp2ps -e8in -c aoc.hp
+stack --profile run  2022 last -- +RTS -p -hy && stack exec -- hp2ps -e8in -c aoc.hp
 
 #+END_SRC
 
@@ -49,7 +50,7 @@ must exist, even if then problem doesn't supply one.
 I would prefer if this were automated, but that will be a TODO for now.
 
 #+BEGIN_SRC haskell
-module Y2021.Day01 (parts) where
+module Y2022.Day01 (parts) where
 
 parts = ( (part1, Nothing)
         , (part2, Nothing)
