@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ImportQualifiedPost, TemplateHaskell #-}
 
 -- |
 -- Module : Input
@@ -8,14 +8,14 @@ module Input
   ( lookupInput
   ) where
 
-import qualified Data.ByteString       as BS
-import           Data.ByteString.UTF8  (toString)
-import qualified Data.FileEmbed        as FE
+import Data.ByteString qualified as BS
+import Data.ByteString.UTF8 (toString)
+import Data.FileEmbed qualified as FE
 
 
 inputsDir :: [(FilePath, BS.ByteString)]
-inputsDir = $(FE.embedDir "inputs") -- TemplateHaskell syntax
+inputsDir = $(FE.makeRelativeToProject "inputs" >>= FE.embedDir)
 
 
 lookupInput :: FilePath -> Maybe String
-lookupInput fp = lookup fp inputsDir >>= pure . toString
+lookupInput fp = toString <$> lookup fp inputsDir
