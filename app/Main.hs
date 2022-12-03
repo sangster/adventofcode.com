@@ -3,7 +3,7 @@ module Main where
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans.Maybe (MaybeT(..), runMaybeT)
 import Data.List (intercalate)
-import Days
+import Days (callDayTimed, dateStr, solutions)
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import Util.Color
@@ -24,7 +24,7 @@ main = do
 
 appAllDays :: String
            -> IO ()
-appAllDays year = mapM_ renderDay (filter ((year ==) . fst) $ fst <$> parts)
+appAllDays year = mapM_ renderDay (filter ((year ==) . fst) $ fst <$> solutions)
   where
     renderDay (y, d) = do
       dayResult <- runMaybeT (appSingleDay year d)

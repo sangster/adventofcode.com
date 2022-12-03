@@ -1,6 +1,5 @@
-{-# LANGUAGE ImportQualifiedPost #-}
 module Days
-  ( parts
+  ( solutions
   , callDayTimed
   , mostRecentDay
   , dateStr
@@ -9,37 +8,13 @@ module Days
 import Control.Exception (evaluate)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..))
+import GeneratedSolutions (solutions, Year, Day)
 import Input (lookupInput)
 import Solution
 import System.TimeIt (timeItT)
 import Util.Color
-import Year2018 qualified
-import Year2019 qualified
-import Year2020 qualified
-import Year2021 qualified
-import Year2022 qualified
 
-
-type Year    = String
-type Day     = String
 type Runtime = Double
-
-
-parts :: [( (Year, Day), Solveable DaySolution)]
-parts = daysFor "2018" Year2018.days
-     ++ daysFor "2019" Year2019.days
-     ++ daysFor "2020" Year2020.days
-     ++ daysFor "2021" Year2021.days
-     ++ daysFor "2022" Year2022.days
-
-
-daysFor :: Year
-        -> [Solveable DaySolution]
-        -> [((Year, Day), Solveable DaySolution)]
-daysFor y parts = [ ((y, fmt d), p) | (d, p) <- zip [1..] parts]
-  where
-    fmt d | d < 10    = '0':show d
-          | otherwise = show d
 
 
 -- | Execute the solution for a single December day in a single year.
@@ -50,7 +25,7 @@ callDayTimed :: MonadIO m
              -> MaybeT m (Runtime, Runtime, Runtime, [(String, Maybe String)])
 callDayTimed year "last" = callDayTimed year (mostRecentDay year)
 callDayTimed year day    = do
-    part  <- MaybeT . pure $ lookup (year, day) parts
+    part  <- MaybeT . pure $ lookup (year, day) solutions
     input <- MaybeT . pure . lookupInput $ year ++ "/" ++ day
     liftIO $ call part input
 
@@ -59,7 +34,7 @@ callDayTimed year day    = do
 mostRecentDay :: Year -> Day
 mostRecentDay year = (snd . fst) (last dd)
   where
-    dd = filter ((== year) . fst . fst) parts
+    dd = filter ((== year) . fst . fst) solutions
 
 
 call :: MonadIO m

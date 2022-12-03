@@ -23,12 +23,24 @@
       flake-utils.lib.eachSystem [ "x86_64-linux" "x86_64-darwin" ] (system:
         let
           pkgs = import nixpkgs { inherit system; overlays = [ overlay ]; };
+
+          generate-sources = pkgs.writeShellScriptBin "generate-sources" ''
+            export PATH="${with pkgs; lib.makeBinPath [ coreutils ]}:$PATH"
+            ${pkgs.lib.readFile ./scripts/generate-sources.sh}
+          '';
         in {
           packages.default = pkgs.aoc;
+          apps.generate-sources = flake-utils.lib.mkApp {
+            drv = generate-sources;
+          };
           apps.aoc-wait = flake-utils.lib.mkApp {
             drv =
               let
-                deps = with pkgs; [ coreutils inotify-tools ];
+                deps = with pkgs; [
+                  coreutils
+                  inotify-tools
+                  generate-sources
+                ];
               in pkgs.writeShellScriptBin "aoc-wait" ''
                 export PATH="${pkgs.lib.makeBinPath deps}:$PATH"
                 ${pkgs.lib.readFile ./scripts/aoc-wait.sh}

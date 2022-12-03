@@ -18,18 +18,17 @@
 * Usage
 
 #+BEGIN_SRC shell
-stack install
+  stack install
 
-stack run 2022 01    # Execute the given day.
-stack run 2022 last  # Execute the most recent day with a source file.
-stack run 2022 all   # Execute every day with a source file.
+  stack run 2022 01    # Execute the given day.
+  stack run 2022 last  # Execute the most recent day with a source file.
+  stack run 2022 all   # Execute every day with a source file.
 
-stack ghci src/Y2022/Day01.hs # REPL
-stack --profile run 2022 last -- +RTS -p -RTS # Profile the day.
+  stack ghci src/Y2022/Day01.hs # REPL
+  stack --profile run 2022 last -- +RTS -p -RTS # Profile the day.
 
-# Profile memory usage.
-stack --profile run  2022 last -- +RTS -p -hy && stack exec -- hp2ps -e8in -c aoc.hp
-
+  # Profile memory usage.
+  stack --profile run  2022 last -- +RTS -p -hy && stack exec -- hp2ps -e8in -c aoc.hp
 #+END_SRC
 
 * Notes
@@ -41,25 +40,40 @@ Thing That Works™ methodology.
 
 ** Download input file into =data/inputs/=
 
-This file should have a two digit filename, with no extension. The input file
-must exist, even if then problem doesn't supply one.
+This file should have a one or two digit filename, with no extension. The input
+file must exist, even if then puzzle doesn't supply one.
 
-** Create a new =Day01.hs= file in =src/=
-** Update =days= export in =src/Days.hs=
+** Run =generate-sources.sh= shell script
 
-I would prefer if this were automated, but that will be a TODO for now.
+The shell script, [[file:scripts/generate-sources.sh]], will create a boilerplate
+Haskell source file for any input files which don't yet have one. It also
+generates a top-level source file, [[file:src/GeneratedSolutions.hs]], which exports
+a catalogue of every available solution.
+
+You can execute this script in multiple ways:
+
+#+begin_src
+  ./scripts/generate-sources.sh
+  # or...
+  nix run .#generate-sources
+
+  # If this is running, it will generate sources anytime inputs are added:
+  nix run .#aoc-wait 2015 last
+#+end_src
+
+*** Example Template
 
 #+BEGIN_SRC haskell
-module Y2022.Day01 (parts) where
+  module Y2015.Day01 (parts) where
 
-parts = ( (part1, Nothing)
-        , (part2, Nothing)
-        , id
-        )
+  parts = ( (part1, Nothing)
+          , (part2, Nothing)
+          , id
+          )
 
-part1 :: a -> String
-part1 input = ""
+  part1 :: a -> String
+  part1 input = ""
 
-part2 :: a -> String
-part2 input = ""
+  part2 :: a -> String
+  part2 input = ""
 #+END_SRC
