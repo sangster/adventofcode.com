@@ -8,8 +8,7 @@ module Days
 import Control.Exception (evaluate)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Trans.Maybe (MaybeT(..))
-import GeneratedSolutions (solutions, Year, Day)
-import Input (lookupInput)
+import GeneratedSolutions (lookupInput, solutions, Year, Day)
 import Solution
 import System.TimeIt (timeItT)
 import Util.Color

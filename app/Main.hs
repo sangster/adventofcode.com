@@ -39,7 +39,7 @@ appSingleDay :: MonadIO m
              -> MaybeT m String
 appSingleDay year day = do
     res <- runMaybeT $ callDayTimed year day
-    MaybeT . pure $ maybe Nothing (Just . renderResults) res
+    MaybeT . pure $ renderResults <$> res
   where
     renderResults (timeP, timeA, timeB, results) =
         intercalate "\n" reports ++ printf "\n%s%s\n" footer (timing :: String)
@@ -66,14 +66,14 @@ formatPart number expected result
   | otherwise = valid++" "++show number++": ⏬\n"++strip result
   where
     shortEnough     = length result < 70
-    singleLine      = not $ elem '\n' result
+    singleLine      = '\n' `notElem` result
     valid           = maybe (ansiForeground Dull Yellow "?") isSuccess expected
     isSuccess ex    = if result == ex
                         then ansiForeground Dull Green "✔"
                         else ansiForeground Dull Red "✘"
-    strip  []       = []
-    strip ('\n':[]) = []
-    strip (c:cc)    = c:(strip cc)
+    strip []     = []
+    strip ['\n'] = []
+    strip (c:cc) = c:strip cc
 
 
 footer :: String
