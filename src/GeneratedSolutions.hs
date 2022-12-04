@@ -89,6 +89,7 @@ import Y2021.Day25 qualified
 import Y2022.Day01 qualified
 import Y2022.Day02 qualified
 import Y2022.Day03 qualified
+import Y2022.Day04 qualified
 
 type Year = String
 type Day  = String
@@ -194,6 +195,7 @@ solutions = concat
       [ solve Y2022.Day01.parts
       , solve Y2022.Day02.parts
       , solve Y2022.Day03.parts
+      , solve Y2022.Day04.parts
       ]
 
 daysFor :: Year
@@ -203,6 +205,9 @@ daysFor y ps = [ ((y, fmt d), p) | (d, p) <- zip [1..] ps]
   where
     fmt d | d < 10    = '0':show d
           | otherwise = show d
+
+lookupInput :: FilePath -> Maybe String
+lookupInput fp = toString <$> lookup fp inputsDir
 
 inputsDir :: [(FilePath, BS.ByteString)]
 inputsDir =
@@ -289,7 +294,5 @@ inputsDir =
     , ("2022/01", $(makeRelativeToProject "inputs/2022/01" >>= embedFile))
     , ("2022/02", $(makeRelativeToProject "inputs/2022/02" >>= embedFile))
     , ("2022/03", $(makeRelativeToProject "inputs/2022/03" >>= embedFile))
+    , ("2022/04", $(makeRelativeToProject "inputs/2022/04" >>= embedFile))
     ]
-
-lookupInput :: FilePath -> Maybe String
-lookupInput fp = toString <$> lookup fp inputsDir

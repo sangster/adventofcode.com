@@ -6,7 +6,7 @@
 
 | Year | Stars | Complete? |
 |------+-------+-----------|
-| 2022 |  06★  |           |
+| 2022 |  08★  |           |
 | 2021 | *50★* |     ✔     |
 | 2020 | *50★* |     ✔     |
 | 2019 | *50★* |     ✔     |
@@ -52,7 +52,7 @@ a catalogue of every available solution.
 
 You can execute this script in multiple ways:
 
-#+begin_src
+#+begin_src shell
   ./scripts/generate-sources.sh
   # or...
   nix run .#generate-sources
