@@ -28,7 +28,7 @@ type Section = Int
 
 
 assignmentPairs :: Parser [Pair]
-assignmentPairs = splitSome spaces pair
+assignmentPairs = splitSome (char '\n') pair
   where
     pair = (,) <$> assignment <*> (char ',' >> assignment)
     assignment = (,) <$> natural <*> (char '-' >> natural)

@@ -101,20 +101,18 @@ parse p s = report $ evalParser p s
   where
     report :: Either ParseError a -> a
     report (Right a) = a
-    report (Left e)  = do
-      error . unlines $
-        [ "did not read entire string."
-        , "    result: " ++ (prettyError e)
-        , ""
-        , " remaining: " ++ s
-        ]
+    report (Left e)  = error . unlines $ [ "did not read entire string."
+                                         , "    result: " ++ prettyError e
+                                         , ""
+                                         , " remaining: " ++ s
+                                         ]
 
     prettyError (UnexpectedToken x l c) =
         unlines . concat $ [[err], before, [arrow], after]
       where
         err = "Unexpected token '"++[x]++"' at "++show l++":"++show c++":\n===="
         (before, after) = splitAt (l+1) $ lines s
-        arrow = reverse $ '^' : take (c-1) (repeat '-')
+        arrow = reverse $ '^' : replicate (c-1) '-'
     prettyError e = show e
 
 
@@ -154,18 +152,16 @@ item :: Parser Char
 item = get >>= cs . queue
   where
     cs []      = throwError EOF
-    cs (c:cs') = do
-      st <- get
-      put st{ queue = cs' }
-      putPos c
-      pure c
+    cs (c:cs') = do st <- get
+                    put st{ queue = cs' }
+                    putPos c >> pure c
 
     putPos :: Char -> Parser Char
     putPos c = do
       st <- get
       if c == '\n'
-          then put st{ col = 0, line = (line st) + 1 }
-          else put st{ col = (col st) + 1 }
+          then put st{ col = 0, line = line st + 1 }
+          else put st{ col = col st + 1 }
       pure c
 
 
@@ -207,7 +203,7 @@ number = do
 
 
 token :: Parser a -> Parser a
-token p = do { a <- p; spaces; pure a }
+token p = do { a <- p; spaces >> pure a }
 
 
 reserved :: String -> Parser String
@@ -223,7 +219,7 @@ spaces = many $ oneOf " \n\r"
 
 
 oneOf :: String -> Parser Char
-oneOf = satisfy . (flip elem)
+oneOf = satisfy . flip elem
 
 
 noneOf :: String -> Parser Char
@@ -259,8 +255,7 @@ splitSome sep parser = do
     st <- get
     case runStateT (runParser sep) st of
       Left  _        -> pure [p]
-      Right (_, st') -> do put st'
-                           (:) <$> pure p <*> splitMany sep parser
+      Right (_, st') -> put st' >> (:) p <$> splitMany sep parser
 
 
 symbol :: a -> Parser b -> Parser a

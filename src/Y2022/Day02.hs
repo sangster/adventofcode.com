@@ -7,7 +7,7 @@ import Parser
 
 parts = ( (part1, Just "14069")
         , (part2, Just "12411")
-        , parse (splitSome spaces strategyGuide)
+        , parse $ splitSome (char '\n') strategyGuide
         )
 
 
@@ -56,11 +56,11 @@ play x y | x == y    = Tie
 
 
 strategyGuide :: Parser Round
-strategyGuide = (,) <$> theirs <*> (spaces >> result)
+strategyGuide = (,) <$> theirs <*> (char ' ' >> result)
   where
-    theirs = symbol Rock     (reserved "A")
-         <|> symbol Paper    (reserved "B")
-         <|> symbol Scissors (reserved "C")
-    result = symbol Loss (reserved "X")
-         <|> symbol Tie  (reserved "Y")
-         <|> symbol Win  (reserved "Z")
+    theirs = symbol Rock     (char 'A')
+         <|> symbol Paper    (char 'B')
+         <|> symbol Scissors (char 'C')
+    result = symbol Loss (char 'X')
+         <|> symbol Tie  (char 'Y')
+         <|> symbol Win  (char 'Z')

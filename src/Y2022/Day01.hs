@@ -4,7 +4,7 @@ import Parser
 
 parts = ( (part1, Just "67633")
         , (part2, Just "199628")
-        , parse (splitSome spaces elf)
+        , parse $ splitSome (char '\n') elf
         )
 
 
