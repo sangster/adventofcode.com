@@ -1,4 +1,4 @@
-# This script searching for AdventofCode.com puzzle input files and creates
+# This script searches for AdventofCode.com puzzle input files and creates
 # Haskell source files where you can solve those puzzles. Its purpose is to save
 # you from the tedium of manually creating and linking source files each day.
 #

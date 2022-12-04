@@ -1,3 +1,4 @@
+scriptDir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 scriptName="$(basename "${BASH_SOURCE[0]}")"
 
 usage() {
@@ -64,6 +65,14 @@ logRun() {
     fi
 }
 
+generateSources() {
+    if command -v generate-sources &> /dev/null; then
+        generate-sources
+    else
+        sh "$scriptDir/generate-sources.sh"
+    fi
+}
+
 [ $at_start -eq 1 ] && logRun
 
 inotifywait -m \
@@ -76,6 +85,6 @@ inotifywait -m \
     | \
     while read file; do
         echo "inotify event: $file"
-        [[ "$file" =~ ^inputs/ ]] && generate-sources
+        [[ "$file" =~ ^inputs/ ]] && generateSources
         logRun
     done
