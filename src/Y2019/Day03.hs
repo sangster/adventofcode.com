@@ -24,7 +24,7 @@ part2 :: [Wire] -> String
 part2 wires = show $ minimum dists
   where
     dists   = sum' <$> intersections wires
-    sum' xy = sum $ (flip wireLength xy) <$> wires
+    sum' xy = sum $ flip wireLength xy <$> wires
 
 
 -- Models
@@ -49,7 +49,7 @@ wireLength :: Wire
            -> Int
 wireLength (s:ss) xy
   | inSegment s xy = distance (fst s) xy
-  | otherwise      = distance (fst s) (snd s) + wireLength ss xy
+  | otherwise      = uncurry distance s + wireLength ss xy
   where
     inSegment ((x1, y1), (x2, y2)) (x, y)
       | x1 == x2 && x1 == x = between y1 y2 y
@@ -60,7 +60,7 @@ wireLength (s:ss) xy
 -- | Translate a list of move instructions into line segments.
 segments :: Path
          -> [LineSegment]
-segments = fst . (segments' (0, 0))
+segments = fst . segments' (0, 0)
   where
     segments' prev []     = ([], prev)
     segments' prev (m:ms) = ((prev, next) : fst (segments' next ms), next)
@@ -82,7 +82,7 @@ intersections :: [Wire]
               -> [(X,Y)]
 intersections wires = catMaybes $ wirePairs >>= uncurry intersect
   where wirePairs       = [(x,y) | (x:rest) <- tails wires, y <- rest]
-        intersect wa wb = do { a <- wa; b <- wb; pure $ intersection a b }
+        intersect wa wb = intersection <$> wa <*> wb
 
 
 -- | The coordinates at which two line segments intersect, if there is one.
@@ -107,7 +107,7 @@ between b1 b2 x = x >= b1' && x <= b2' where [b1', b2'] = sort [b1, b2]
 
 
 -- | The manhattan distance between two points.
-distance (x1, y1) (x2, y2) = (abs $ x2 - x1) + (abs $ y2 - y1)
+distance (x1, y1) (x2, y2) = abs (x2 - x1) + abs (y2 - y1)
 
 
 --
@@ -120,22 +120,20 @@ distance (x1, y1) (x2, y2) = (abs $ x2 - x1) + (abs $ y2 - y1)
 -- followed by a positive integer defining a distance.
 parseWires :: String
             -> [Wire]
-parseWires = fmap segments . (parse $ some path)
+parseWires = fmap segments . parse (some path)
 
 
 -- | Parse a single comma-separated list of moves
 path :: Parser Path
 path = do moves <- some move
-          spaces
-          pure moves
+          whitespace >> pure moves
 
 
 -- | Parse a single move expression.
 move :: Parser Move
 move = do d <- direction
           n <- natural
-          many $ char ','
-          pure $ d n
+          many (char ',') >> pure (d n)
 
 
 -- | Parse a direction token.

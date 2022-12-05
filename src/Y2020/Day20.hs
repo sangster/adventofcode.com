@@ -13,7 +13,7 @@ import           Parser
 
 parts = ( (part1, Just "66020135789767")
         , (part2, Just "1537")
-        , parse $ splitSome spaces tile
+        , parse $ splitSome whitespace tile
         )
 
 

@@ -6,7 +6,7 @@ import Parser
 
 parts = ( (part1, Just "311949")
         , (part2, Just "3042730309")
-        , parse $ splitSome spaces (some $ oneOf (opens++closes))
+        , parse $ splitSome whitespace (some $ oneOf (opens++closes))
         )
 
 

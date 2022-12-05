@@ -33,7 +33,7 @@ type Departure = Int
 
 notes :: Parser Notes
 notes = do earliest <- natural
-           spaces
+           whitespace
            buses <- splitSome (char ',') maybeNatural
            pure (earliest, buses)
   where

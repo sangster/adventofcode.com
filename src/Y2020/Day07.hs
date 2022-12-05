@@ -37,19 +37,19 @@ bag = do words <- token $ some colorWord
          string "bags" <|> string "bag"
          pure $ intercalate " " words
   where
-    colorWord = do spaces
+    colorWord = do whitespace
                    w <- some (oneOf ['a'..'z'])
                    bool abort (pure w) (not $ elem w ["bag", "bags"])
 
 
 requiredSet :: Parser (S.HashSet Requirement)
-requiredSet = do spaces >> string "contain" >> spaces
+requiredSet = do whitespace >> string "contain" >> whitespace
                  req <- emptyReq <|> someReq
                  pure req
   where
-    emptyReq = spaces >> symbol S.empty (string "no other bags")
+    emptyReq = whitespace >> symbol S.empty (string "no other bags")
     someReq = S.fromList <$> splitSome (char ',') requirement
-    requirement = do { spaces; n <- natural; b <- bag; pure (b, n) }
+    requirement = do { whitespace; n <- natural; b <- bag; pure (b, n) }
 
 
 canEventuallyFit :: RulesMap -> Bag -> S.HashSet Bag

@@ -97,8 +97,8 @@ score (num, b) = num * sum unmarkedNums
 -- | Parse the input text into a Game object.
 game :: Parser Game
 game = do calledNums <- splitSome (char ',') natural
-          _ <- spaces
-          boards' <- splitSome spaces board
+          _ <- whitespace
+          boards' <- splitSome whitespace board
           pure $ Game { calls = calledNums, boards = boards' }
   where
     board = mkBoard <$> rows

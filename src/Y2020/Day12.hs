@@ -6,7 +6,7 @@ import Parser
 
 parts = ( (part1, Just "362")
         , (part2, Just "29895")
-        , parse (splitSome spaces nav)
+        , parse (splitSome whitespace nav)
         )
 
 

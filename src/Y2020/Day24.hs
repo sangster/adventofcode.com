@@ -9,7 +9,7 @@ import           Parser
 
 parts = ( (part1, Just "400")
         , (part2, Just "3768")
-        , mapFloorTiles . parse (splitSome spaces path)
+        , mapFloorTiles . parse (splitSome whitespace path)
         )
 
 

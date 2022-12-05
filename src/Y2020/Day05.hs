@@ -37,17 +37,17 @@ instance Ord Seat where
 
 
 seatCode :: Parser SeatCode
-seatCode = do spaces
+seatCode = do whitespace
               row <- replicateM (planeLength - 1) direction
               col <- replicateM (planeWidth - 1) direction
               pure $ SeatCode row col
 
 
 direction :: Parser Bool
-direction = (symbol False $ char 'F')
-        <|> (symbol True  $ char 'B')
-        <|> (symbol False $ char 'L')
-        <|> (symbol True  $ char 'R')
+direction = symbol False (char 'F')
+        <|> symbol True  (char 'B')
+        <|> symbol False (char 'L')
+        <|> symbol True  (char 'R')
 
 
 codeToSeat :: SeatCode -> Seat

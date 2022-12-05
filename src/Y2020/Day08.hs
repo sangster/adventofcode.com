@@ -30,7 +30,7 @@ type Instruction = (Opcode, Int)
 
 
 instruction :: Parser Instruction
-instruction = do spaces
+instruction = do whitespace
                  op <- opcode
                  n  <- number
                  pure (op, n)

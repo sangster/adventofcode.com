@@ -50,7 +50,7 @@ instance Show Color where
 
 
 colors :: Parser [Color]
-colors = do { ds <- many digit; spaces; pure $ color <$> ds }
+colors = do { ds <- many digit; whitespace >> pure (color <$> ds) }
   where
     color '0' = Black
     color '1' = White
@@ -68,7 +68,7 @@ compile (lay:ls) = compile' lay $ compile ls
 
 
 layers :: [Color] -> Int -> Int -> [Layer]
-layers colors w h = group h $ group w colors
+layers colors' w h = group h $ group w colors'
   where
     group _ [] = []
     group n xs = take n xs : group n (drop n xs)

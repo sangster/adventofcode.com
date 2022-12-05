@@ -41,9 +41,9 @@ password :: Parser Password
 password = do min <- natural
               char '-'
               max <- natural
-              spaces
+              whitespace
               ch <- item
               string ": "
               pass <- word
-              spaces
+              whitespace
               return $ Password min max ch pass

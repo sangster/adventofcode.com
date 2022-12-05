@@ -44,6 +44,7 @@ module Parser
   , reserved
   , word
   , spaces
+  , whitespace
 
   , module Control.Monad.State.Strict
   ) where
@@ -203,7 +204,7 @@ number = do
 
 
 token :: Parser a -> Parser a
-token p = do { a <- p; spaces >> pure a }
+token p = do { a <- p; whitespace >> pure a }
 
 
 reserved :: String -> Parser String
@@ -213,9 +214,11 @@ reserved = token . string
 word :: Parser String
 word = some $ noneOf " \n\r"
 
-
 spaces :: Parser String
-spaces = many $ oneOf " \n\r"
+spaces = many $ char ' '
+
+whitespace :: Parser String
+whitespace = many $ oneOf " \n\r"
 
 
 oneOf :: String -> Parser Char

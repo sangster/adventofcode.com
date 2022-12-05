@@ -9,7 +9,7 @@ import           Data.Hashable
 
 parts = ( (part1, Just "32783")
         , (part2, Just "33455")
-        , parse $ splitSome spaces deck
+        , parse $ splitSome whitespace deck
         )
 
 

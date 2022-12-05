@@ -103,9 +103,9 @@ filterValidRules = M.map filt
 
 puzzleInput :: Parser (S.HashSet Rule, Ticket, [Ticket])
 puzzleInput = do rules <- S.fromList <$> splitSome (char '\n') rule
-                 spaces >> string "your ticket:" >> spaces
+                 whitespace >> string "your ticket:" >> whitespace
                  your <- ticket
-                 spaces >> string "nearby tickets:" >> spaces
+                 whitespace >> string "nearby tickets:" >> whitespace
                  nearby <- splitSome (char '\n') ticket
                  pure (rules, your, nearby)
   where

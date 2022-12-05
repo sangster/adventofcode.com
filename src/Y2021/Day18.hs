@@ -68,7 +68,7 @@ split (RegNum n) | n >= 10   = Just $ (Pair `on` RegNum) (floor n') (ceiling n')
 
 
 snailNum :: Parser SnailNum
-snailNum = spaces >> pair <|> liftM RegNum natural
+snailNum = whitespace >> pair <|> liftM RegNum natural
   where
     pair = do x <- char '[' >> snailNum
               y <- char ',' >> snailNum

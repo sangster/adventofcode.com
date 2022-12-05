@@ -8,7 +8,6 @@ import Data.Maybe
 
 import Parser hiding (execStateT, runStateT)
 import Util.InstructionSet
-import Util.OpCode
 import Util.Program hiding (name)
 
 
@@ -27,8 +26,8 @@ parts = ( (part1, Just "278664")
 part1 :: String -> String
 part1 input = runST $ do
     rooms <- mapShip input
-    prog  <- program input
-    findKeycode prog rooms (itemSequences rooms)
+    prog' <- program input
+    findKeycode prog' rooms (itemSequences rooms)
   where
     program :: PrimMonad m => String -> m (Program' m)
     program       = fmap (Program haltIfNoStdinSet) . parseRAM
@@ -70,11 +69,11 @@ exploreLoop proc = do
             { stdin = command $ Go dir
             , user = (user proc''){ next = rest
                                   , move = Just dir
-                                  , seen = (joinSeen proc' proc'')
+                                  , seen = joinSeen proc' proc''
                                   }
             }
         else pure $ seen (user proc')
-    joinSeen a b = nub $ (seen $ user a) ++ (seen $ user b)
+    joinSeen a b = nub $ seen (user a) ++ seen (user b)
 
 
 
@@ -83,19 +82,19 @@ exploreLoop proc = do
 -- pass the Security Checkpoint.
 findKeycode :: PrimMonad m => Program' m -> [Room] -> [[Item]] -> m String
 findKeycode _    _     []           = pure ""
-findKeycode prog rooms (items:rest) = do
+findKeycode prog' rooms (items':rest) = do
     dialogue <- execCmd steps
     if "Santa" `isInfixOf` dialogue
       then pure . show $ parse keypadCode dialogue
-      else findKeycode prog rooms (rest' dialogue)
+      else findKeycode prog' rooms (rest' dialogue)
   where
-    execCmd cmds = fmap chr <$> exec prog (concat $ command <$> cmds)
+    execCmd cmds = fmap chr <$> exec prog' (concat $ command <$> cmds)
     steps        = compressSteps $ concat stepsFull ++ final
-    stepsFull    = sortBy (compare `on` length) $ takeAndReturn rooms <$> items
+    stepsFull    = sortBy (compare `on` length) $ takeAndReturn rooms <$> items'
     final        = Go <$> pathToSanta rooms
     keypadCode   :: Parser Int
     keypadCode   = some (noneOf "1234567890") >> natural
-    restLighter  = filter (\r -> not $ items `isInfixOf` r) rest
+    restLighter  = filter (\r -> not $ items' `isInfixOf` r) rest
     rest'        = bool rest restLighter . tooHeavy
     tooHeavy str = not (checkpointRoomName `isInfixOf` str) ||
                    "Droids on this ship are lighter" `isInfixOf` str
@@ -104,7 +103,7 @@ findKeycode prog rooms (items:rest) = do
 -- | Minimise the number of steps the droid must take by reducing the number of
 -- times the bot backtraces between previously visited rooms.
 compressSteps :: [Command] -> [Command]
-compressSteps steps = compress [] steps
+compressSteps = compress []
   where
     compress :: [Command] -> [Command] -> [Command]
     compress xs     []     = reverse xs
@@ -214,7 +213,7 @@ exec prog' io' = loop prog' io' [] 0 0
 haltIfNoStdinSet :: PrimMonad m => InstructionSet m a
 haltIfNoStdinSet = mergeSets aoc19Set [storeOrHalt "STOR" 3]
   where
-    storeOrHalt n = mkInstruction 1 store' n
+    storeOrHalt = mkInstruction 1 store'
       where
         store' assocs = do
           dat <- stdin <$> get
@@ -231,7 +230,7 @@ haltIfNoStdinSet = mergeSets aoc19Set [storeOrHalt "STOR" 3]
 exploreSet :: PrimMonad m => InstructionSet m (Search m)
 exploreSet = mergeSets aoc19Set [storeRoom "STOR" 3, outputAndContinue " OUT" 4]
   where
-    storeRoom n = mkInstruction 1 store' n
+    storeRoom = mkInstruction 1 store'
       where
         store' assocs = do
           pop >>= \out -> unless (null out) (parseRoom out)
@@ -265,7 +264,7 @@ continueExploration room = userState
 
 continue :: PrimMonad m => Room -> Runtime m (Search m) ()
 continue room = do
-    modify $ \p -> p{ user = (user p){ curr = Just room, seen = room:(seen $ user p) } }
+    modify $ \p -> p{ user = (user p){ curr = Just room, seen = room:seen (user p) } }
 
     proc' <- get
     let search = user proc'
@@ -286,7 +285,7 @@ continue room = do
 -- | Parse a Room record from its description.
 room :: Maybe (Dir, Room) -> Parser (Maybe Room)
 room from = do
-      n <- spaces >> name
+      n <- whitespace >> name
       _ <- desc
       d <- doors
       i <- items <|> pure []
@@ -296,7 +295,7 @@ room from = do
       pure . Just $ Room{ name = n, doors = d, back = b, items = i }
   where
     name = do { reserved "=="; n <- untilCh '='; reserved "=="; pure $ init n }
-    desc = do { desc <- untilCh '\n'; spaces; pure desc }
+    desc = do { desc <- untilCh '\n'; whitespace; pure desc }
 
     doors = reserved "Doors here lead:" >> many dir
       where
@@ -308,6 +307,6 @@ room from = do
 
     items = reserved "Items here:" >> many item
       where
-        item = do { reserved "-"; i <- untilCh '\n'; spaces; pure i }
+        item = do { reserved "-"; i <- untilCh '\n'; whitespace; pure i }
 
     untilCh ch = many $ satisfy (/= ch)

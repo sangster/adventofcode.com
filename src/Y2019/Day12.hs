@@ -17,8 +17,8 @@ part1 moons = show $ systemEnergy (steps !! 1000)
   where steps           = iterate step moons
         systemEnergy    = sum . fmap totalEnergy
         totalEnergy m   = potentialEnergy m * kineticEnergy m
-        potentialEnergy = sum . (fmap abs) . pos
-        kineticEnergy   = sum . (fmap abs) . vel
+        potentialEnergy = sum . fmap abs . pos
+        kineticEnergy   = sum . fmap abs . vel
 
 
 part2 :: [Moon] -> String
@@ -52,9 +52,9 @@ moon :: Parser Moon
 moon = do x <- coord "<x="
           y <- coord ", y="
           z <- coord ", z="
-          char '>' >> spaces
-          pure $ [(x,0), (y,0), (z,0)]
-  where coord prefix = do { string prefix; number }
+          char '>' >> whitespace >> pure [(x,0), (y,0), (z,0)]
+  where
+    coord prefix = string prefix >> number
 
 
 -- | Move the moons one step forward in time.
@@ -77,8 +77,8 @@ applyGravity moons = applyGrav <$> moons
 
 -- | Change the velocity of a single moon in a single dimension.
 applyGravitySingle :: [Moon] -> Moon -> Dimension -> (Position,Velocity)
-applyGravitySingle moons moon d = (p, v + deltaV)
-  where (p,v)     = moon !! d
+applyGravitySingle moons moon' d = (p, v + deltaV)
+  where (p,v)     = moon' !! d
         deltaV    = sum $ offset <$> moons
         offset m' = unit p (fst $ m' !! d)
 

@@ -10,7 +10,7 @@ import           Parser
 
 parts = ( (part1, Just "4886706177792")
         , (part2, Just "3348493585827")
-        , parse $ splitSome spaces (setMask <|> setMem)
+        , parse $ splitSome whitespace (setMask <|> setMem)
         )
 
 

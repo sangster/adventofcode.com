@@ -74,16 +74,14 @@ technique (delta, card0) New      = (negate delta         , card0 - delta)
 move :: Parser Move
 move = do
     move' <- cutMove <|> dealMove <|> newMove
-    spaces
-    pure move'
+    whitespace >> pure move'
   where
-    cutMove  = string "cut "                 >> number  >>= pure . Cut
-    dealMove = string "deal with increment " >> natural >>= pure . Deal
-    newMove  = string "deal into new stack"  >> pure New
+    cutMove  = Cut  <$> (string "cut "                 >> number)
+    dealMove = Deal <$> (string "deal with increment " >> natural)
+    newMove  = symbol New (string "deal into new stack")
 
 
 render :: SomeMod -> String
-render mod =
-    case mod of
-        SomeMod sm -> show $ getVal sm
-        _          -> error "unknown modulo"
+render mod' = case mod' of
+                SomeMod sm -> show $ getVal sm
+                _          -> error "unknown modulo"
