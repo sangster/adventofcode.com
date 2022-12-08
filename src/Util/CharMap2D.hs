@@ -24,12 +24,13 @@ module Util.CharMap2D
     , map2dToListWithCoords
     ) where
 
-import Data.Bool     (bool)
-import Data.Char     (ord)
+import Data.Bifunctor (bimap)
+import Data.Bool (bool)
+import Data.Char (ord)
 import Data.Function (on)
-import Data.List     (findIndex, intercalate)
-import Data.Maybe    (catMaybes, fromJust)
-import Data.Vector   qualified as V
+import Data.List (elemIndex, intercalate)
+import Data.Maybe (catMaybes, fromJust)
+import Data.Vector qualified as V
 import Parser
 
 
@@ -54,10 +55,9 @@ instance Show a => Show (CharMap2D a) where
 
 
 instance Eq a => Eq (CharMap2D a) where
-  a == b = and [ ((==) `on` mapWidth ) a b
-               , ((==) `on` mapHeight) a b
-               , ((==) `on` mapCells ) a b
-               ]
+  a == b = ((==) `on` mapWidth ) a b
+        && ((==) `on` mapHeight) a b
+        && ((==) `on` mapCells ) a b
 
 
 map2dPutCells :: CharMap2D a -> [a] -> CharMap2D a
@@ -155,7 +155,7 @@ neighborsF ds sm (x, y) = catMaybes
 
 
 neighborsF' :: [(Int, Int)] -> MapCoord -> [MapCoord]
-neighborsF' ds (x, y) = (\(dx,dy) -> ((x+dx), (y+dy))) <$> ds
+neighborsF' ds (x, y) = bimap (x+) (y+) <$> ds
 
 
 map2dParse :: (Char -> a)
@@ -163,7 +163,7 @@ map2dParse :: (Char -> a)
          -> CharMap2D a
 map2dParse f input = CharMap2D { mapCells = cells', mapHeight = h, mapWidth = w }
   where
-    w = fromJust $ findIndex (== '\n') input
+    w = fromJust $ elemIndex '\n' input
     h = length cells' `div` w
 
     cells' = V.fromList . map f . concat
@@ -193,10 +193,10 @@ map2dMap f m = m{ mapCells = V.map f $ mapCells m }
 map2dMapWithCoords :: (MapCoord -> a -> b) -> CharMap2D a -> CharMap2D b
 map2dMapWithCoords f m = m{ mapCells = V.imap f' $ mapCells m }
   where
-    f' i a = f (map2dIndexToCoord m i) a
+    f' = f . map2dIndexToCoord m
 
 
 map2dToListWithCoords :: CharMap2D a -> [(MapCoord, a)]
-map2dToListWithCoords m = f <$> (V.toList $ mapCells m) `zip` [0..]
+map2dToListWithCoords m = f <$> V.toList (mapCells m) `zip` [0..]
   where
     f (a,i) = (map2dIndexToCoord m i, a)
