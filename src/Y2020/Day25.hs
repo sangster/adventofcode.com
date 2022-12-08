@@ -2,7 +2,7 @@ module Y2020.Day25 (parts) where
 
 import Data.List
 import Data.Maybe
-import Math.NumberTheory.Powers.Modular
+import GHC.Natural (powModNatural)
 
 
 parts = ( (part1, Just "18862163")
@@ -32,3 +32,8 @@ findLoopSize key = fst . fromJust $ find ((key ==) . snd) candidates
 
 transform :: Int -> Int -> Int
 transform subject val = (val * subject) `mod` ringSize
+
+
+powModInt :: Int -> Int -> Int -> Int
+powModInt b e m = fromIntegral
+                $ powModNatural (fromIntegral b) (fromIntegral e) (fromIntegral m)
