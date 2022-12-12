@@ -94,7 +94,6 @@ map2dCoordInBounds CharMap2D { mapHeight, mapWidth } (x,y)
     | otherwise               = True
 
 
--- | The height at the given Index.
 map2dCell :: CharMap2D a -> MapCoord -> a
 map2dCell sm (x, y) = mapCells sm V.! (mapWidth sm * y + x)
 
