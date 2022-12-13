@@ -137,13 +137,13 @@ setStdin dd = modify $ \p -> p{ stdin = dd }
 
 -- | Add the given data to the head of @stdin@.
 push :: PrimMonad m => Data -> Runtime m a ()
-push d = do { dd <- stdin <$> get; setStdin (d:dd) }
+push d = gets stdin >>= setStdin . (d:)
 
 
 -- | Empty the @stdout@ and return its contents.
 pop :: PrimMonad m => Runtime m a [Data]
 pop = do
-    out <- stdout <$> get
+    out <- gets stdout
     modify $ \p -> p{ stdout = [] }
     pure out
 
@@ -154,20 +154,19 @@ pop = do
 -- The amount of memory will be increased to insure the given index isn't out of
 -- bounds.
 fetch :: PrimMonad m => Index -> Runtime m a Data
-fetch src = growIfSmall src >> mem . prog <$> get >>= flip readData src
+fetch src = growIfSmall src >> gets (mem . prog) >>= flip readData src
 
 
 -- | TODO: Fetch user state.
 userState :: (PrimMonad m, Monad m) => Runtime m a a
-userState = user <$> get
+userState = gets user
 
 
 -- | TODO: Set user state.
 setUserState :: PrimMonad m => (a -> a) -> Runtime m a a
-setUserState f = do
-    state <- f <$> userState
-    modify $ \p -> p{ user = state }
-    pure state
+setUserState f = do state' <- f <$> userState
+                    modify $ \p -> p{ user = state' }
+                    pure state'
 
 
 -- | Write a datum to memory.
@@ -179,7 +178,7 @@ write :: PrimMonad m
       -> Data
       -> Runtime m a ()
 write dst dat = growIfSmall dst
-             >> mem . prog <$> get >>= \r -> writeData r dst dat
+             >> gets (mem . prog) >>= \r -> writeData r dst dat
 
 
 -- | Grow the amount of available memory to ensure the given index isn't out of
@@ -188,11 +187,11 @@ growIfSmall :: PrimMonad m
             => Index
             -> Runtime m a ()
 growIfSmall i = do
-    ram <- mem . prog <$> get
+    ram <- gets (mem . prog)
     if memlen ram > i
         then pure ()
         else do cpy <- lift $ grow ram i
-                modify $ \p -> p{ prog = (Program (is . prog $ p) cpy) }
+                modify $ \p -> p{ prog = Program (is . prog $ p) cpy }
 
 
 -- | Move execution of the program relative to its current @cursor@.
@@ -205,7 +204,7 @@ relativeJump n = do
 -- | The position in memory currently being executed.
 -- A negative number will be returned if the program is halted.
 cursor :: PrimMonad m => Runtime m a Index
-cursor = get >>= pure . act (-1) id
+cursor = gets $ act (-1) id
 
 
 -- | Read data from memory using position or immediate mode.
@@ -225,6 +224,10 @@ modeRead assocs i = do
 -- It differs from @modeRead@ by not derefercing @Position@ modes. ie: @Position
 -- 10@ will write to @10@, and not reading the current value of @10@ and using
 -- that address.
+modeDest :: PrimMonad m
+         => [(Mode, Data)]
+         -> Data
+         -> Runtime m a Data
 modeDest assocs i = do
     eitherIndexOrData <- modeLoc assocs i
     case eitherIndexOrData of
@@ -242,7 +245,7 @@ modeLoc assocs i = uncurry loc $ assocs !! i
     loc :: (PrimMonad m, Functor m) => Mode -> Data -> Runtime m a (Either Data Data)
     loc Immediate a = pure $ Left a
     loc Position  a = pure $ Right a
-    loc Relative  a = do { b <- base <$> get; pure . Right $ b + a }
+    loc Relative  a = do { b <- gets base; pure . Right $ b + a }
 
 
 -- | Make a copy of the given Process.
