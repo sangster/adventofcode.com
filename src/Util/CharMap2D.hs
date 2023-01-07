@@ -1,8 +1,9 @@
-{-# LANGUAGE GADTs, ImportQualifiedPost, NamedFieldPuns #-}
+{-# LANGUAGE FlexibleInstances, GADTs, ImportQualifiedPost, NamedFieldPuns #-}
 
 module Util.CharMap2D
     ( CharMap2D(..)
     , MapCoord
+    , map2dShow
     , map2dPutCells
     , map2dSize
     , map2dCoords
@@ -45,19 +46,31 @@ data CharMap2D a where
 type MapCoord = (Int, Int)
 
 
-instance Show a => Show (CharMap2D a) where
-  show m = intercalate "\n" [row y | y <- [0 .. h-1]]
-        ++ "\n" ++ show w ++ "x" ++ show h
-    where
-      row y = concat [show $ map2dCell m (x,y) | x <- [0 .. w-1]]
-      w = mapWidth m
-      h = mapHeight m
-
-
 instance Eq a => Eq (CharMap2D a) where
   a == b = ((==) `on` mapWidth ) a b
         && ((==) `on` mapHeight) a b
         && ((==) `on` mapCells ) a b
+
+
+instance Show a => Show (CharMap2D a) where
+  show = map2dShow show
+
+instance {-# OVERLAPPING #-} Show (CharMap2D Char) where
+  show = map2dShow (: [])
+
+instance {-# OVERLAPPING #-} Show (CharMap2D String) where
+  show = map2dShow id
+
+
+-- | Draw the "CharMap2D" in rows and columns, rending each cell with the given
+-- function.
+map2dShow :: (a -> String) -> CharMap2D a -> String
+map2dShow f m = intercalate "\n" [row y | y <- [0 .. h-1]]
+             ++ "\n" ++ show w ++ "x" ++ show h
+  where
+    row y = concat [f $ map2dCell m (x,y) | x <- [0 .. w-1]]
+    w = mapWidth m
+    h = mapHeight m
 
 
 map2dPutCells :: CharMap2D a -> [a] -> CharMap2D a
