@@ -98,6 +98,7 @@ import Y2022.Day09 qualified
 import Y2022.Day10 qualified
 import Y2022.Day11 qualified
 import Y2022.Day12 qualified
+import Y2022.Day13 qualified
 
 type Year = String
 type Day  = String
@@ -212,6 +213,7 @@ solutions = concat
       , solve Y2022.Day10.parts
       , solve Y2022.Day11.parts
       , solve Y2022.Day12.parts
+      , solve Y2022.Day13.parts
       ]
 
 daysFor :: Year
@@ -319,4 +321,5 @@ inputsDir =
     , ("2022/10", $(makeRelativeToProject "inputs/2022/10" >>= embedFile))
     , ("2022/11", $(makeRelativeToProject "inputs/2022/11" >>= embedFile))
     , ("2022/12", $(makeRelativeToProject "inputs/2022/12" >>= embedFile))
+    , ("2022/13", $(makeRelativeToProject "inputs/2022/13" >>= embedFile))
     ]
