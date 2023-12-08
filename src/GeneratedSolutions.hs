@@ -11,6 +11,26 @@ import Y2018.Day02 qualified
 import Y2018.Day03 qualified
 import Y2018.Day04 qualified
 import Y2018.Day05 qualified
+import Y2018.Day06 qualified
+import Y2018.Day07 qualified
+import Y2018.Day08 qualified
+import Y2018.Day09 qualified
+import Y2018.Day10 qualified
+import Y2018.Day11 qualified
+import Y2018.Day12 qualified
+import Y2018.Day13 qualified
+import Y2018.Day14 qualified
+import Y2018.Day15 qualified
+import Y2018.Day16 qualified
+import Y2018.Day17 qualified
+import Y2018.Day18 qualified
+import Y2018.Day19 qualified
+import Y2018.Day20 qualified
+import Y2018.Day21 qualified
+import Y2018.Day22 qualified
+import Y2018.Day23 qualified
+import Y2018.Day24 qualified
+import Y2018.Day25 qualified
 import Y2019.Day01 qualified
 import Y2019.Day02 qualified
 import Y2019.Day03 qualified
@@ -100,6 +120,17 @@ import Y2022.Day11 qualified
 import Y2022.Day12 qualified
 import Y2022.Day13 qualified
 import Y2022.Day14 qualified
+import Y2022.Day15 qualified
+import Y2022.Day16 qualified
+import Y2022.Day17 qualified
+import Y2022.Day18 qualified
+import Y2022.Day19 qualified
+import Y2022.Day20 qualified
+import Y2022.Day21 qualified
+import Y2022.Day22 qualified
+import Y2022.Day23 qualified
+import Y2022.Day24 qualified
+import Y2022.Day25 qualified
 
 type Year = String
 type Day  = String
@@ -119,6 +150,26 @@ solutions = concat
       , solve Y2018.Day03.parts
       , solve Y2018.Day04.parts
       , solve Y2018.Day05.parts
+      , solve Y2018.Day06.parts
+      , solve Y2018.Day07.parts
+      , solve Y2018.Day08.parts
+      , solve Y2018.Day09.parts
+      , solve Y2018.Day10.parts
+      , solve Y2018.Day11.parts
+      , solve Y2018.Day12.parts
+      , solve Y2018.Day13.parts
+      , solve Y2018.Day14.parts
+      , solve Y2018.Day15.parts
+      , solve Y2018.Day16.parts
+      , solve Y2018.Day17.parts
+      , solve Y2018.Day18.parts
+      , solve Y2018.Day19.parts
+      , solve Y2018.Day20.parts
+      , solve Y2018.Day21.parts
+      , solve Y2018.Day22.parts
+      , solve Y2018.Day23.parts
+      , solve Y2018.Day24.parts
+      , solve Y2018.Day25.parts
       ]
     days2019 =
       [ solve Y2019.Day01.parts
@@ -216,6 +267,17 @@ solutions = concat
       , solve Y2022.Day12.parts
       , solve Y2022.Day13.parts
       , solve Y2022.Day14.parts
+      , solve Y2022.Day15.parts
+      , solve Y2022.Day16.parts
+      , solve Y2022.Day17.parts
+      , solve Y2022.Day18.parts
+      , solve Y2022.Day19.parts
+      , solve Y2022.Day20.parts
+      , solve Y2022.Day21.parts
+      , solve Y2022.Day22.parts
+      , solve Y2022.Day23.parts
+      , solve Y2022.Day24.parts
+      , solve Y2022.Day25.parts
       ]
 
 daysFor :: Year
@@ -236,6 +298,26 @@ inputsDir =
     , ("2018/03", $(makeRelativeToProject "inputs/2018/03" >>= embedFile))
     , ("2018/04", $(makeRelativeToProject "inputs/2018/04" >>= embedFile))
     , ("2018/05", $(makeRelativeToProject "inputs/2018/05" >>= embedFile))
+    , ("2018/06", $(makeRelativeToProject "inputs/2018/06" >>= embedFile))
+    , ("2018/07", $(makeRelativeToProject "inputs/2018/07" >>= embedFile))
+    , ("2018/08", $(makeRelativeToProject "inputs/2018/08" >>= embedFile))
+    , ("2018/09", $(makeRelativeToProject "inputs/2018/09" >>= embedFile))
+    , ("2018/10", $(makeRelativeToProject "inputs/2018/10" >>= embedFile))
+    , ("2018/11", $(makeRelativeToProject "inputs/2018/11" >>= embedFile))
+    , ("2018/12", $(makeRelativeToProject "inputs/2018/12" >>= embedFile))
+    , ("2018/13", $(makeRelativeToProject "inputs/2018/13" >>= embedFile))
+    , ("2018/14", $(makeRelativeToProject "inputs/2018/14" >>= embedFile))
+    , ("2018/15", $(makeRelativeToProject "inputs/2018/15" >>= embedFile))
+    , ("2018/16", $(makeRelativeToProject "inputs/2018/16" >>= embedFile))
+    , ("2018/17", $(makeRelativeToProject "inputs/2018/17" >>= embedFile))
+    , ("2018/18", $(makeRelativeToProject "inputs/2018/18" >>= embedFile))
+    , ("2018/19", $(makeRelativeToProject "inputs/2018/19" >>= embedFile))
+    , ("2018/20", $(makeRelativeToProject "inputs/2018/20" >>= embedFile))
+    , ("2018/21", $(makeRelativeToProject "inputs/2018/21" >>= embedFile))
+    , ("2018/22", $(makeRelativeToProject "inputs/2018/22" >>= embedFile))
+    , ("2018/23", $(makeRelativeToProject "inputs/2018/23" >>= embedFile))
+    , ("2018/24", $(makeRelativeToProject "inputs/2018/24" >>= embedFile))
+    , ("2018/25", $(makeRelativeToProject "inputs/2018/25" >>= embedFile))
     , ("2019/01", $(makeRelativeToProject "inputs/2019/01" >>= embedFile))
     , ("2019/02", $(makeRelativeToProject "inputs/2019/02" >>= embedFile))
     , ("2019/03", $(makeRelativeToProject "inputs/2019/03" >>= embedFile))
@@ -325,4 +407,15 @@ inputsDir =
     , ("2022/12", $(makeRelativeToProject "inputs/2022/12" >>= embedFile))
     , ("2022/13", $(makeRelativeToProject "inputs/2022/13" >>= embedFile))
     , ("2022/14", $(makeRelativeToProject "inputs/2022/14" >>= embedFile))
+    , ("2022/15", $(makeRelativeToProject "inputs/2022/15" >>= embedFile))
+    , ("2022/16", $(makeRelativeToProject "inputs/2022/16" >>= embedFile))
+    , ("2022/17", $(makeRelativeToProject "inputs/2022/17" >>= embedFile))
+    , ("2022/18", $(makeRelativeToProject "inputs/2022/18" >>= embedFile))
+    , ("2022/19", $(makeRelativeToProject "inputs/2022/19" >>= embedFile))
+    , ("2022/20", $(makeRelativeToProject "inputs/2022/20" >>= embedFile))
+    , ("2022/21", $(makeRelativeToProject "inputs/2022/21" >>= embedFile))
+    , ("2022/22", $(makeRelativeToProject "inputs/2022/22" >>= embedFile))
+    , ("2022/23", $(makeRelativeToProject "inputs/2022/23" >>= embedFile))
+    , ("2022/24", $(makeRelativeToProject "inputs/2022/24" >>= embedFile))
+    , ("2022/25", $(makeRelativeToProject "inputs/2022/25" >>= embedFile))
     ]
