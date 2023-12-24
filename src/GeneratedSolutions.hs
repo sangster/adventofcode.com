@@ -131,6 +131,30 @@ import Y2022.Day22 qualified
 import Y2022.Day23 qualified
 import Y2022.Day24 qualified
 import Y2022.Day25 qualified
+import Y2023.Day01 qualified
+import Y2023.Day02 qualified
+import Y2023.Day03 qualified
+import Y2023.Day04 qualified
+import Y2023.Day05 qualified
+import Y2023.Day06 qualified
+import Y2023.Day07 qualified
+import Y2023.Day08 qualified
+import Y2023.Day09 qualified
+import Y2023.Day10 qualified
+import Y2023.Day11 qualified
+import Y2023.Day12 qualified
+import Y2023.Day13 qualified
+import Y2023.Day14 qualified
+import Y2023.Day15 qualified
+import Y2023.Day16 qualified
+import Y2023.Day17 qualified
+import Y2023.Day18 qualified
+import Y2023.Day19 qualified
+import Y2023.Day20 qualified
+import Y2023.Day21 qualified
+import Y2023.Day22 qualified
+import Y2023.Day23 qualified
+import Y2023.Day24 qualified
 
 type Year = String
 type Day  = String
@@ -142,6 +166,7 @@ solutions = concat
     , daysFor "2020" days2020
     , daysFor "2021" days2021
     , daysFor "2022" days2022
+    , daysFor "2023" days2023
     ]
   where
     days2018 =
@@ -278,6 +303,32 @@ solutions = concat
       , solve Y2022.Day23.parts
       , solve Y2022.Day24.parts
       , solve Y2022.Day25.parts
+      ]
+    days2023 =
+      [ solve Y2023.Day01.parts
+      , solve Y2023.Day02.parts
+      , solve Y2023.Day03.parts
+      , solve Y2023.Day04.parts
+      , solve Y2023.Day05.parts
+      , solve Y2023.Day06.parts
+      , solve Y2023.Day07.parts
+      , solve Y2023.Day08.parts
+      , solve Y2023.Day09.parts
+      , solve Y2023.Day10.parts
+      , solve Y2023.Day11.parts
+      , solve Y2023.Day12.parts
+      , solve Y2023.Day13.parts
+      , solve Y2023.Day14.parts
+      , solve Y2023.Day15.parts
+      , solve Y2023.Day16.parts
+      , solve Y2023.Day17.parts
+      , solve Y2023.Day18.parts
+      , solve Y2023.Day19.parts
+      , solve Y2023.Day20.parts
+      , solve Y2023.Day21.parts
+      , solve Y2023.Day22.parts
+      , solve Y2023.Day23.parts
+      , solve Y2023.Day24.parts
       ]
 
 daysFor :: Year
@@ -418,4 +469,28 @@ inputsDir =
     , ("2022/23", $(makeRelativeToProject "inputs/2022/23" >>= embedFile))
     , ("2022/24", $(makeRelativeToProject "inputs/2022/24" >>= embedFile))
     , ("2022/25", $(makeRelativeToProject "inputs/2022/25" >>= embedFile))
+    , ("2023/01", $(makeRelativeToProject "inputs/2023/01" >>= embedFile))
+    , ("2023/02", $(makeRelativeToProject "inputs/2023/02" >>= embedFile))
+    , ("2023/03", $(makeRelativeToProject "inputs/2023/03" >>= embedFile))
+    , ("2023/04", $(makeRelativeToProject "inputs/2023/04" >>= embedFile))
+    , ("2023/05", $(makeRelativeToProject "inputs/2023/05" >>= embedFile))
+    , ("2023/06", $(makeRelativeToProject "inputs/2023/06" >>= embedFile))
+    , ("2023/07", $(makeRelativeToProject "inputs/2023/07" >>= embedFile))
+    , ("2023/08", $(makeRelativeToProject "inputs/2023/08" >>= embedFile))
+    , ("2023/09", $(makeRelativeToProject "inputs/2023/09" >>= embedFile))
+    , ("2023/10", $(makeRelativeToProject "inputs/2023/10" >>= embedFile))
+    , ("2023/11", $(makeRelativeToProject "inputs/2023/11" >>= embedFile))
+    , ("2023/12", $(makeRelativeToProject "inputs/2023/12" >>= embedFile))
+    , ("2023/13", $(makeRelativeToProject "inputs/2023/13" >>= embedFile))
+    , ("2023/14", $(makeRelativeToProject "inputs/2023/14" >>= embedFile))
+    , ("2023/15", $(makeRelativeToProject "inputs/2023/15" >>= embedFile))
+    , ("2023/16", $(makeRelativeToProject "inputs/2023/16" >>= embedFile))
+    , ("2023/17", $(makeRelativeToProject "inputs/2023/17" >>= embedFile))
+    , ("2023/18", $(makeRelativeToProject "inputs/2023/18" >>= embedFile))
+    , ("2023/19", $(makeRelativeToProject "inputs/2023/19" >>= embedFile))
+    , ("2023/20", $(makeRelativeToProject "inputs/2023/20" >>= embedFile))
+    , ("2023/21", $(makeRelativeToProject "inputs/2023/21" >>= embedFile))
+    , ("2023/22", $(makeRelativeToProject "inputs/2023/22" >>= embedFile))
+    , ("2023/23", $(makeRelativeToProject "inputs/2023/23" >>= embedFile))
+    , ("2023/24", $(makeRelativeToProject "inputs/2023/24" >>= embedFile))
     ]
